@@ -1,0 +1,776 @@
+:root {
+  --bg: #101112;
+  --panel: #18191b;
+  --panel-soft: #202124;
+  --line: rgba(223, 178, 76, 0.22);
+  --text: #f5f1e8;
+  --muted: #afa99d;
+  --gold: #d9a93f;
+  --gold-strong: #f3c85f;
+  --ink: #121212;
+  --error: #ffb0a3;
+  --nav-height: 70px;
+  color-scheme: dark;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  width: 100%;
+  overflow-x: hidden;
+  min-width: 320px;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.background-video,
+.background-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.background-video {
+  z-index: -3;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.background-overlay {
+  z-index: -2;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(243, 200, 95, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(10, 10, 10, 0.48), rgba(16, 17, 18, 0.78) 46%, rgba(16, 17, 18, 0.92)),
+    rgba(16, 17, 18, 0.54);
+  backdrop-filter: saturate(0.82);
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-shell {
+  position: relative;
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  min-height: 100svh;
+  padding: 14px 14px calc(var(--nav-height) + env(safe-area-inset-bottom) + 18px);
+}
+
+.topbar {
+  position: sticky;
+  top: 10px;
+  z-index: 5;
+  width: calc(100vw - 28px);
+  max-width: calc(100vw - 28px);
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 66px;
+  margin-bottom: 14px;
+  padding: 8px 10px 8px 12px;
+  border: 1px solid rgba(243, 200, 95, 0.18);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(30, 30, 31, 0.78), rgba(18, 18, 19, 0.42)),
+    rgba(18, 18, 19, 0.46);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(22px) saturate(1.12);
+}
+
+.topbar::after {
+  position: absolute;
+  right: 18px;
+  bottom: -23px;
+  left: 18px;
+  height: 23px;
+  background: linear-gradient(180deg, rgba(16, 17, 18, 0.28), rgba(16, 17, 18, 0));
+  content: "";
+  pointer-events: none;
+}
+
+.brand {
+  flex: 0 1 min(210px, 52vw);
+  display: inline-flex;
+  align-items: center;
+  width: min(196px, 50vw);
+  min-width: 0;
+}
+
+.brand img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.language-switch {
+  flex: 0 0 96px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  width: 96px;
+  padding: 4px;
+  border: 1px solid rgba(243, 200, 95, 0.24);
+  border-radius: 999px;
+  background: rgba(5, 5, 5, 0.26);
+}
+
+.lang-button {
+  min-height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.lang-button.is-active {
+  background: var(--gold);
+  color: var(--ink);
+}
+
+main {
+  width: calc(100vw - 28px);
+  max-width: calc(100vw - 28px);
+  margin: 0 auto;
+  min-width: 0;
+}
+
+.site-tagline {
+  width: min(224px, calc(100vw - 42px));
+  display: none;
+  margin: clamp(116px, 15svh, 154px) auto 0;
+  color: var(--text);
+  font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  font-size: clamp(1.1rem, 4.5vw, 1.38rem);
+  font-weight: 300;
+  line-height: 1.16;
+  text-align: center;
+  text-shadow: 0 18px 42px rgba(0, 0, 0, 0.68);
+}
+
+body:has(#order.is-active) .site-tagline {
+  display: block;
+}
+
+.site-tagline::after {
+  display: block;
+  width: 86px;
+  height: 2px;
+  margin: 14px auto 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--gold-strong), transparent);
+  content: "";
+}
+
+.app-view {
+  display: none;
+}
+
+.app-view.is-active {
+  display: block;
+}
+
+.booking-grid {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding-top: clamp(112px, 17svh, 172px);
+}
+
+.booking-panel,
+.contact-panel,
+.content-view {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(24, 25, 27, 0.9), rgba(17, 18, 19, 0.82)),
+    rgba(24, 25, 27, 0.76);
+  box-shadow: 0 22px 58px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(18px);
+}
+
+.booking-panel {
+  padding: 18px;
+}
+
+.contact-panel {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--gold-strong);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h1,
+h2 {
+  margin: 0;
+  letter-spacing: 0;
+}
+
+h1 {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  font-size: clamp(2.45rem, 11vw, 3.05rem);
+  line-height: 0.95;
+}
+
+h2 {
+  font-size: clamp(2rem, 10vw, 3rem);
+  line-height: 1;
+}
+
+.route-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.field {
+  position: relative;
+  display: grid;
+  gap: 7px;
+}
+
+.field:focus-within {
+  z-index: 20;
+}
+
+.field span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.field svg {
+  position: absolute;
+  bottom: 16px;
+  left: 14px;
+  width: 19px;
+  height: 19px;
+  color: var(--gold);
+  pointer-events: none;
+}
+
+.field input {
+  width: 100%;
+  min-height: 54px;
+  padding: 0 14px 0 44px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  outline: none;
+  background: var(--panel-soft);
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.field input:focus {
+  border-color: rgba(243, 200, 95, 0.72);
+  box-shadow: 0 0 0 4px rgba(217, 169, 63, 0.1);
+}
+
+.autocomplete-list {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  left: 0;
+  z-index: 30;
+  max-height: min(290px, 48vh);
+  overflow-y: auto;
+  border: 1px solid rgba(243, 200, 95, 0.28);
+  border-radius: 8px;
+  background: rgba(24, 25, 27, 0.98);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.42);
+}
+
+.autocomplete-option,
+.autocomplete-empty {
+  width: 100%;
+  min-height: 58px;
+  padding: 11px 14px 11px 44px;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+}
+
+.autocomplete-option {
+  position: relative;
+  display: grid;
+  gap: 3px;
+  cursor: pointer;
+}
+
+.autocomplete-option:last-child,
+.autocomplete-empty:last-child {
+  border-bottom: 0;
+}
+
+.autocomplete-option::before {
+  position: absolute;
+  top: 17px;
+  left: 15px;
+  width: 15px;
+  height: 15px;
+  border: 2px solid var(--gold);
+  border-radius: 999px;
+  content: "";
+}
+
+.autocomplete-option.is-active,
+.autocomplete-option:hover {
+  background: rgba(217, 169, 63, 0.13);
+}
+
+.autocomplete-option strong,
+.autocomplete-option span,
+.autocomplete-empty {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.autocomplete-option strong {
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.autocomplete-option span,
+.autocomplete-empty {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.swap-button {
+  justify-self: center;
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  margin: -2px 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(217, 169, 63, 0.08);
+  color: var(--gold-strong);
+  cursor: pointer;
+}
+
+.primary-button,
+.whatsapp-button,
+.email-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  border: 0;
+  border-radius: 8px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.primary-button {
+  margin-top: 4px;
+  background: linear-gradient(180deg, var(--gold-strong), var(--gold));
+  color: var(--ink);
+}
+
+.whatsapp-button {
+  margin-top: 2px;
+  background: #25d366;
+  color: #06180c;
+}
+
+.email-button {
+  background:
+    linear-gradient(180deg, rgba(245, 241, 232, 0.95), rgba(217, 169, 63, 0.78)),
+    var(--gold);
+  color: var(--ink);
+}
+
+.whatsapp-button:disabled,
+.email-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.primary-button svg,
+.whatsapp-button svg,
+.email-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.route-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.route-summary div:last-child {
+  grid-column: 1 / -1;
+}
+
+.route-summary div {
+  min-width: 0;
+  padding: 12px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.route-summary span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 750;
+}
+
+.route-summary strong {
+  display: block;
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: clamp(0.98rem, 4vw, 1.18rem);
+}
+
+.route-note {
+  min-height: 20px;
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.route-note.is-error {
+  color: var(--error);
+}
+
+.map-wrap {
+  position: relative;
+  min-width: 0;
+  min-height: 320px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: #252525;
+}
+
+.map-wrap iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.content-view {
+  width: min(760px, 100%);
+  margin: 10px auto 0;
+  padding: 22px 18px;
+}
+
+.section-head {
+  margin-bottom: 22px;
+}
+
+.price-list {
+  display: grid;
+  gap: 10px;
+}
+
+.price-list article,
+.about-points div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 58px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  background: var(--panel-soft);
+}
+
+.price-list span,
+.body-copy,
+.about-points span {
+  color: var(--muted);
+}
+
+.price-list strong {
+  color: var(--gold-strong);
+  white-space: nowrap;
+}
+
+.body-copy {
+  margin: 18px 0 0;
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.about-points {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.about-points div {
+  justify-content: flex-start;
+}
+
+.about-points svg {
+  flex: 0 0 auto;
+  width: 21px;
+  height: 21px;
+  color: var(--gold);
+}
+
+.fleet-section {
+  margin-top: 26px;
+}
+
+.fleet-section h3 {
+  margin: 0 0 14px;
+  color: var(--text);
+  font-size: 1.05rem;
+  letter-spacing: 0;
+}
+
+.fleet-list {
+  display: grid;
+  gap: 18px;
+}
+
+.fleet-car {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.fleet-car img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 220px;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 22px 28px rgba(0, 0, 0, 0.38));
+}
+
+.fleet-car div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.fleet-car:last-child div {
+  border-bottom: 0;
+}
+
+.fleet-car strong {
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.fleet-car span {
+  color: var(--gold-strong);
+  font-weight: 800;
+}
+
+.bottom-nav {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: 100%;
+  min-height: calc(var(--nav-height) + env(safe-area-inset-bottom));
+  margin: 0;
+  padding: 8px 14px calc(8px + env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(243, 200, 95, 0.2);
+  border-radius: 22px 22px 0 0;
+  background:
+    linear-gradient(180deg, rgba(28, 29, 31, 0.74), rgba(15, 15, 16, 0.94)),
+    rgba(14, 14, 15, 0.86);
+  box-shadow:
+    0 -18px 44px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(24px) saturate(1.12);
+}
+
+.nav-item {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  min-width: 0;
+  min-height: 54px;
+  border: 1px solid transparent;
+  border-radius: 16px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.72rem;
+  font-weight: 800;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.nav-item svg {
+  width: 21px;
+  height: 21px;
+}
+
+.nav-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(243, 200, 95, 0.18));
+}
+
+.nav-item:first-child .nav-icon {
+  width: 46px;
+}
+
+.nav-item.is-active {
+  border-color: rgba(243, 200, 95, 0.24);
+  background:
+    linear-gradient(180deg, rgba(217, 169, 63, 0.24), rgba(217, 169, 63, 0.1)),
+    rgba(217, 169, 63, 0.08);
+  color: var(--gold-strong);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+@media (min-width: 760px) {
+  .app-shell {
+    padding: 20px 24px 116px;
+  }
+
+  .topbar {
+    min-height: 78px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  main {
+    width: min(1180px, 100%);
+    max-width: 1180px;
+  }
+
+  .site-tagline {
+    width: min(820px, calc(100vw - 96px));
+    margin-top: 96px;
+    font-size: clamp(2rem, 3.4vw, 3.8rem);
+  }
+
+  .brand {
+    width: 260px;
+  }
+
+  .booking-grid {
+    grid-template-columns: minmax(360px, 0.82fr) minmax(380px, 1.18fr);
+    align-items: stretch;
+    padding-top: 0;
+    margin-top: 34px;
+  }
+
+  .booking-panel {
+    padding: 24px;
+  }
+
+  .contact-panel {
+    grid-column: 1;
+    padding: 24px;
+  }
+
+  h1 {
+    font-size: clamp(3.2rem, 7vw, 5.4rem);
+  }
+
+  .map-wrap {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    min-height: 680px;
+  }
+
+  .route-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .route-summary div:last-child {
+    grid-column: auto;
+  }
+
+  .content-view {
+    margin-top: 52px;
+    padding: 34px;
+  }
+
+  .fleet-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .fleet-car div {
+    min-height: 54px;
+  }
+}
+
+@media (min-width: 1120px) {
+  .bottom-nav {
+    right: 0;
+    left: 0;
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .background-video {
+    display: none;
+  }
+}
