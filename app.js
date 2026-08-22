@@ -17,6 +17,8 @@ const translations = {
     heroLuxury: "Luxury Transfer Services",
     heroComfort: "Discreet, punctual, and exceptionally comfortable",
     heroFinal: "Your best chauffeur service in Switzerland",
+    scrollHint: "Scroll to explore",
+    loaderText: "Preparing your journey",
     eyebrow: "Private transfers in Switzerland",
     siteTagline: "Your best chauffeur service in Switzerland.",
     headline: "Book your ride",
@@ -88,6 +90,8 @@ const translations = {
     heroLuxury: "Exklusive Transferdienste",
     heroComfort: "Diskret, pünktlich und außergewöhnlich komfortabel",
     heroFinal: "Ihr bester Chauffeurservice in der Schweiz",
+    scrollHint: "Zum Entdecken scrollen",
+    loaderText: "Ihre Fahrt wird vorbereitet",
     eyebrow: "Private Transfers in der Schweiz",
     siteTagline: "Ihr bester Chauffeurservice in der Schweiz.",
     headline: "Fahrt buchen",
@@ -181,6 +185,7 @@ const elements = {
   destinationSuggestions: document.querySelector("#destinationSuggestions"),
   header: document.querySelector("[data-header]"),
   menuToggle: document.querySelector("[data-menu-toggle]"),
+  loader: document.querySelector("[data-loader]"),
   scrollHero: document.querySelector("[data-scroll-hero]"),
   scrollVideo: document.querySelector("[data-scroll-video]"),
   scrollProgress: document.querySelector("[data-scroll-progress]"),
@@ -694,7 +699,24 @@ function initNavigation() {
 function initScrollHero() {
   const { scrollHero, scrollVideo, scrollProgress } = elements;
 
+  let loaderReleased = false;
+  let loaderRemovalTimer = 0;
+  let loaderFailsafeTimer = 0;
+
+  const releaseLoader = () => {
+    if (loaderReleased) {
+      return;
+    }
+
+    loaderReleased = true;
+    window.clearTimeout(loaderFailsafeTimer);
+    document.documentElement.classList.remove("is-loading");
+    elements.loader?.setAttribute("aria-hidden", "true");
+    loaderRemovalTimer = window.setTimeout(() => elements.loader?.remove(), 900);
+  };
+
   if (!scrollHero || !scrollVideo) {
+    releaseLoader();
     return;
   }
 
@@ -726,6 +748,7 @@ function initScrollHero() {
     const sourceUrl = scrollVideo.dataset.scrollSrc;
 
     if (!sourceUrl) {
+      releaseLoader();
       return;
     }
 
@@ -778,6 +801,31 @@ function initScrollHero() {
     scene.style.setProperty("--scene-scale", (0.985 + opacity * 0.015).toFixed(4));
   };
 
+  const mobileViewport = window.matchMedia("(max-width: 860px)");
+
+  const renderMobileVideoFraming = (videoTime) => {
+    if (!mobileViewport.matches) {
+      scrollVideo.style.removeProperty("--mobile-video-top");
+      scrollVideo.style.removeProperty("--mobile-video-height");
+      scrollVideo.style.removeProperty("--mobile-video-x");
+      return;
+    }
+
+    const framingDuration = Math.max(0.1, duration - 0.06);
+    const introProgress = smoothstep(0, 2, videoTime);
+    const outroProgress = smoothstep(
+      Math.max(2, framingDuration * 0.5),
+      framingDuration,
+      videoTime,
+    );
+    const zoomOut = 6 + 12 * introProgress - 12 * outroProgress;
+    const horizontalPosition = 28 + 22 * introProgress;
+
+    scrollVideo.style.setProperty("--mobile-video-top", `${(zoomOut / 2).toFixed(3)}%`);
+    scrollVideo.style.setProperty("--mobile-video-height", `${(100 - zoomOut).toFixed(3)}%`);
+    scrollVideo.style.setProperty("--mobile-video-x", `${horizontalPosition.toFixed(3)}%`);
+  };
+
   const renderStory = (progress) => {
     const firstOpacity = getSceneOpacity(progress, 0.06, 0.13, 0.27, 0.34);
     const secondOpacity = getSceneOpacity(progress, 0.37, 0.44, 0.62, 0.69);
@@ -828,6 +876,7 @@ function initScrollHero() {
       scrollProgress.style.transform = `scaleX(${progress})`;
     }
 
+    renderMobileVideoFraming(targetTime);
     renderStory(progress);
 
     frameId = window.requestAnimationFrame(updateFrame);
@@ -854,6 +903,7 @@ function initScrollHero() {
     scrollVideo.currentTime = reduceMotion
       ? 0.01
       : getVideoProgress(getProgress()) * Math.max(0.1, duration - 0.06);
+    renderMobileVideoFraming(scrollVideo.currentTime);
   });
 
   const primeDecoder = () => {
@@ -878,10 +928,14 @@ function initScrollHero() {
   };
 
   scrollVideo.addEventListener("canplay", primeDecoder, { once: true });
+  scrollVideo.addEventListener("canplay", releaseLoader, { once: true });
+  scrollVideo.addEventListener("error", releaseLoader, { once: true });
 
   window.addEventListener(
     "pagehide",
     () => {
+      window.clearTimeout(loaderRemovalTimer);
+      window.clearTimeout(loaderFailsafeTimer);
       if (videoObjectUrl) {
         URL.revokeObjectURL(videoObjectUrl);
       }
@@ -895,6 +949,12 @@ function initScrollHero() {
   );
   heroObserver.observe(scrollHero);
 
+  if (reduceMotion) {
+    releaseLoader();
+  } else {
+    loaderFailsafeTimer = window.setTimeout(releaseLoader, 30000);
+  }
+
   loadSeekableVideo();
 
   if (scrollVideo.readyState >= 1) {
@@ -902,6 +962,7 @@ function initScrollHero() {
     mediaReady = true;
     if (scrollVideo.readyState >= 3) {
       primeDecoder();
+      releaseLoader();
     }
     if (!reduceMotion) {
       start();

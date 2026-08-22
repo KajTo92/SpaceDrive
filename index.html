@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html class="is-loading" lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -12,6 +12,15 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div class="site-loader" data-loader role="status" aria-live="polite">
+      <div class="site-loader__brand" aria-label="Space Drive">
+        <img src="spacedrive-monogram-header.png" alt="" width="426" height="640" />
+        <strong>Space Drive</strong>
+      </div>
+      <div class="site-loader__progress" aria-hidden="true"><span></span></div>
+      <p data-i18n="loaderText">Preparing your journey</p>
+    </div>
+    <noscript><style>html.is-loading, html.is-loading body { height: auto; overflow-y: auto; } .site-loader { display: none; }</style></noscript>
     <a class="skip-link" href="#booking" data-i18n="skipBooking">Skip to booking</a>
     <header class="site-header" data-header>
       <a class="brand-mark" href="index.html" aria-label="Space Drive home"><img src="spacedrive-monogram-header.png" alt="" width="426" height="640" /><span>Space Drive</span></a>
@@ -49,6 +58,10 @@
               </div>
             </div>
           </div>
+          <div class="hero-scroll-cue">
+            <span data-i18n="scrollHint">Scroll to explore</span>
+            <i data-lucide="chevrons-down" aria-hidden="true"></i>
+          </div>
           <div class="scroll-progress" aria-hidden="true"><span data-scroll-progress></span></div>
         </div>
       </section>
@@ -78,7 +91,7 @@
         </div>
       </section>
     </main>
-    <footer class="site-footer"><img src="spacedrivelogo.png" alt="Space Drive" width="238" height="69" /><p data-i18n="footerText">Private chauffeur service across Switzerland.</p><div><a href="info.html" data-i18n="navInfo">Info</a><a href="pricing.html" data-i18n="navPricing">Pricing</a></div></footer>
+    <footer class="site-footer"><div class="footer-brand" aria-label="Space Drive"><img src="spacedrive-monogram-header.png" alt="" width="426" height="640" /><span>Space Drive</span></div><p data-i18n="footerText">Private chauffeur service across Switzerland.</p><div class="footer-links"><a href="info.html" data-i18n="navInfo">Info</a><a href="pricing.html" data-i18n="navPricing">Pricing</a></div></footer>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script><script src="app.js"></script>
   </body>
 </html>
