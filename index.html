@@ -3,237 +3,78 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta
-      name="description"
-      content="SpaceDrive private transfer booking in Switzerland."
-    />
-    <title>SpaceDrive Transfers Switzerland</title>
-    <link rel="preconnect" href="https://unpkg.com" />
+    <meta name="theme-color" content="#090909" />
+    <meta name="description" content="Space Drive premium chauffeur service and private transfers across Switzerland." />
+    <title>Space Drive | VIP Transport Switzerland</title>
+    <link rel="icon" href="spacedrive-monogram.png" type="image/png" />
+    <link rel="preload" href="scroll-poster.jpg?v=2" as="image" type="image/jpeg" />
+    <link rel="preload" href="spacedrive-monogram-header.png" as="image" type="image/png" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <video class="background-video" autoplay muted loop playsinline aria-hidden="true">
-      <source src="bgfilmpc.mp4" type="video/mp4" />
-    </video>
-    <div class="background-overlay" aria-hidden="true"></div>
-
-    <div class="app-shell">
-      <header class="topbar">
-        <a class="brand" href="#order" aria-label="SpaceDrive home">
-          <img src="spacedrivelogo.png" alt="SpaceDrive" />
-        </a>
-        <div class="language-switch" aria-label="Language">
-          <button class="lang-button is-active" type="button" data-lang="en">EN</button>
-          <button class="lang-button" type="button" data-lang="de">DE</button>
-        </div>
-      </header>
-
-      <p class="site-tagline" data-i18n="siteTagline">
-        Your best chauffeur service in Switzerland.
-      </p>
-
-      <main>
-        <section class="booking-view app-view is-active" id="order" data-view="order">
-          <div class="booking-grid">
-            <div class="booking-panel">
-              <p class="eyebrow" data-i18n="eyebrow">Private transfers in Switzerland</p>
-              <h1 data-i18n="headline">Book your ride</h1>
-
-              <form class="route-form" id="routeForm">
-                <label class="field">
-                  <span data-i18n="pickupLabel">Pickup location</span>
-                  <i data-lucide="map-pin" aria-hidden="true"></i>
-                  <input
-                    id="pickup"
-                    name="pickup"
-                    type="text"
-                    autocomplete="off"
-                    aria-autocomplete="list"
-                    aria-controls="pickupSuggestions"
-                    aria-expanded="false"
-                    placeholder="Zurich Airport"
-                    data-i18n-placeholder="pickupPlaceholder"
-                    required
-                  />
-                  <div class="autocomplete-list" id="pickupSuggestions" role="listbox" hidden></div>
-                </label>
-
-                <button class="swap-button" type="button" id="swapRoute" aria-label="Swap route">
-                  <i data-lucide="arrow-up-down" aria-hidden="true"></i>
-                </button>
-
-                <label class="field">
-                  <span data-i18n="destinationLabel">Destination</span>
-                  <i data-lucide="flag" aria-hidden="true"></i>
-                  <input
-                    id="destination"
-                    name="destination"
-                    type="text"
-                    autocomplete="off"
-                    aria-autocomplete="list"
-                    aria-controls="destinationSuggestions"
-                    aria-expanded="false"
-                    placeholder="St. Moritz"
-                    data-i18n-placeholder="destinationPlaceholder"
-                    required
-                  />
-                  <div class="autocomplete-list" id="destinationSuggestions" role="listbox" hidden></div>
-                </label>
-
-                <p class="route-note" id="routeNote" data-i18n="routeNote">
-                  Enter pickup and destination to calculate route.
-                </p>
-
-                <button class="primary-button" type="submit">
-                  <i data-lucide="route" aria-hidden="true"></i>
-                  <span data-i18n="calculateButton">Show route and price</span>
-                </button>
-              </form>
-
-              <div class="route-summary" aria-live="polite">
-                <div>
-                  <span data-i18n="distance">Distance</span>
-                  <strong id="distanceValue">--</strong>
+    <a class="skip-link" href="#booking" data-i18n="skipBooking">Skip to booking</a>
+    <header class="site-header" data-header>
+      <a class="brand-mark" href="index.html" aria-label="Space Drive home"><img src="spacedrive-monogram-header.png" alt="" width="426" height="640" /><span>Space Drive</span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primaryNav" data-menu-toggle><span class="menu-line"></span><span class="menu-line"></span><span class="sr-only">Menu</span></button>
+      <nav class="primary-nav" id="primaryNav" aria-label="Primary navigation">
+        <a href="info.html" data-i18n="navInfo">Info</a><a href="pricing.html" data-i18n="navPricing">Pricing</a><a class="nav-cta" href="#booking" data-i18n="navBook">Book a ride</a>
+        <div class="language-switch" aria-label="Language"><button class="lang-button is-active" type="button" data-lang="en">EN</button><button class="lang-button" type="button" data-lang="de">DE</button></div>
+      </nav>
+    </header>
+    <main>
+      <section class="scroll-hero" aria-label="Space Drive cinematic journey" data-scroll-hero>
+        <div class="scroll-hero__sticky">
+          <video class="scroll-hero__video" data-scroll-video data-scroll-src="scroll.mp4?v=2" muted playsinline preload="none" poster="scroll-poster.jpg?v=2" aria-hidden="true"></video>
+          <div class="scroll-hero__scrim" aria-hidden="true"></div>
+          <div class="scroll-hero__copy" data-hero-copy aria-live="off">
+            <div class="hero-scene hero-scene--one" data-hero-scene="one">
+              <p data-i18n="heroLuxury">Luxury Transfer Services</p>
+            </div>
+            <div class="hero-scene hero-scene--two" data-hero-scene="two">
+              <p data-i18n="heroComfort">Discreet, punctual, and exceptionally comfortable</p>
+            </div>
+            <div class="hero-scene hero-scene--final" data-hero-scene="final">
+              <div class="finale-content">
+                <div class="finale-ornament" aria-hidden="true">
+                  <span class="finale-line"></span>
+                  <img class="swiss-flag" src="flaga.png" alt="" width="154" height="152" />
+                  <span class="finale-line"></span>
                 </div>
-                <div>
-                  <span data-i18n="duration">Travel time</span>
-                  <strong id="durationValue">--</strong>
-                </div>
-                <div>
-                  <span data-i18n="price">Estimated price</span>
-                  <strong id="priceValue">--</strong>
-                </div>
+                <h2 data-i18n="heroFinal">Your best chauffeur service in Switzerland</h2>
+                <span class="finale-baseline" aria-hidden="true"></span>
               </div>
             </div>
-
-            <div class="map-wrap" aria-label="Route map">
-              <iframe
-                id="mapFrame"
-                title="Google Maps route"
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade"
-                src="https://www.google.com/maps?output=embed&q=Switzerland"
-              ></iframe>
-            </div>
-
-            <div class="contact-panel">
-              <label class="field">
-                <span data-i18n="nameLabel">Name</span>
-                <i data-lucide="user" aria-hidden="true"></i>
-                <input
-                  id="customerName"
-                  name="customerName"
-                  type="text"
-                  autocomplete="name"
-                  placeholder="John Smith"
-                  data-i18n-placeholder="namePlaceholder"
-                />
-              </label>
-
-              <label class="field">
-                <span data-i18n="telephoneLabel">Telephone number</span>
-                <i data-lucide="phone" aria-hidden="true"></i>
-                <input
-                  id="telephone"
-                  name="telephone"
-                  type="tel"
-                  autocomplete="tel"
-                  placeholder="+41 79 123 45 67"
-                  data-i18n-placeholder="telephonePlaceholder"
-                />
-              </label>
-
-              <button class="whatsapp-button" type="button" id="whatsappButton" disabled>
-                <i data-lucide="message-circle" aria-hidden="true"></i>
-                <span data-i18n="whatsappButton">Send inquiry on WhatsApp</span>
-              </button>
-
-              <button class="email-button" type="button" id="emailButton" disabled>
-                <i data-lucide="mail" aria-hidden="true"></i>
-                <span data-i18n="emailButton">Send inquiry per mail</span>
-              </button>
-            </div>
           </div>
-        </section>
-
-        <section class="content-view app-view" id="prices" data-view="prices">
-          <div class="section-head">
-            <p class="eyebrow" data-i18n="pricesEyebrow">Transparent estimates</p>
-            <h2 data-i18n="pricesHeadline">Pricing</h2>
+          <div class="scroll-progress" aria-hidden="true"><span data-scroll-progress></span></div>
+        </div>
+      </section>
+      <section class="booking-section" id="booking">
+        <div class="booking-heading">
+          <p class="eyebrow" data-i18n="eyebrow">Private transfers in Switzerland</p>
+          <h1 data-i18n="headline">Book your ride</h1>
+          <p data-i18n="bookingIntro">Tell us where you are going. We will calculate the route and prepare your private transfer.</p>
+        </div>
+        <div class="booking-grid">
+          <div class="booking-panel">
+            <form class="route-form" id="routeForm">
+              <label class="field"><span data-i18n="pickupLabel">Pickup location</span><i data-lucide="map-pin" aria-hidden="true"></i><input id="pickup" name="pickup" type="text" autocomplete="off" aria-autocomplete="list" aria-controls="pickupSuggestions" aria-expanded="false" placeholder="Zurich Airport" data-i18n-placeholder="pickupPlaceholder" required /><div class="autocomplete-list" id="pickupSuggestions" role="listbox" hidden></div></label>
+              <button class="swap-button" type="button" id="swapRoute" aria-label="Swap route"><i data-lucide="arrow-up-down" aria-hidden="true"></i></button>
+              <label class="field"><span data-i18n="destinationLabel">Destination</span><i data-lucide="flag" aria-hidden="true"></i><input id="destination" name="destination" type="text" autocomplete="off" aria-autocomplete="list" aria-controls="destinationSuggestions" aria-expanded="false" placeholder="St. Moritz" data-i18n-placeholder="destinationPlaceholder" required /><div class="autocomplete-list" id="destinationSuggestions" role="listbox" hidden></div></label>
+              <p class="route-note" id="routeNote" data-i18n="routeNote">Enter pickup and destination to calculate route.</p>
+              <button class="primary-button" type="submit"><i data-lucide="route" aria-hidden="true"></i><span data-i18n="calculateButton">Show route and price</span></button>
+            </form>
+            <div class="route-summary" aria-live="polite"><div><span data-i18n="distance">Distance</span><strong id="distanceValue">--</strong></div><div><span data-i18n="duration">Travel time</span><strong id="durationValue">--</strong></div><div><span data-i18n="price">Estimated price</span><strong id="priceValue">--</strong></div></div>
           </div>
-          <div class="price-list">
-            <article>
-              <span data-i18n="baseFare">Base fare</span>
-              <strong>CHF 7</strong>
-            </article>
-            <article>
-              <span data-i18n="perKmShort">Per km up to 20 km</span>
-              <strong>CHF 2</strong>
-            </article>
-            <article>
-              <span data-i18n="perKmLong">Per km over 20 km</span>
-              <strong>CHF 1.50</strong>
-            </article>
-            <article>
-              <span data-i18n="airportService">Airport service</span>
-              <strong data-i18n="included">Included</strong>
-            </article>
+          <div class="map-wrap" aria-label="Route map"><iframe id="mapFrame" title="Google Maps route" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&q=Switzerland"></iframe></div>
+          <div class="contact-panel">
+            <div class="contact-intro"><h2 data-i18n="requestHeadline">Request availability</h2><p data-i18n="requestText">Add your contact details and choose how you would like to send the inquiry.</p></div>
+            <div class="contact-fields"><label class="field"><span data-i18n="nameLabel">Name</span><i data-lucide="user" aria-hidden="true"></i><input id="customerName" name="customerName" type="text" autocomplete="name" placeholder="Alex Morgan" data-i18n-placeholder="namePlaceholder" /></label><label class="field"><span data-i18n="telephoneLabel">Telephone number</span><i data-lucide="phone" aria-hidden="true"></i><input id="telephone" name="telephone" type="tel" autocomplete="tel" placeholder="+41 79 123 45 67" data-i18n-placeholder="telephonePlaceholder" /></label></div>
+            <div class="contact-actions"><button class="whatsapp-button" type="button" id="whatsappButton" disabled><i data-lucide="message-circle" aria-hidden="true"></i><span data-i18n="whatsappButton">Send inquiry on WhatsApp</span></button><button class="email-button" type="button" id="emailButton" disabled><i data-lucide="mail" aria-hidden="true"></i><span data-i18n="emailButton">Send inquiry by email</span></button></div>
           </div>
-          <p class="body-copy" data-i18n="pricingText">
-            Final pricing can vary by vehicle class, waiting time, night service, and special requests.
-          </p>
-        </section>
-
-        <section class="content-view app-view" id="about" data-view="about">
-          <div class="section-head">
-            <p class="eyebrow" data-i18n="aboutEyebrow">Premium private transport</p>
-            <h2 data-i18n="aboutHeadline">About SpaceDrive</h2>
-          </div>
-          <p class="body-copy" data-i18n="aboutText">
-            SpaceDrive offers comfortable private transfers across Switzerland for airport pickups,
-            hotels, ski resorts, business travel, and point-to-point journeys.
-          </p>
-          <div class="about-points">
-            <div><i data-lucide="shield-check" aria-hidden="true"></i><span data-i18n="aboutPointOne">Professional drivers</span></div>
-            <div><i data-lucide="clock" aria-hidden="true"></i><span data-i18n="aboutPointTwo">Reliable scheduling</span></div>
-            <div><i data-lucide="gem" aria-hidden="true"></i><span data-i18n="aboutPointThree">Discreet premium service</span></div>
-          </div>
-          <div class="fleet-section">
-            <h3 data-i18n="fleetHeadline">Our cars</h3>
-            <div class="fleet-list">
-              <article class="fleet-car">
-                <img src="y2025.png" alt="Tesla Model Y Juniper" />
-                <div>
-                  <strong>Tesla Model Y Juniper</strong>
-                  <span>2025</span>
-                </div>
-              </article>
-              <article class="fleet-car">
-                <img src="y2024.png" alt="Tesla Model Y" />
-                <div>
-                  <strong>Tesla Model Y</strong>
-                  <span>2024</span>
-                </div>
-              </article>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      <nav class="bottom-nav" aria-label="Primary navigation">
-        <a class="nav-item is-active" href="#order" data-nav="order" aria-label="Ride">
-          <img class="nav-icon" src="1icon.png" alt="" aria-hidden="true" />
-        </a>
-        <a class="nav-item" href="#prices" data-nav="prices" aria-label="Prices">
-          <img class="nav-icon" src="2icon.png" alt="" aria-hidden="true" />
-        </a>
-        <a class="nav-item" href="#about" data-nav="about" aria-label="About">
-          <img class="nav-icon" src="3icon.png" alt="" aria-hidden="true" />
-        </a>
-      </nav>
-    </div>
-
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-    <script src="app.js"></script>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer"><img src="spacedrivelogo.png" alt="Space Drive" width="238" height="69" /><p data-i18n="footerText">Private chauffeur service across Switzerland.</p><div><a href="info.html" data-i18n="navInfo">Info</a><a href="pricing.html" data-i18n="navPricing">Pricing</a></div></footer>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script><script src="app.js"></script>
   </body>
 </html>

@@ -10,9 +10,18 @@ const AUTOCOMPLETE_DEBOUNCE_MS = 220;
 
 const translations = {
   en: {
+    skipBooking: "Skip to booking",
+    navInfo: "Info",
+    navPricing: "Pricing",
+    navBook: "Book a ride",
+    heroLuxury: "Luxury Transfer Services",
+    heroComfort: "Discreet, punctual, and exceptionally comfortable",
+    heroFinal: "Your best chauffeur service in Switzerland",
     eyebrow: "Private transfers in Switzerland",
     siteTagline: "Your best chauffeur service in Switzerland.",
     headline: "Book your ride",
+    bookingIntro:
+      "Tell us where you are going. We will calculate the route and prepare your private transfer.",
     pickupLabel: "Pickup location",
     pickupPlaceholder: "Zurich Airport",
     destinationLabel: "Destination",
@@ -22,10 +31,10 @@ const translations = {
     duration: "Travel time",
     price: "Estimated price",
     whatsappButton: "Send inquiry on WhatsApp",
-    emailButton: "Send inquiry per mail",
+    emailButton: "Send inquiry by email",
     emailSubject: "SpaceDrive transfer inquiry",
     nameLabel: "Name",
-    namePlaceholder: "John Smith",
+    namePlaceholder: "Alex Morgan",
     telephoneLabel: "Telephone number",
     telephonePlaceholder: "+41 79 123 45 67",
     routeNote: "Enter pickup and destination to calculate route.",
@@ -36,30 +45,54 @@ const translations = {
     missingContact: "Please enter your name and telephone number.",
     searchingPlaces: "Searching...",
     noPlaces: "No matching place found",
-    pricesEyebrow: "Transparent estimates",
-    pricesHeadline: "Pricing",
     baseFare: "Base fare",
-    perKmShort: "Per km up to 20 km",
-    perKmLong: "Per km over 20 km",
+    perKmShort: "Up to 20 km",
+    perKmLong: "Over 20 km",
     airportService: "Airport service",
     included: "Included",
     pricingText:
       "Final pricing can vary by vehicle class, waiting time, night service, and special requests.",
     aboutEyebrow: "Premium private transport",
-    aboutHeadline: "About SpaceDrive",
-    aboutText:
-      "SpaceDrive offers comfortable private transfers across Switzerland for airport pickups, hotels, ski resorts, business travel, and point-to-point journeys.",
     aboutPointOne: "Professional drivers",
     aboutPointTwo: "Reliable scheduling",
     aboutPointThree: "Discreet premium service",
     fleetHeadline: "Our cars",
+    requestHeadline: "Request availability",
+    requestText: "Add your contact details and choose how you would like to send the inquiry.",
+    footerText: "Private chauffeur service across Switzerland.",
+    pricesEyebrow: "Clear estimates",
+    pricesHeadline: "Pricing without surprises.",
+    pricingLead:
+      "Every journey is calculated from the actual route. You see an estimate before sending your inquiry.",
+    pricingDetails: "How your estimate is calculated",
+    baseFareText: "Applied once to every journey.",
+    perKm: "per kilometre",
+    includedInEstimate: "Included in your route estimate.",
+    pricingCta: "Ready to plan your journey?",
+    aboutHeadline: "Switzerland, on your terms.",
+    aboutText:
+      "Airport pickups, hotels, ski resorts and business travel. Every journey is private, punctual and handled with discretion.",
+    serviceHeadline: "The standard is personal.",
+    serviceText:
+      "A calm cabin, a carefully planned route and a driver who understands that good service is felt, not announced.",
+    fleetText: "Modern electric comfort for city transfers and long-distance journeys.",
+    infoCta: "Your next journey starts here.",
     whatsappMessage: ({ pickup, destination, distance, duration, price, name, telephone }) =>
       `Hello SpaceDrive, I would like to request a transfer.\n\nName: ${name}\nTelephone: ${telephone}\nPickup: ${pickup}\nDestination: ${destination}\nDistance: ${distance}\nTravel time: ${duration}\nEstimated price: ${price}\n\nPlease send me availability and a final quote.`,
   },
   de: {
+    skipBooking: "Direkt zur Buchung",
+    navInfo: "Info",
+    navPricing: "Preise",
+    navBook: "Fahrt buchen",
+    heroLuxury: "Exklusive Transferdienste",
+    heroComfort: "Diskret, pünktlich und außergewöhnlich komfortabel",
+    heroFinal: "Ihr bester Chauffeurservice in der Schweiz",
     eyebrow: "Private Transfers in der Schweiz",
     siteTagline: "Ihr bester Chauffeurservice in der Schweiz.",
     headline: "Fahrt buchen",
+    bookingIntro:
+      "Nennen Sie uns Ihr Ziel. Wir berechnen die Route und bereiten Ihren privaten Transfer vor.",
     pickupLabel: "Abholort",
     pickupPlaceholder: "Flughafen Zürich",
     destinationLabel: "Zielort",
@@ -84,23 +117,38 @@ const translations = {
     missingContact: "Bitte geben Sie Ihren Namen und Ihre Telefonnummer ein.",
     searchingPlaces: "Suche...",
     noPlaces: "Kein passender Ort gefunden",
-    pricesEyebrow: "Transparente Schätzung",
-    pricesHeadline: "Preise",
     baseFare: "Grundpreis",
-    perKmShort: "Pro km bis 20 km",
-    perKmLong: "Pro km über 20 km",
+    perKmShort: "Bis 20 km",
+    perKmLong: "Über 20 km",
     airportService: "Flughafenservice",
     included: "Inklusive",
     pricingText:
       "Der finale Preis kann je nach Fahrzeugklasse, Wartezeit, Nachtservice und Sonderwünschen variieren.",
     aboutEyebrow: "Premium-Privattransport",
-    aboutHeadline: "Über SpaceDrive",
-    aboutText:
-      "SpaceDrive bietet komfortable private Transfers in der ganzen Schweiz für Flughäfen, Hotels, Skigebiete, Geschäftsreisen und Punkt-zu-Punkt-Fahrten.",
     aboutPointOne: "Professionelle Fahrer",
     aboutPointTwo: "Zuverlässige Planung",
     aboutPointThree: "Diskreter Premium-Service",
     fleetHeadline: "Unsere Fahrzeuge",
+    requestHeadline: "Verfügbarkeit anfragen",
+    requestText: "Ergänzen Sie Ihre Kontaktdaten und wählen Sie den gewünschten Kontaktweg.",
+    footerText: "Privater Chauffeurservice in der ganzen Schweiz.",
+    pricesEyebrow: "Klare Schätzungen",
+    pricesHeadline: "Preise ohne Überraschungen.",
+    pricingLead:
+      "Jede Fahrt wird anhand der tatsächlichen Route berechnet. Vor Ihrer Anfrage sehen Sie eine Schätzung.",
+    pricingDetails: "So wird Ihre Schätzung berechnet",
+    baseFareText: "Wird einmal pro Fahrt berechnet.",
+    perKm: "pro Kilometer",
+    includedInEstimate: "In Ihrer Routenschätzung enthalten.",
+    pricingCta: "Bereit, Ihre Fahrt zu planen?",
+    aboutHeadline: "Die Schweiz nach Ihren Wünschen.",
+    aboutText:
+      "Flughäfen, Hotels, Skigebiete und Geschäftsreisen. Jede Fahrt ist privat, pünktlich und diskret.",
+    serviceHeadline: "Der Standard ist persönlich.",
+    serviceText:
+      "Eine ruhige Kabine, eine sorgfältig geplante Route und ein Fahrer, der unaufdringlichen Service versteht.",
+    fleetText: "Moderner elektrischer Komfort für Stadttransfers und lange Strecken.",
+    infoCta: "Ihre nächste Fahrt beginnt hier.",
     whatsappMessage: ({ pickup, destination, distance, duration, price, name, telephone }) =>
       `Hallo SpaceDrive, ich möchte einen Transfer anfragen.\n\nName: ${name}\nTelefon: ${telephone}\nAbholung: ${pickup}\nZiel: ${destination}\nDistanz: ${distance}\nFahrzeit: ${duration}\nGeschätzter Preis: ${price}\n\nBitte senden Sie mir Verfügbarkeit und ein finales Angebot.`,
   },
@@ -131,6 +179,14 @@ const elements = {
   tagline: document.querySelector(".site-tagline"),
   pickupSuggestions: document.querySelector("#pickupSuggestions"),
   destinationSuggestions: document.querySelector("#destinationSuggestions"),
+  header: document.querySelector("[data-header]"),
+  menuToggle: document.querySelector("[data-menu-toggle]"),
+  scrollHero: document.querySelector("[data-scroll-hero]"),
+  scrollVideo: document.querySelector("[data-scroll-video]"),
+  scrollProgress: document.querySelector("[data-scroll-progress]"),
+  heroSceneOne: document.querySelector('[data-hero-scene="one"]'),
+  heroSceneTwo: document.querySelector('[data-hero-scene="two"]'),
+  heroSceneFinal: document.querySelector('[data-hero-scene="final"]'),
 };
 
 function t(key) {
@@ -604,17 +660,253 @@ function openEmail() {
 }
 
 function initNavigation() {
-  elements.navItems.forEach((item) => {
-    item.addEventListener("click", () => {
-      setActiveView(item.dataset.nav);
+  if (!elements.header) {
+    return;
+  }
+
+  const sentinel = document.createElement("span");
+  sentinel.className = "header-sentinel";
+  sentinel.setAttribute("aria-hidden", "true");
+  document.body.prepend(sentinel);
+
+  const headerObserver = new IntersectionObserver(
+    ([entry]) => elements.header.classList.toggle("is-scrolled", !entry.isIntersecting),
+    { threshold: 0 },
+  );
+  headerObserver.observe(sentinel);
+
+  if (elements.menuToggle) {
+    elements.menuToggle.addEventListener("click", () => {
+      const open = elements.menuToggle.getAttribute("aria-expanded") !== "true";
+      elements.menuToggle.setAttribute("aria-expanded", String(open));
+      elements.header.classList.toggle("is-menu-open", open);
     });
+
+    document.querySelectorAll("#primaryNav a").forEach((link) => {
+      link.addEventListener("click", () => {
+        elements.menuToggle.setAttribute("aria-expanded", "false");
+        elements.header.classList.remove("is-menu-open");
+      });
+    });
+  }
+}
+
+function initScrollHero() {
+  const { scrollHero, scrollVideo, scrollProgress } = elements;
+
+  if (!scrollHero || !scrollVideo) {
+    return;
+  }
+
+  const heroEndSentinel = document.createElement("span");
+  heroEndSentinel.className = "hero-end-sentinel";
+  heroEndSentinel.setAttribute("aria-hidden", "true");
+  scrollHero.append(heroEndSentinel);
+
+  const headerSurfaceObserver = new IntersectionObserver(
+    ([entry]) => {
+      const viewportBottom = entry.rootBounds?.bottom ?? window.innerHeight;
+      const heroHasEnded = entry.isIntersecting || entry.boundingClientRect.top < viewportBottom;
+      elements.header?.classList.toggle("is-after-hero", heroHasEnded);
+    },
+    { threshold: 0 },
+  );
+  headerSurfaceObserver.observe(heroEndSentinel);
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let frameId = 0;
+  let active = false;
+  let duration = 12.5;
+  let mediaReady = scrollVideo.readyState >= 1;
+  let lastSeekAt = 0;
+  let primed = false;
+  let videoObjectUrl = "";
+
+  const loadSeekableVideo = async () => {
+    const sourceUrl = scrollVideo.dataset.scrollSrc;
+
+    if (!sourceUrl) {
+      return;
+    }
+
+    try {
+      const response = await fetch(sourceUrl);
+
+      if (!response.ok) {
+        throw new Error("Scroll video could not be loaded");
+      }
+
+      const videoBlob = await response.blob();
+      videoObjectUrl = URL.createObjectURL(videoBlob);
+      scrollVideo.src = videoObjectUrl;
+      scrollVideo.load();
+    } catch (error) {
+      // Direct source remains a functional fallback on hosts with byte-range support.
+      scrollVideo.src = sourceUrl;
+      scrollVideo.preload = "auto";
+      scrollVideo.load();
+    }
+  };
+
+  const getProgress = () => {
+    const rect = scrollHero.getBoundingClientRect();
+    const scrollDistance = Math.max(1, scrollHero.offsetHeight - window.innerHeight);
+    return Math.min(1, Math.max(0, -rect.top / scrollDistance));
+  };
+
+  const getVideoProgress = (progress) => Math.min(1, progress / 0.78);
+
+  const smoothstep = (start, end, value) => {
+    const normalized = Math.min(1, Math.max(0, (value - start) / (end - start)));
+    return normalized * normalized * (3 - 2 * normalized);
+  };
+
+  const getSceneOpacity = (progress, enterStart, enterEnd, exitStart, exitEnd) => {
+    const enter = smoothstep(enterStart, enterEnd, progress);
+    const exit = 1 - smoothstep(exitStart, exitEnd, progress);
+    return Math.min(enter, exit);
+  };
+
+  const renderScene = (scene, opacity, horizontalDirection = 0) => {
+    if (!scene) {
+      return;
+    }
+
+    scene.style.setProperty("--scene-opacity", opacity.toFixed(4));
+    scene.style.setProperty("--scene-x", `${horizontalDirection * (1 - opacity) * 34}px`);
+    scene.style.setProperty("--scene-y", `${(1 - opacity) * 24}px`);
+    scene.style.setProperty("--scene-scale", (0.985 + opacity * 0.015).toFixed(4));
+  };
+
+  const renderStory = (progress) => {
+    const firstOpacity = getSceneOpacity(progress, 0.06, 0.13, 0.27, 0.34);
+    const secondOpacity = getSceneOpacity(progress, 0.37, 0.44, 0.62, 0.69);
+    const finalOpacity = smoothstep(0.74, 0.82, progress);
+
+    renderScene(elements.heroSceneOne, firstOpacity, -1);
+    renderScene(elements.heroSceneTwo, secondOpacity, 1);
+    renderScene(elements.heroSceneFinal, finalOpacity, 0);
+
+    if (elements.heroSceneFinal) {
+      elements.heroSceneFinal.style.setProperty("--final-reveal", finalOpacity.toFixed(4));
+      elements.heroSceneFinal.style.setProperty(
+        "--flag-scale",
+        (0.72 + finalOpacity * 0.28).toFixed(4),
+      );
+      elements.heroSceneFinal.style.setProperty(
+        "--flag-rotate",
+        `${((1 - finalOpacity) * -5).toFixed(2)}deg`,
+      );
+    }
+
+    elements.header?.classList.toggle(
+      "is-hero-finale",
+      progress >= 0.79 && progress < 0.995,
+    );
+  };
+
+  const updateFrame = (timestamp = 0) => {
+    if (!active) {
+      return;
+    }
+
+    const progress = getProgress();
+    const targetTime = getVideoProgress(progress) * Math.max(0.1, duration - 0.06);
+
+    // Keep only the newest scroll position. Browsers coalesce an in-flight seek,
+    // so fast scrolling never has to wait for outdated frames to finish decoding.
+    if (
+      mediaReady &&
+      timestamp - lastSeekAt >= 32 &&
+      Math.abs(scrollVideo.currentTime - targetTime) > 0.012
+    ) {
+      scrollVideo.currentTime = targetTime;
+      lastSeekAt = timestamp;
+    }
+
+    if (scrollProgress) {
+      scrollProgress.style.transform = `scaleX(${progress})`;
+    }
+
+    renderStory(progress);
+
+    frameId = window.requestAnimationFrame(updateFrame);
+  };
+
+  const start = () => {
+    if (active || reduceMotion) {
+      return;
+    }
+    active = true;
+    frameId = window.requestAnimationFrame(updateFrame);
+  };
+
+  const stop = () => {
+    active = false;
+    window.cancelAnimationFrame(frameId);
+    elements.header?.classList.remove("is-hero-finale");
+  };
+
+  scrollVideo.addEventListener("loadedmetadata", () => {
+    duration = Number.isFinite(scrollVideo.duration) ? scrollVideo.duration : duration;
+    mediaReady = true;
+    scrollVideo.pause();
+    scrollVideo.currentTime = reduceMotion
+      ? 0.01
+      : getVideoProgress(getProgress()) * Math.max(0.1, duration - 0.06);
   });
 
-  window.addEventListener("hashchange", () => {
-    setActiveView(window.location.hash.replace("#", ""));
-  });
+  const primeDecoder = () => {
+    if (primed || reduceMotion) {
+      return;
+    }
 
-  setActiveView(window.location.hash.replace("#", "") || "order");
+    primed = true;
+    const playAttempt = scrollVideo.play();
+
+    if (playAttempt && typeof playAttempt.then === "function") {
+      playAttempt
+        .then(() => {
+          scrollVideo.pause();
+          scrollVideo.currentTime =
+            getVideoProgress(getProgress()) * Math.max(0.1, duration - 0.06);
+        })
+        .catch(() => {
+          scrollVideo.pause();
+        });
+    }
+  };
+
+  scrollVideo.addEventListener("canplay", primeDecoder, { once: true });
+
+  window.addEventListener(
+    "pagehide",
+    () => {
+      if (videoObjectUrl) {
+        URL.revokeObjectURL(videoObjectUrl);
+      }
+    },
+    { once: true },
+  );
+
+  const heroObserver = new IntersectionObserver(
+    ([entry]) => (entry.isIntersecting ? start() : stop()),
+    { rootMargin: "120px 0px" },
+  );
+  heroObserver.observe(scrollHero);
+
+  loadSeekableVideo();
+
+  if (scrollVideo.readyState >= 1) {
+    duration = Number.isFinite(scrollVideo.duration) ? scrollVideo.duration : duration;
+    mediaReady = true;
+    if (scrollVideo.readyState >= 3) {
+      primeDecoder();
+    }
+    if (!reduceMotion) {
+      start();
+    }
+  }
 }
 
 function initLanguageSwitch() {
@@ -626,6 +918,10 @@ function initLanguageSwitch() {
 }
 
 function initSwapButton() {
+  if (!elements.swap) {
+    return;
+  }
+
   elements.swap.addEventListener("click", () => {
     const pickup = elements.pickup.value;
     elements.pickup.value = elements.destination.value;
@@ -639,14 +935,24 @@ function initSwapButton() {
 }
 
 function initApp() {
+  document.querySelectorAll(".brand-mark img").forEach((logo) => {
+    logo.src = "spacedrive-monogram-header.png";
+    logo.width = 426;
+    logo.height = 640;
+  });
+
   initLanguageSwitch();
   initNavigation();
-  initAutocomplete(elements.pickup, elements.pickupSuggestions);
-  initAutocomplete(elements.destination, elements.destinationSuggestions);
-  initSwapButton();
-  elements.form.addEventListener("submit", handleRouteSubmit);
-  elements.whatsapp.addEventListener("click", openWhatsApp);
-  elements.email.addEventListener("click", openEmail);
+  initScrollHero();
+
+  if (elements.form) {
+    initAutocomplete(elements.pickup, elements.pickupSuggestions);
+    initAutocomplete(elements.destination, elements.destinationSuggestions);
+    initSwapButton();
+    elements.form.addEventListener("submit", handleRouteSubmit);
+    elements.whatsapp.addEventListener("click", openWhatsApp);
+    elements.email.addEventListener("click", openEmail);
+  }
 
   if (window.lucide) {
     window.lucide.createIcons();
