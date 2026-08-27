@@ -912,19 +912,9 @@ function initScrollHero() {
     }
 
     primed = true;
-    const playAttempt = scrollVideo.play();
-
-    if (playAttempt && typeof playAttempt.then === "function") {
-      playAttempt
-        .then(() => {
-          scrollVideo.pause();
-          scrollVideo.currentTime =
-            getVideoProgress(getProgress()) * Math.max(0.1, duration - 0.06);
-        })
-        .catch(() => {
-          scrollVideo.pause();
-        });
-    }
+    scrollVideo.pause();
+    scrollVideo.currentTime =
+      getVideoProgress(getProgress()) * Math.max(0.1, duration - 0.06);
   };
 
   scrollVideo.addEventListener("canplay", primeDecoder, { once: true });
