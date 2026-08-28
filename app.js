@@ -743,12 +743,24 @@ function initScrollHero() {
   let lastSeekAt = 0;
   let primed = false;
   let videoObjectUrl = "";
+  const usesSafariMediaEngine =
+    /AppleWebKit/i.test(navigator.userAgent) &&
+    !/(Chrome|Chromium|Edg|OPR|Android)/i.test(navigator.userAgent);
 
   const loadSeekableVideo = async () => {
     const sourceUrl = scrollVideo.dataset.scrollSrc;
 
     if (!sourceUrl) {
       releaseLoader();
+      return;
+    }
+
+    // Safari is more reliable when seeking a regular HTTP media resource. Its
+    // decoder can permanently detach from a Blob URL after a tab is suspended.
+    if (usesSafariMediaEngine) {
+      scrollVideo.src = sourceUrl;
+      scrollVideo.preload = "auto";
+      scrollVideo.load();
       return;
     }
 
@@ -933,7 +945,13 @@ function initScrollHero() {
     active = false;
     lastSeekAt = 0;
 
-    if (scrollVideo.readyState >= 1) {
+    if (usesSafariMediaEngine && scrollVideo.currentSrc) {
+      // Rebuild Safari's media pipeline. The loadedmetadata handler below will
+      // seek back to the frame that corresponds to the current scroll position.
+      mediaReady = false;
+      primed = false;
+      scrollVideo.load();
+    } else if (scrollVideo.readyState >= 1) {
       mediaReady = true;
       const progress = getProgress();
       const targetTime = getVideoProgress(progress) * Math.max(0.1, duration - 0.06);
