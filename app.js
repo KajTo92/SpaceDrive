@@ -921,17 +921,59 @@ function initScrollHero() {
   scrollVideo.addEventListener("canplay", releaseLoader, { once: true });
   scrollVideo.addEventListener("error", releaseLoader, { once: true });
 
-  window.addEventListener(
-    "pagehide",
-    () => {
+  const resumeAfterTabRestore = () => {
+    if (document.visibilityState === "hidden" || reduceMotion) {
+      return;
+    }
+
+    // Safari can suspend both requestAnimationFrame and the decoder of a paused
+    // video while the tab is in the background. Re-seek to the current scroll
+    // position and create a fresh animation-frame chain after the tab returns.
+    window.cancelAnimationFrame(frameId);
+    active = false;
+    lastSeekAt = 0;
+
+    if (scrollVideo.readyState >= 1) {
+      mediaReady = true;
+      const progress = getProgress();
+      const targetTime = getVideoProgress(progress) * Math.max(0.1, duration - 0.06);
+      scrollVideo.pause();
+      scrollVideo.currentTime = targetTime;
+      renderMobileVideoFraming(targetTime);
+      renderStory(progress);
+    }
+
+    const rect = scrollHero.getBoundingClientRect();
+    const isNearViewport = rect.bottom >= -120 && rect.top <= window.innerHeight + 120;
+    if (isNearViewport) {
+      start();
+    }
+  };
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      window.requestAnimationFrame(resumeAfterTabRestore);
+    }
+  });
+
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) {
+      window.requestAnimationFrame(resumeAfterTabRestore);
+    }
+  });
+
+  window.addEventListener("pagehide", (event) => {
+    // A persisted page will be restored from Safari's back/forward cache and
+    // still needs this Blob URL and its pending loader timers.
+    if (!event.persisted) {
       window.clearTimeout(loaderRemovalTimer);
       window.clearTimeout(loaderFailsafeTimer);
       if (videoObjectUrl) {
         URL.revokeObjectURL(videoObjectUrl);
+        videoObjectUrl = "";
       }
-    },
-    { once: true },
-  );
+    }
+  });
 
   const heroObserver = new IntersectionObserver(
     ([entry]) => (entry.isIntersecting ? start() : stop()),
