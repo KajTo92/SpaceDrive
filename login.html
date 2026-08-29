@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#090909" />
+    <meta name="description" content="Login to track your Space Drive journey." />
+    <title>Ride tracking | Space Drive</title>
+    <link rel="icon" href="spacedrive-monogram.png" type="image/png" />
+    <link rel="stylesheet" href="styles.css?v=4" />
+  </head>
+  <body class="login-page">
+    <header class="site-header is-solid" data-header>
+      <a class="brand-mark" href="index.html" aria-label="Space Drive home"><img src="spacedrive-monogram-header.png" alt="" width="426" height="640" /><span>Space Drive</span></a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primaryNav" data-menu-toggle><span class="menu-line"></span><span class="menu-line"></span><span class="sr-only">Menu</span></button>
+      <nav class="primary-nav" id="primaryNav" aria-label="Primary navigation">
+        <a href="info.html" data-i18n="navInfo">Info</a><a href="pricing.html" data-i18n="navPricing">Pricing</a><a class="nav-cta" href="index.html#booking" data-i18n="navBook">Book a ride</a>
+        <div class="language-switch" aria-label="Language"><button class="lang-button is-active" type="button" data-lang="en">EN</button><button class="lang-button" type="button" data-lang="de">DE</button></div>
+      </nav>
+    </header>
+    <main class="login-main">
+      <section class="login-intro" aria-labelledby="loginTitle">
+        <p class="eyebrow" data-i18n="loginEyebrow">Ride tracking</p>
+        <h1 id="loginTitle" data-i18n="loginHeadline">Welcome back</h1>
+        <p data-i18n="loginIntro">Sign in to view your ride details and live status.</p>
+      </section>
+      <section class="login-panel" aria-label="Login">
+        <div class="login-tabs" role="tablist" aria-label="Account type">
+          <button class="login-tab is-active" id="passengerTab" type="button" role="tab" aria-selected="true" aria-controls="passengerForm" data-login-tab="passenger" data-i18n="passengerTab">Passenger</button>
+          <button class="login-tab" id="driverTab" type="button" role="tab" aria-selected="false" aria-controls="driverForm" data-login-tab="driver" data-i18n="driverTab">Driver</button>
+        </div>
+        <form class="login-form" id="passengerForm" data-login-form="passenger" role="tabpanel" aria-labelledby="passengerTab">
+          <label class="field"><span data-i18n="emailLabel">Email address</span><input name="passengerEmail" type="email" autocomplete="email" placeholder="you@example.com" data-i18n-placeholder="emailPlaceholder" /></label>
+          <label class="field"><span data-i18n="passwordLabel">Password</span><input name="passengerPassword" type="password" autocomplete="current-password" placeholder="Enter your password" data-i18n-placeholder="passwordPlaceholder" /></label>
+          <button class="primary-button login-submit" type="submit"><span data-i18n="passengerLoginButton">Login as passenger</span></button>
+          <div class="login-divider"><span>or</span></div>
+          <button class="login-provider" type="button" data-login-provider><i data-lucide="globe" aria-hidden="true"></i><span>Continue with Google</span></button>
+          <p class="login-magic">Magic Link access is prepared for the authentication integration.</p>
+        </form>
+        <form class="login-form" id="driverForm" data-login-form="driver" role="tabpanel" aria-labelledby="driverTab" hidden>
+          <label class="field"><span data-i18n="driverIdLabel">Driver ID</span><input name="driverId" type="text" autocomplete="username" placeholder="Enter your driver ID" data-i18n-placeholder="driverIdPlaceholder" required /></label>
+          <label class="field"><span data-i18n="passwordLabel">Password</span><input name="driverPassword" type="password" autocomplete="current-password" placeholder="Enter your password" data-i18n-placeholder="passwordPlaceholder" required /></label>
+          <button class="primary-button login-submit" type="submit"><span data-i18n="driverLoginButton">Login as driver</span></button>
+        </form>
+        <p class="login-message" data-login-message aria-live="polite"></p>
+      </section>
+    </main>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script><script src="app.js?v=9"></script><script src="login.js?v=3"></script>
+  </body>
+</html>

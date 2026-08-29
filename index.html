@@ -9,7 +9,7 @@
     <link rel="icon" href="spacedrive-monogram.png" type="image/png" />
     <link rel="preload" href="scroll-poster.jpg?v=2" as="image" type="image/jpeg" />
     <link rel="preload" href="spacedrive-monogram-header.png" as="image" type="image/png" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=10" />
   </head>
   <body>
     <div class="site-loader" data-loader role="status" aria-live="polite">
@@ -26,16 +26,26 @@
       <a class="brand-mark" href="index.html" aria-label="Space Drive home"><img src="spacedrive-monogram-header.png" alt="" width="426" height="640" /><span>Space Drive</span></a>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primaryNav" data-menu-toggle><span class="menu-line"></span><span class="menu-line"></span><span class="sr-only">Menu</span></button>
       <nav class="primary-nav" id="primaryNav" aria-label="Primary navigation">
-        <a href="info.html" data-i18n="navInfo">Info</a><a href="pricing.html" data-i18n="navPricing">Pricing</a><a class="nav-cta" href="#booking" data-i18n="navBook">Book a ride</a>
+        <a href="info.html" data-i18n="navInfo">Info</a><a href="pricing.html" data-i18n="navPricing">Pricing</a><a class="nav-login" href="login.html" data-i18n="navLogin">Login</a><a class="nav-cta" href="#booking" data-i18n="navBook">Book a ride</a>
         <div class="language-switch" aria-label="Language"><button class="lang-button is-active" type="button" data-lang="en">EN</button><button class="lang-button" type="button" data-lang="de">DE</button></div>
       </nav>
     </header>
     <main>
       <section class="scroll-hero" aria-label="Space Drive cinematic journey" data-scroll-hero>
         <div class="scroll-hero__sticky">
-          <video class="scroll-hero__video" data-scroll-video data-scroll-src="scroll.mp4?v=2" muted playsinline preload="none" poster="scroll-poster.jpg?v=2" aria-hidden="true"></video>
+          <video class="scroll-hero__video" data-scroll-video data-scroll-src="scrollnowy.mp4?v=1" muted playsinline preload="none" poster="scroll-poster.jpg?v=2" aria-hidden="true"></video>
           <div class="scroll-hero__scrim" aria-hidden="true"></div>
           <div class="scroll-hero__copy" data-hero-copy aria-live="off">
+            <div class="hero-scene hero-scene--welcome" data-hero-scene="welcome">
+              <div class="welcome-content">
+                <h1 data-i18n="heroWelcome">Welcome to your best chauffeur service in Switzerland</h1>
+                <div class="welcome-language" aria-label="Choose language">
+                  <span data-i18n="languageLabel">Language</span>
+                  <button class="welcome-lang-button lang-button is-active" type="button" data-lang="en">EN</button>
+                  <button class="welcome-lang-button lang-button" type="button" data-lang="de">DE</button>
+                </div>
+              </div>
+            </div>
             <div class="hero-scene hero-scene--one" data-hero-scene="one">
               <p data-i18n="heroLuxury">Luxury Transfer Services</p>
             </div>
@@ -53,8 +63,12 @@
                   <img src="spacedrive-monogram-header.png" alt="" width="426" height="640" />
                   <span>Space Drive</span>
                 </div>
-                <h2 data-i18n="heroFinal">Your best chauffeur service in Switzerland</h2>
-                <span class="finale-baseline" aria-hidden="true"></span>
+                <div class="finale-conversion">
+                  <div class="finale-actions" aria-label="Choose how to book">
+                    <button class="finale-action finale-action--primary" type="button" data-reveal-booking data-i18n="bookOneRide">Book one ride</button>
+                    <a class="finale-action finale-action--secondary" href="login.html" data-i18n="passengerAccessCta">Login to access multiple rides, city tours, chat and live monitoring features</a>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -65,7 +79,7 @@
           <div class="scroll-progress" aria-hidden="true"><span data-scroll-progress></span></div>
         </div>
       </section>
-      <section class="booking-section" id="booking">
+      <section class="booking-section" id="booking" data-booking-section hidden>
         <div class="booking-heading">
           <p class="eyebrow" data-i18n="eyebrow">Private transfers in Switzerland</p>
           <h1 data-i18n="headline">Book your ride</h1>
@@ -82,7 +96,13 @@
             </form>
             <div class="route-summary" aria-live="polite"><div><span data-i18n="distance">Distance</span><strong id="distanceValue">--</strong></div><div><span data-i18n="duration">Travel time</span><strong id="durationValue">--</strong></div><div><span data-i18n="price">Estimated price</span><strong id="priceValue">--</strong></div></div>
           </div>
-          <div class="map-wrap" aria-label="Route map"><iframe id="mapFrame" title="Google Maps route" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&q=Switzerland"></iframe></div>
+          <div class="map-column">
+            <div class="map-wrap" aria-label="Route map"><iframe id="mapFrame" title="Google Maps route" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&q=Switzerland"></iframe></div>
+            <a class="ride-tracking-cta" href="login.html">
+              <span data-i18n="trackRideCta">Login to track your ride</span>
+              <i data-lucide="arrow-up-right" aria-hidden="true"></i>
+            </a>
+          </div>
           <div class="contact-panel">
             <div class="contact-intro"><h2 data-i18n="requestHeadline">Request availability</h2><p data-i18n="requestText">Add your contact details and choose how you would like to send the inquiry.</p></div>
             <div class="contact-fields"><label class="field"><span data-i18n="nameLabel">Name</span><i data-lucide="user" aria-hidden="true"></i><input id="customerName" name="customerName" type="text" autocomplete="name" placeholder="Alex Morgan" data-i18n-placeholder="namePlaceholder" /></label><label class="field"><span data-i18n="telephoneLabel">Telephone number</span><i data-lucide="phone" aria-hidden="true"></i><input id="telephone" name="telephone" type="tel" autocomplete="tel" placeholder="+41 79 123 45 67" data-i18n-placeholder="telephonePlaceholder" /></label></div>
@@ -91,7 +111,7 @@
         </div>
       </section>
     </main>
-    <footer class="site-footer"><div class="footer-brand" aria-label="Space Drive"><img src="spacedrive-monogram-header.png" alt="" width="426" height="640" /><span>Space Drive</span></div><p data-i18n="footerText">Private chauffeur service across Switzerland.</p><div class="footer-links"><a href="info.html" data-i18n="navInfo">Info</a><a href="pricing.html" data-i18n="navPricing">Pricing</a></div></footer>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script><script src="app.js"></script>
+    <footer class="site-footer" data-post-booking hidden><div class="footer-brand" aria-label="Space Drive"><img src="spacedrive-monogram-header.png" alt="" width="426" height="640" /><span>Space Drive</span></div><p data-i18n="footerText">Private chauffeur service across Switzerland.</p><div class="footer-links"><a href="info.html" data-i18n="navInfo">Info</a><a href="pricing.html" data-i18n="navPricing">Pricing</a></div></footer>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script><script src="app.js?v=9"></script>
   </body>
 </html>

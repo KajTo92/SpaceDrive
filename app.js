@@ -13,10 +13,16 @@ const translations = {
     skipBooking: "Skip to booking",
     navInfo: "Info",
     navPricing: "Pricing",
+    navLogin: "Login",
     navBook: "Book a ride",
     heroLuxury: "Luxury Transfer Services",
     heroComfort: "Discreet, punctual, and exceptionally comfortable",
     heroFinal: "Your best chauffeur service in Switzerland",
+    heroWelcome: "Welcome to your best chauffeur service in Switzerland",
+    languageLabel: "Language",
+    bookOneRide: "Book one ride",
+    passengerAccessCta:
+      "Login to access multiple rides, city tours, chat and live monitoring features",
     scrollHint: "Scroll to explore",
     loaderText: "Preparing your journey",
     eyebrow: "Private transfers in Switzerland",
@@ -62,6 +68,21 @@ const translations = {
     requestHeadline: "Request availability",
     requestText: "Add your contact details and choose how you would like to send the inquiry.",
     footerText: "Private chauffeur service across Switzerland.",
+    trackRideCta: "Login to track your ride",
+    loginEyebrow: "Ride tracking",
+    loginHeadline: "Welcome back",
+    loginIntro: "Sign in to view your ride details and live status.",
+    passengerTab: "Passenger",
+    driverTab: "Driver",
+    emailLabel: "Email address",
+    emailPlaceholder: "you@example.com",
+    passwordLabel: "Password",
+    passwordPlaceholder: "Enter your password",
+    passengerLoginButton: "Login as passenger",
+    driverIdLabel: "Driver ID",
+    driverIdPlaceholder: "Enter your driver ID",
+    driverLoginButton: "Login as driver",
+    loginPending: "Ride tracking access will be connected in the next step.",
     pricesEyebrow: "Clear estimates",
     pricesHeadline: "Pricing without surprises.",
     pricingLead:
@@ -86,10 +107,16 @@ const translations = {
     skipBooking: "Direkt zur Buchung",
     navInfo: "Info",
     navPricing: "Preise",
+    navLogin: "Anmelden",
     navBook: "Fahrt buchen",
     heroLuxury: "Exklusive Transferdienste",
     heroComfort: "Diskret, pünktlich und außergewöhnlich komfortabel",
     heroFinal: "Ihr bester Chauffeurservice in der Schweiz",
+    heroWelcome: "Willkommen bei Ihrem besten Chauffeurservice in der Schweiz",
+    languageLabel: "Sprache",
+    bookOneRide: "Eine Fahrt buchen",
+    passengerAccessCta:
+      "Anmelden für mehrere Fahrten, Stadttouren, Chat und Live-Überwachung",
     scrollHint: "Zum Entdecken scrollen",
     loaderText: "Ihre Fahrt wird vorbereitet",
     eyebrow: "Private Transfers in der Schweiz",
@@ -136,6 +163,21 @@ const translations = {
     requestHeadline: "Verfügbarkeit anfragen",
     requestText: "Ergänzen Sie Ihre Kontaktdaten und wählen Sie den gewünschten Kontaktweg.",
     footerText: "Privater Chauffeurservice in der ganzen Schweiz.",
+    trackRideCta: "Anmelden und Fahrt verfolgen",
+    loginEyebrow: "Fahrtverfolgung",
+    loginHeadline: "Willkommen zurück",
+    loginIntro: "Melden Sie sich an, um Fahrtdetails und Live-Status zu sehen.",
+    passengerTab: "Fahrgast",
+    driverTab: "Fahrer",
+    emailLabel: "E-Mail-Adresse",
+    emailPlaceholder: "sie@beispiel.ch",
+    passwordLabel: "Passwort",
+    passwordPlaceholder: "Passwort eingeben",
+    passengerLoginButton: "Als Fahrgast anmelden",
+    driverIdLabel: "Fahrer-ID",
+    driverIdPlaceholder: "Fahrer-ID eingeben",
+    driverLoginButton: "Als Fahrer anmelden",
+    loginPending: "Der Zugang zur Fahrtverfolgung wird im nächsten Schritt verbunden.",
     pricesEyebrow: "Klare Schätzungen",
     pricesHeadline: "Preise ohne Überraschungen.",
     pricingLead:
@@ -189,9 +231,13 @@ const elements = {
   scrollHero: document.querySelector("[data-scroll-hero]"),
   scrollVideo: document.querySelector("[data-scroll-video]"),
   scrollProgress: document.querySelector("[data-scroll-progress]"),
+  heroSceneWelcome: document.querySelector('[data-hero-scene="welcome"]'),
   heroSceneOne: document.querySelector('[data-hero-scene="one"]'),
   heroSceneTwo: document.querySelector('[data-hero-scene="two"]'),
   heroSceneFinal: document.querySelector('[data-hero-scene="final"]'),
+  bookingSection: document.querySelector("[data-booking-section]"),
+  bookingRevealButtons: document.querySelectorAll("[data-reveal-booking]"),
+  postBookingElements: document.querySelectorAll("[data-booking-section], [data-post-booking]"),
 };
 
 function t(key) {
@@ -696,6 +742,50 @@ function initNavigation() {
   }
 }
 
+function initBookingReveal() {
+  const { bookingSection, bookingRevealButtons, postBookingElements } = elements;
+
+  if (!bookingSection) {
+    return;
+  }
+
+  const revealBooking = ({ scroll = true } = {}) => {
+    postBookingElements.forEach((element) => {
+      element.hidden = false;
+      element.setAttribute("aria-hidden", "false");
+    });
+
+    if (scroll) {
+      window.requestAnimationFrame(() => {
+        bookingSection.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? "auto"
+            : "smooth",
+          block: "start",
+        });
+      });
+    }
+  };
+
+  postBookingElements.forEach((element) => element.setAttribute("aria-hidden", "true"));
+  bookingRevealButtons.forEach((button) => {
+    button.addEventListener("click", () => revealBooking());
+  });
+
+  document.querySelectorAll('a[href="#booking"], a[href="index.html#booking"]').forEach((link) => {
+    link.addEventListener("click", (event) => {
+      if (window.location.pathname.endsWith("/index.html") || link.getAttribute("href") === "#booking") {
+        event.preventDefault();
+        revealBooking();
+      }
+    });
+  });
+
+  if (window.location.hash === "#booking") {
+    revealBooking({ scroll: false });
+  }
+}
+
 function initScrollHero() {
   const { scrollHero, scrollVideo, scrollProgress } = elements;
 
@@ -839,10 +929,12 @@ function initScrollHero() {
   };
 
   const renderStory = (progress) => {
+    const welcomeOpacity = 1 - smoothstep(0.004, 0.055, progress);
     const firstOpacity = getSceneOpacity(progress, 0.06, 0.13, 0.27, 0.34);
     const secondOpacity = getSceneOpacity(progress, 0.37, 0.44, 0.62, 0.69);
     const finalOpacity = smoothstep(0.74, 0.82, progress);
 
+    renderScene(elements.heroSceneWelcome, welcomeOpacity, 0);
     renderScene(elements.heroSceneOne, firstOpacity, -1);
     renderScene(elements.heroSceneTwo, secondOpacity, 1);
     renderScene(elements.heroSceneFinal, finalOpacity, 0);
@@ -1054,6 +1146,7 @@ function initApp() {
 
   initLanguageSwitch();
   initNavigation();
+  initBookingReveal();
   initScrollHero();
 
   if (elements.form) {
