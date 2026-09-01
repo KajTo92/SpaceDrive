@@ -1,4 +1,5 @@
 import { journeyStages, statusLabel } from "../../shared/ride-status.js?v=2";
+import { resolveAssetUrl } from "../../shared/asset-url.js";
 
 let rootPath = "../";
 
@@ -6,7 +7,7 @@ export function setPassengerRoot(path) {
   rootPath = path;
 }
 
-export const assetUrl = (path) => `${rootPath}${path}`;
+export const assetUrl = (path) => resolveAssetUrl(path, rootPath);
 export const passengerUrl = (path = "") => `${rootPath}passenger/${path}`;
 export const tripUrl = (id) => passengerUrl(`trips/detail.html?id=${encodeURIComponent(id)}`);
 
@@ -18,7 +19,10 @@ function icon(name) {
   return `<i data-lucide="${name}" aria-hidden="true"></i>`;
 }
 
-export function PassengerLayout({ active, title, subtitle, notifications, content }) {
+const escapeHtml = (value = "") => String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]);
+const passengerInitials = (passenger) => [passenger?.firstName, passenger?.lastName].filter(Boolean).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "SD";
+
+export function PassengerLayout({ active, title, subtitle, passenger, notifications, content }) {
   const unread = notifications.filter((item) => !item.read).length;
   const nav = [
     ["home", "", "house", "Home"],
@@ -41,7 +45,7 @@ export function PassengerLayout({ active, title, subtitle, notifications, conten
           <div><p>${subtitle || "Passenger portal"}</p><h1>${title}</h1></div>
           <div class="passenger-header__actions">
             <button class="icon-button notification-trigger" type="button" aria-label="Open notifications" aria-expanded="false" data-notification-trigger>${icon("bell")} ${unread ? `<span>${unread}</span>` : ""}</button>
-            <a class="profile-chip" href="${passengerUrl("profile/")}" aria-label="Open profile"><span>AM</span><strong>Alex Morgan</strong></a>
+            <a class="profile-chip" href="${passengerUrl("profile/")}" aria-label="Open profile"><span>${passengerInitials(passenger)}</span><strong>${escapeHtml([passenger?.firstName, passenger?.lastName].filter(Boolean).join(" ") || "Passenger")}</strong></a>
           </div>
         </header>
         <main class="passenger-content" id="passengerContent">${content}</main>

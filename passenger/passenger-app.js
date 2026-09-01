@@ -55,6 +55,8 @@ function refreshIcons() {
   globalThis.lucide?.createIcons({ attrs: { "stroke-width": 1.65 } });
 }
 
+const escapeHtml = (value = "") => String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]);
+
 function toast(message) {
   document.querySelector(".passenger-toast")?.remove();
   const node = document.createElement("div");
@@ -87,8 +89,8 @@ function bindSharedInteractions() {
 }
 
 async function withLayout({ active, title, subtitle, content }) {
-  const notifications = await getNotifications();
-  app.innerHTML = PassengerLayout({ active, title, subtitle, notifications, content });
+  const [notifications, passenger] = await Promise.all([getNotifications(), getPassenger()]);
+  app.innerHTML = PassengerLayout({ active, title, subtitle, passenger, notifications, content });
   bindSharedInteractions();
 }
 
@@ -305,6 +307,7 @@ function renderHourlyConciergeBooking() {
 }
 
 async function renderRequests() {
+  const passenger = await getPassenger();
   const services = [
     { id: "simple-transfer", title: "Simple Transfer", description: "Direct, private travel from pickup to destination.", image: "passenger/assets/services/simple-transfer.png" },
     { id: "city-tour", title: "City Tour", description: "A private route through the city, paced around you.", image: "passenger/assets/services/city-tour.png" },
@@ -313,7 +316,7 @@ async function renderRequests() {
   const cards = services.map((service) => `<button class="service-card service-card--${service.id}" type="button" data-service-id="${service.id}" data-service-choice="${service.title}" aria-label="Choose ${service.title}" aria-pressed="false"><img src="${assetUrl(service.image)}" alt="" width="1400" height="896"><span class="service-card__shade"></span><span class="service-card__content"><span><strong>${service.title}</strong><small>${service.description}</small></span><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></button>`).join("");
   const booking = `
     <section class="simple-transfer-booking" data-simple-transfer-booking hidden aria-labelledby="simpleTransferTitle">
-      <header class="simple-transfer-booking__heading"><div><p>Simple Transfer</p><h2 id="simpleTransferTitle">Plan your route</h2><span>Your profile and journey preferences will be added automatically.</span></div><span class="booking-passenger-chip"><i data-lucide="circle-check"></i> Signed in as Alex</span></header>
+      <header class="simple-transfer-booking__heading"><div><p>Simple Transfer</p><h2 id="simpleTransferTitle">Plan your route</h2><span>Your profile and journey preferences will be added automatically.</span></div><span class="booking-passenger-chip"><i data-lucide="circle-check"></i> Signed in as ${escapeHtml(passenger.firstName || "Passenger")}</span></header>
       <div class="transfer-booking-grid">
         <form class="transfer-booking-panel" data-transfer-form>
           <div class="transfer-route-fields">
@@ -1033,7 +1036,7 @@ async function renderProfile() {
   const passenger = await getPassenger();
   const preferences = await getSavedJourneyPreferences(passenger.preferences);
   const content = `
-    <section class="profile-heading"><div class="profile-avatar">AM</div><div><p>Passenger profile</p><h2>${passenger.firstName} ${passenger.lastName}</h2><span>${passenger.email}</span></div></section>
+    <section class="profile-heading"><div class="profile-avatar">${[passenger.firstName, passenger.lastName].filter(Boolean).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "SD"}</div><div><p>Passenger profile</p><h2>${passenger.firstName} ${passenger.lastName}</h2><span>${passenger.email}</span></div></section>
     <section class="profile-grid"><article class="profile-section"><header><h2>Personal information</h2><button type="button" data-demo-action="Edit profile">Edit</button></header><div class="profile-values"><div><span>Full name</span><strong>${passenger.firstName} ${passenger.lastName}</strong></div><div><span>Email</span><strong>${passenger.email}</strong></div><div><span>Telephone</span><strong>Not added</strong></div></div></article><article class="profile-section saved-places"><header><h2>Saved places</h2><button type="button" data-demo-action="Add place">Add place</button></header>${passenger.savedPlaces.map((place) => `<div><i data-lucide="${place.name === "Home" ? "house" : "briefcase-business"}"></i><span><strong>${place.name}</strong><small>${place.address}</small></span><button type="button" aria-label="Edit ${place.name}" data-demo-action="Edit place"><i data-lucide="pencil"></i></button></div>`).join("")}</article></section>
     <section class="preferences-section"><div class="section-heading section-heading--stack"><h2>Journey preferences</h2><p>Saved securely to your Space Drive passenger profile.</p></div>${preferencesMarkup(preferences)}</section>
     <section class="profile-grid profile-grid--settings"><article class="profile-section"><header><h2>Notifications</h2></header><label class="setting-row"><span><strong>Journey updates</strong><small>Driver and booking status</small></span><span class="switch"><input type="checkbox" checked><span></span></span></label><label class="setting-row"><span><strong>New offers</strong><small>Ride request proposals</small></span><span class="switch"><input type="checkbox" checked><span></span></span></label></article><article class="profile-section"><header><h2>Security</h2></header><div class="security-summary"><i data-lucide="shield-check"></i><div><strong>Account protection</strong><p>Authentication and magic link settings will be connected with the backend.</p></div></div><button class="passenger-button" type="button" data-demo-action="Security settings">Security settings</button></article></section>`;

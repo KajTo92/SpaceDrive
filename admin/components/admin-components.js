@@ -1,8 +1,10 @@
 import { statusLabel } from "../../shared/ride-status.js?v=3";
 
+import { resolveAssetUrl } from "../../shared/asset-url.js";
+
 let rootPath = "../";
 export const setAdminRoot = (path) => { rootPath = path; };
-export const assetUrl = (path) => `${rootPath}${path}`;
+export const assetUrl = (path) => resolveAssetUrl(path, rootPath);
 export const adminUrl = (path = "") => `${rootPath}admin/${path}`;
 export const icon = (name) => `<i data-lucide="${name}" aria-hidden="true"></i>`;
 export const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);

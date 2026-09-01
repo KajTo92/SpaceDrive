@@ -1,8 +1,9 @@
 import { getDriverRideAction, journeyStages, statusLabel } from "../../shared/ride-status.js?v=2";
+import { resolveAssetUrl } from "../../shared/asset-url.js";
 
 let rootPath = "../";
 export const setDriverRoot = (path) => { rootPath = path; };
-export const assetUrl = (path) => `${rootPath}${path}`;
+export const assetUrl = (path) => resolveAssetUrl(path, rootPath);
 export const driverUrl = (path = "") => `${rootPath}driver/${path}`;
 export const driverRideUrl = (id) => driverUrl(`rides/detail.html?id=${encodeURIComponent(id)}`);
 export const icon = (name) => `<i data-lucide="${name}" aria-hidden="true"></i>`;
