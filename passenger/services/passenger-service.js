@@ -1,25 +1,16 @@
-import { assignedDriver, notifications, passenger, rideRequests } from "../data/mock-passenger.js?v=3";
-import { getAllRides, getSharedRideById } from "../../shared/services/ride-store.js?v=4";
-
-const wait = (value, delay = 180) => new Promise((resolve) => window.setTimeout(() => resolve(structuredClone(value)), delay));
-
-export const getPassenger = () => wait(passenger);
-export const getCurrentRide = () => wait(getSharedRideById("sd-240829"));
-export const getPassengerTrips = () => wait(getAllRides().filter((ride) => ride.passengerId === passenger.id));
-export const getRideById = (id) => wait(getAllRides().find((ride) => ride.id === id && ride.passengerId === passenger.id) || null);
-export const getRideRequests = () => wait(rideRequests);
-export const getAssignedDriver = () => wait(assignedDriver || null);
-export const getNotifications = () => wait(notifications);
-
-export function saveJourneyPreferences(preferences) {
-  localStorage.setItem("spacedrive-passenger-preferences", JSON.stringify(preferences));
-  return wait(preferences, 120);
-}
-
-export function getSavedJourneyPreferences(fallback) {
-  try {
-    return JSON.parse(localStorage.getItem("spacedrive-passenger-preferences")) || fallback;
-  } catch {
-    return fallback;
-  }
-}
+import { currentProfile, supabase } from "../../shared/supabase-client.js";
+import { mapRide, rideSelect } from "../../shared/services/ride-mapper.js";
+const fail=(error)=>{if(error)throw error;};
+export async function getPassenger(){const p=await currentProfile();if(!p)throw new Error("Authentication required");const{data}=await supabase.from("passenger_preferences").select("*").eq("passenger_id",p.id).maybeSingle();return{id:p.id,firstName:p.first_name,lastName:p.last_name,email:p.email,phone:p.phone,savedPlaces:[],preferences:data?{atmosphere:data.ride_atmosphere||"normal",temperature:data.temperature||21,music:data.music||"none",water:data.water||"no_preference",airportNameSign:data.name_sign,notes:data.notes}:{atmosphere:"normal",temperature:21,music:"none",water:"no_preference",airportNameSign:false}};}
+async function rides(){const{data,error}=await supabase.from("rides").select(rideSelect).order("scheduled_start_at",{ascending:false});fail(error);return(data||[]).map(mapRide);}
+export async function getCurrentRide(){return(await rides()).find(r=>!["completed","cancelled","declined"].includes(r.status))||null;}
+export const getPassengerTrips=rides;
+export async function getRideById(id){const{data,error}=await supabase.from("rides").select(rideSelect).eq("id",id).maybeSingle();fail(error);return mapRide(data);}
+export async function getRideRequests(){return(await rides()).filter(r=>["request_received","under_review","offer_sent"].includes(r.status));}
+export async function getAssignedDriver(){return(await getCurrentRide())?.driver||null;}
+export async function getNotifications(){const{data,error}=await supabase.from("notifications").select("*").order("created_at",{ascending:false});fail(error);return(data||[]).map(n=>({id:n.id,title:n.title,body:n.message,createdAt:n.created_at,read:!!n.read_at,rideId:n.ride_id}));}
+export async function createRideRequest(input){const p=await currentProfile();const start=new Date(`${input.pickupDate}T${input.pickupTime}:00`);const duration=input.hourlyDetails?.durationHours?input.hourlyDetails.durationHours*60:input.tourDetails?.durationHours?input.tourDetails.durationHours*60:90;const payload={service_type:input.serviceType||input.requestType||"transfer",scheduled_start_at:start.toISOString(),scheduled_end_at:new Date(start.getTime()+duration*60000).toISOString(),duration_minutes:duration,customer_name:p?`${p.first_name} ${p.last_name}`.trim():input.customerName,customer_email:p?.email||input.customerEmail,customer_phone:p?.phone||input.customerPhone,pickup_name:input.pickup?.name,pickup_address:input.pickup?.address,destination_name:input.destination?.name,destination_address:input.destination?.address,passenger_count:input.passengers||1,luggage:input.luggage,flight_number:input.flightNumber,requested_vehicle_id:input.requestedVehicleId,requested_vehicle_class:input.requestedVehicle,estimated_price:input.calculatedPrice,currency:input.currency||"CHF",special_requests:(input.specialRequests||[]).join("\n"),details:input.tourDetails?{region:input.tourDetails.region,tour_style:input.tourDetails.style,duration_minutes:duration,custom_notes:(input.specialRequests||[]).join("\n")}:input.hourlyDetails?{purpose:input.hourlyDetails.purpose,duration_minutes:duration,hourly_rate_snapshot:input.hourlyDetails.hourlyRate,included_kilometers_snapshot:input.hourlyDetails.includedKilometers}:undefined};const{data,error}=await supabase.rpc("submit_ride_request",{payload});fail(error);return{id:data,...input,status:"request_received",createdAt:new Date().toISOString()};}
+export async function saveJourneyPreferences(x){const p=await currentProfile();if(!p)throw new Error("Authentication required");const{error}=await supabase.from("passenger_preferences").upsert({passenger_id:p.id,ride_atmosphere:x.atmosphere,temperature:x.temperature,music:x.music,water:x.water,name_sign:!!x.airportNameSign,notes:x.notes});fail(error);return x;}
+export async function getSavedJourneyPreferences(fallback){try{return(await getPassenger()).preferences||fallback;}catch{return fallback;}}
+export async function acceptOffer(rideId){const{error}=await supabase.rpc("passenger_accept_offer",{ride_id:rideId});fail(error);}
+export function subscribeToPassengerRides(onChange){const c=supabase.channel("passenger-rides").on("postgres_changes",{event:"UPDATE",schema:"public",table:"rides"},onChange).subscribe();return()=>supabase.removeChannel(c);}

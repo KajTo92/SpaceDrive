@@ -1,0 +1,22 @@
+{
+  "name": "space-drive",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "node scripts/lint.mjs",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.mjs",
+    "supabase": "supabase"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4"
+  },
+  "devDependencies": {
+    "supabase": "^2.39.2",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.3"
+  }
+}

@@ -1,4 +1,4 @@
-import { rides as seedRides } from "../../passenger/data/mock-passenger.js?v=3";
+import { rides as seedRides } from "../../passenger/data/mock-passenger.js?v=5";
 
 const STATUS_STORAGE_KEY = "spacedrive-ride-statuses-v2";
 const clone = (value) => typeof structuredClone === "function" ? structuredClone(value) : JSON.parse(JSON.stringify(value));
@@ -8,7 +8,7 @@ function getStoredStatuses() {
   catch { return {}; }
 }
 
-const withStoredStatus = (ride) => ({ ...ride, status: getStoredStatuses()[ride.id] || ride.status });
+const withStoredStatus = (ride) => ({ ...ride, driverId: ride.driverId || ride.driver?.id, vehicleId: ride.vehicleId || ride.vehicle?.id, status: getStoredStatuses()[ride.id] || ride.status });
 
 export const getAllRides = () => clone(seedRides.map(withStoredStatus));
 

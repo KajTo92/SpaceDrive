@@ -32,6 +32,12 @@ img { display: block; max-width: 100%; }
 [hidden] { display: none !important; }
 ::selection { background: var(--driver-gold); color: #111; }
 
+.driver-access-state { min-height: 100vh; display: grid; place-content: center; justify-items: center; gap: 1rem; padding: 2rem; text-align: center; background: #090b0d; color: #f6f2e9; }
+.driver-access-state img { width: 72px; height: 72px; object-fit: contain; }
+.driver-access-state span { color: #c9a969; letter-spacing: .14em; text-transform: uppercase; font-size: .75rem; }
+.driver-access-state h1 { max-width: 620px; margin: 0; font-size: clamp(2rem, 6vw, 4.5rem); line-height: 1; }
+.driver-access-state p { max-width: 520px; color: #a8aaad; }
+
 .driver-skip { position: fixed; top: 10px; left: 10px; z-index: 200; padding: 11px 16px; border-radius: 999px; background: var(--driver-gold-light); color: #111; font-weight: 800; text-decoration: none; transform: translateY(-160%); }
 .driver-skip:focus { transform: translateY(0); }
 .driver-shell { min-height: 100dvh; }
@@ -145,7 +151,7 @@ img { display: block; max-width: 100%; }
 .driver-map-header span { color: var(--driver-dim); font-size: .62rem; font-weight: 750; letter-spacing: .11em; text-transform: uppercase; }
 .driver-map-header h2 { max-width: 22ch; margin-top: 4px; font-size: .92rem; font-weight: 620; }
 .driver-trip-map { position: relative; min-height: 300px; background: #111517; }
-.driver-trip-map iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; filter: grayscale(1) invert(.9) contrast(.92) brightness(.62) sepia(.15); }
+.driver-trip-map iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; filter: grayscale(.45) invert(.88) contrast(.94) brightness(.76) sepia(.1); }
 .driver-map-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; border-top: 1px solid var(--driver-line); background: var(--driver-line); }
 .driver-map-actions button, .driver-quiet-button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; border: 0; background: var(--driver-surface); color: var(--driver-text); font-size: .72rem; font-weight: 680; cursor: pointer; }
 .driver-map-actions svg { width: 17px; color: var(--driver-gold-light); }

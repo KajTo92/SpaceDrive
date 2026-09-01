@@ -9,9 +9,11 @@ import {
   reportRideIssue,
   updateDriverAvailability,
   updateRideStatus,
-} from "./services/driver-service.js?v=4";
+  subscribeToDriverRides,
+} from "./services/driver-service.js?v=5";
+import "./config.js";
+import { currentProfile, requireRole, signOut, supabase } from "../shared/supabase-client.js";
 import { openNavigation } from "./services/navigation-service.js?v=2";
-import { useDriverLocation } from "./hooks/use-driver-location.js?v=2";
 import { LiveTripMap } from "../passenger/components/live-trip-map.js?v=5";
 import { isClosedRideStatus, isTrackingRideStatus, statusLabel } from "../shared/ride-status.js?v=2";
 import {
@@ -43,6 +45,14 @@ const app = document.querySelector("#driverApp");
 const page = document.body.dataset.page || "home";
 const root = document.body.dataset.root || "../";
 setDriverRoot(root);
+const signedInProfile = await currentProfile();
+const { data: pendingApplication } = signedInProfile?.role === "passenger" ? await supabase.from("driver_applications").select("status").eq("user_id", signedInProfile.id).eq("status", "pending").maybeSingle() : { data: null };
+const driverAccessPending = Boolean(pendingApplication);
+if (driverAccessPending) {
+  app.innerHTML = `<main class="driver-access-state"><img src="${root}spacedrive-monogram.png" alt="Space Drive"><span>Driver application received</span><h1>Your account is waiting for approval.</h1><p>You can continue using your Passenger Portal while dispatch reviews your application.</p><a class="driver-primary-button" href="${root}passenger/">Open Passenger Portal</a></main>`;
+} else {
+  await requireRole(["driver", "admin"], `${root}login.html`);
+}
 let activeRide = null;
 let locationController = null;
 
@@ -78,13 +88,13 @@ function locationStateChanged(state) {
 
 function ensureLocationController(ride) {
   if (locationController) return locationController;
-  locationController = useDriverLocation({ rideId: ride?.id, onChange: locationStateChanged });
+  locationController = { getState: () => ({ permission: "unsupported", isTracking: false, error: null }), start: async () => false, stop: () => {} };
   return locationController;
 }
 
 async function withLayout({ active, title, subtitle, content }) {
-  const [driver, notifications] = await Promise.all([getDriverProfile(), getDriverNotifications()]);
-  app.innerHTML = DriverLayout({ active, title, subtitle, driver, availability: getDriverAvailability(), notifications, content });
+  const [driver, notifications, availability] = await Promise.all([getDriverProfile(), getDriverNotifications(), getDriverAvailability()]);
+  app.innerHTML = DriverLayout({ active, title, subtitle, driver, availability, notifications, content });
   bindSharedInteractions();
 }
 
@@ -204,7 +214,7 @@ async function renderHome() {
   const [currentRide, rides] = await Promise.all([getDriverCurrentRide(), getDriverRides()]);
   activeRide = currentRide;
   if (!currentRide) {
-    const availability = getDriverAvailability();
+    const availability = await getDriverAvailability();
     await withLayout({ active: "home", title: "Mission control", subtitle: "Driver portal", content: availability === "offline" ? `${EmptyState("You're currently offline", "Go available when you are ready to receive journey assignments.", "power")}<button class="driver-primary-button" type="button" data-go-available>Go available</button>` : EmptyState("No rides today", "You're all clear for now.", "calendar-check") });
     document.querySelector("[data-go-available]")?.addEventListener("click", async () => { await updateDriverAvailability("available"); render(); });
     return;
@@ -277,13 +287,19 @@ async function renderPassengerPage() {
 }
 
 async function renderProfile() {
-  const driver = await getDriverProfile();
+  const [driver, availability] = await Promise.all([getDriverProfile(), getDriverAvailability()]);
   const currentRide = await getDriverCurrentRide();
   activeRide = currentRide;
   const location = ensureLocationController(currentRide).getState();
-  const vehicle = driver.vehicle;
+  const vehicle = currentRide?.vehicle;
   const content = `<section class="driver-profile-hero"><img src="${assetUrl(driver.photo)}" alt="Portrait of ${driver.name}"><div><span>Driver profile</span><h2>${driver.name}</h2><p>${driver.email}</p></div></section><section class="driver-profile-grid"><article class="driver-setting-card"><header>${icon("id-card")}<div><span>Personal information</span><h2>${driver.name}</h2></div></header><dl><div><dt>Role</dt><dd>${driver.role}</dd></div><div><dt>Languages</dt><dd>${driver.languages.join(", ")}</dd></div><div><dt>Driver status</dt><dd>${statusLabel(getDriverAvailability())}</dd></div></dl></article>${vehicle ? `<article class="driver-setting-card vehicle-assignment"><header>${icon("car-front")}<div><span>Assigned vehicle</span><h2>${vehicle.brand} ${vehicle.model}</h2></div></header><img src="${assetUrl(vehicle.image)}" alt="${vehicle.brand} ${vehicle.model}"><dl><div><dt>Class</dt><dd>${vehicle.category}</dd></div><div><dt>Plate</dt><dd>${vehicle.plate || "Not assigned"}</dd></div></dl></article>` : EmptyState("No assigned vehicle", "Dispatch has not assigned a vehicle yet.", "car-front")}${LocationPermissionCard(location.permission, location.isTracking)}<article class="driver-setting-card"><header>${icon("bell")}<div><span>Notifications</span><h2>Journey updates</h2></div></header><label class="driver-setting-row"><span><strong>Operational updates</strong><small>Assignments, pickup changes and flight updates</small></span><input type="checkbox" checked aria-label="Operational updates"></label></article><article class="driver-setting-card"><header>${icon("shield-check")}<div><span>Security</span><h2>Driver account</h2></div></header><p>Authentication and device security are ready for backend connection.</p><button class="driver-secondary-button" type="button" data-demo>Security settings</button></article><article class="driver-setting-card"><header>${icon("settings-2")}<div><span>App preferences</span><h2>Driver experience</h2></div></header><label class="driver-setting-row"><span><strong>Stable mission layout</strong><small>Keep journey details visible when its status changes</small></span><input type="checkbox" checked disabled aria-label="Stable mission layout"></label></article></section>`;
   await withLayout({ active: "profile", title: "Profile", subtitle: "Driver settings", content });
+  const signOutButton = document.createElement("button");
+  signOutButton.className = "driver-secondary-button";
+  signOutButton.type = "button";
+  signOutButton.textContent = "Log out";
+  signOutButton.addEventListener("click", signOut);
+  document.querySelector(".driver-profile-grid")?.after(signOutButton);
   document.querySelector("[data-demo]")?.addEventListener("click", () => toast("Security settings are ready for authentication integration."));
 }
 
@@ -299,4 +315,8 @@ async function render() {
   }
 }
 
-render();
+if (!driverAccessPending) {
+  render();
+  let driverRealtimeTimer;
+  subscribeToDriverRides(() => { clearTimeout(driverRealtimeTimer); driverRealtimeTimer = setTimeout(render, 120); });
+}

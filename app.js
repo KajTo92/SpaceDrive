@@ -1,10 +1,10 @@
-// Add the direct WhatsApp number in international format, for example: "41791234567".
-const WHATSAPP_NUMBER = "+41772440004";
+import { supabase } from "./shared/supabase-client.js";
 const INQUIRY_EMAIL = "jan@spacecode.ch";
-const BASE_FARE_CHF = 7;
 const SHORT_DISTANCE_LIMIT_KM = 20;
-const SHORT_DISTANCE_RATE_CHF = 2;
-const LONG_DISTANCE_RATE_CHF = 1.5;
+const VEHICLE_RATES = {
+  "Tesla Model Y": { base: 8, short: 2.5, long: 1.5 },
+  "Mercedes V-Class": { base: 10, short: 3.5, long: 2 },
+};
 const AUTOCOMPLETE_MIN_LENGTH = 2;
 const AUTOCOMPLETE_DEBOUNCE_MS = 220;
 
@@ -20,14 +20,15 @@ const translations = {
     heroFinal: "Your best chauffeur service in Switzerland",
     heroWelcome: "Welcome to your best chauffeur service in Switzerland",
     languageLabel: "Language",
-    bookOneRide: "Book one ride",
-    passengerAccessCta:
-      "Login to access multiple rides, city tours, chat and live monitoring features",
+    bookOneRide: "Book single transfer",
+    passengerAccessCta: "Login",
+    passengerAccessDescription:
+      "By logging in you can access features like City Tours, Multiple rides, Live monitoring and many more.",
     scrollHint: "Scroll to explore",
     loaderText: "Preparing your journey",
     eyebrow: "Private transfers in Switzerland",
     siteTagline: "Your best chauffeur service in Switzerland.",
-    headline: "Book your ride",
+    headline: "Book single transfer",
     bookingIntro:
       "Tell us where you are going. We will calculate the route and prepare your private transfer.",
     pickupLabel: "Pickup location",
@@ -39,7 +40,7 @@ const translations = {
     duration: "Travel time",
     price: "Estimated price",
     whatsappButton: "Send inquiry on WhatsApp",
-    emailButton: "Send inquiry by email",
+    emailButton: "Send inquiry via email",
     emailSubject: "SpaceDrive transfer inquiry",
     nameLabel: "Name",
     namePlaceholder: "Alex Morgan",
@@ -65,10 +66,18 @@ const translations = {
     aboutPointTwo: "Reliable scheduling",
     aboutPointThree: "Discreet premium service",
     fleetHeadline: "Our cars",
-    requestHeadline: "Request availability",
-    requestText: "Add your contact details and choose how you would like to send the inquiry.",
+    requestHeadline: "Your contact details",
+    requestText: "Add your details before sending the email inquiry.",
+    bothWaysLabel: "Both Ways",
+    bothWaysText: "Add a return journey on the same route",
+    dateLabel: "Date",
+    timeLabel: "Time",
+    returnDateLabel: "Return date",
+    returnTimeLabel: "Return time",
+    luggageLabel: "Luggage",
+    vehicleLabel: "Choose your vehicle",
     footerText: "Private chauffeur service across Switzerland.",
-    trackRideCta: "Login to track your ride",
+    trackRideCta: "Login to access live monitoring, city tours and more",
     loginEyebrow: "Ride tracking",
     loginHeadline: "Welcome back",
     loginIntro: "Sign in to view your ride details and live status.",
@@ -79,6 +88,7 @@ const translations = {
     passwordLabel: "Password",
     passwordPlaceholder: "Enter your password",
     passengerLoginButton: "Login as passenger",
+    passengerDemoButton: "Discover demo view",
     driverIdLabel: "Driver ID",
     driverIdPlaceholder: "Enter your driver ID",
     driverLoginButton: "Login as driver",
@@ -98,10 +108,11 @@ const translations = {
     serviceHeadline: "The standard is personal.",
     serviceText:
       "A calm cabin, a carefully planned route and a driver who understands that good service is felt, not announced.",
-    fleetText: "Modern electric comfort for city transfers and long-distance journeys.",
+    fleetText: "Modern comfort for city transfers and long-distance journeys.",
+    fleetVClassCapacity: "7 seater",
     infoCta: "Your next journey starts here.",
-    whatsappMessage: ({ pickup, destination, distance, duration, price, name, telephone }) =>
-      `Hello SpaceDrive, I would like to request a transfer.\n\nName: ${name}\nTelephone: ${telephone}\nPickup: ${pickup}\nDestination: ${destination}\nDistance: ${distance}\nTravel time: ${duration}\nEstimated price: ${price}\n\nPlease send me availability and a final quote.`,
+    whatsappMessage: ({ pickup, destination, distance, duration, price, name, telephone, vehicle, pickupDate, pickupTime, bothWays, returnDate, returnTime, luggage }) =>
+      `Hello SpaceDrive, I would like to request a transfer.\n\nName: ${name}\nTelephone: ${telephone}\nPickup: ${pickup}\nDestination: ${destination}\nDate: ${pickupDate} at ${pickupTime}${bothWays ? `\nReturn: ${returnDate} at ${returnTime}` : ""}\nVehicle: ${vehicle}\nLuggage: ${luggage}\nDistance: ${distance}\nTravel time: ${duration}\nEstimated price: ${price}\n\nPlease send me availability and a final quote.`,
   },
   de: {
     skipBooking: "Direkt zur Buchung",
@@ -114,14 +125,15 @@ const translations = {
     heroFinal: "Ihr bester Chauffeurservice in der Schweiz",
     heroWelcome: "Willkommen bei Ihrem besten Chauffeurservice in der Schweiz",
     languageLabel: "Sprache",
-    bookOneRide: "Eine Fahrt buchen",
-    passengerAccessCta:
-      "Anmelden für mehrere Fahrten, Stadttouren, Chat und Live-Überwachung",
+    bookOneRide: "Einzeltransfer buchen",
+    passengerAccessCta: "Anmelden",
+    passengerAccessDescription:
+      "Nach der Anmeldung haben Sie Zugriff auf Funktionen wie Stadttouren, mehrere Fahrten, Live-Überwachung und vieles mehr.",
     scrollHint: "Zum Entdecken scrollen",
     loaderText: "Ihre Fahrt wird vorbereitet",
     eyebrow: "Private Transfers in der Schweiz",
     siteTagline: "Ihr bester Chauffeurservice in der Schweiz.",
-    headline: "Fahrt buchen",
+    headline: "Einzeltransfer buchen",
     bookingIntro:
       "Nennen Sie uns Ihr Ziel. Wir berechnen die Route und bereiten Ihren privaten Transfer vor.",
     pickupLabel: "Abholort",
@@ -160,10 +172,10 @@ const translations = {
     aboutPointTwo: "Zuverlässige Planung",
     aboutPointThree: "Diskreter Premium-Service",
     fleetHeadline: "Unsere Fahrzeuge",
-    requestHeadline: "Verfügbarkeit anfragen",
-    requestText: "Ergänzen Sie Ihre Kontaktdaten und wählen Sie den gewünschten Kontaktweg.",
+    requestHeadline: "Ihre Kontaktdaten",
+    requestText: "Ergänzen Sie Ihre Angaben, bevor Sie die E-Mail-Anfrage senden.",
     footerText: "Privater Chauffeurservice in der ganzen Schweiz.",
-    trackRideCta: "Anmelden und Fahrt verfolgen",
+    trackRideCta: "Anmelden für Live-Überwachung, Stadttouren und mehr",
     loginEyebrow: "Fahrtverfolgung",
     loginHeadline: "Willkommen zurück",
     loginIntro: "Melden Sie sich an, um Fahrtdetails und Live-Status zu sehen.",
@@ -174,6 +186,7 @@ const translations = {
     passwordLabel: "Passwort",
     passwordPlaceholder: "Passwort eingeben",
     passengerLoginButton: "Als Fahrgast anmelden",
+    passengerDemoButton: "Demoansicht entdecken",
     driverIdLabel: "Fahrer-ID",
     driverIdPlaceholder: "Fahrer-ID eingeben",
     driverLoginButton: "Als Fahrer anmelden",
@@ -193,10 +206,19 @@ const translations = {
     serviceHeadline: "Der Standard ist persönlich.",
     serviceText:
       "Eine ruhige Kabine, eine sorgfältig geplante Route und ein Fahrer, der unaufdringlichen Service versteht.",
-    fleetText: "Moderner elektrischer Komfort für Stadttransfers und lange Strecken.",
+    fleetText: "Moderner Komfort für Stadttransfers und lange Strecken.",
+    fleetVClassCapacity: "7-Sitzer",
     infoCta: "Ihre nächste Fahrt beginnt hier.",
-    whatsappMessage: ({ pickup, destination, distance, duration, price, name, telephone }) =>
-      `Hallo SpaceDrive, ich möchte einen Transfer anfragen.\n\nName: ${name}\nTelefon: ${telephone}\nAbholung: ${pickup}\nZiel: ${destination}\nDistanz: ${distance}\nFahrzeit: ${duration}\nGeschätzter Preis: ${price}\n\nBitte senden Sie mir Verfügbarkeit und ein finales Angebot.`,
+    bothWaysLabel: "Hin- und Rückfahrt",
+    bothWaysText: "Rückfahrt auf derselben Strecke hinzufügen",
+    dateLabel: "Datum",
+    timeLabel: "Uhrzeit",
+    returnDateLabel: "Rückfahrdatum",
+    returnTimeLabel: "Rückfahrzeit",
+    luggageLabel: "Gepäck",
+    vehicleLabel: "Fahrzeug wählen",
+    whatsappMessage: ({ pickup, destination, distance, duration, price, name, telephone, vehicle, pickupDate, pickupTime, bothWays, returnDate, returnTime, luggage }) =>
+      `Hallo SpaceDrive, ich möchte einen Transfer anfragen.\n\nName: ${name}\nTelefon: ${telephone}\nAbholung: ${pickup}\nZiel: ${destination}\nDatum: ${pickupDate} um ${pickupTime}${bothWays ? `\nRückfahrt: ${returnDate} um ${returnTime}` : ""}\nFahrzeug: ${vehicle}\nGepäck: ${luggage}\nDistanz: ${distance}\nFahrzeit: ${duration}\nGeschätzter Preis: ${price}\n\nBitte senden Sie mir Verfügbarkeit und ein finales Angebot.`,
   },
 };
 
@@ -210,6 +232,7 @@ const elements = {
   destination: document.querySelector("#destination"),
   customerName: document.querySelector("#customerName"),
   telephone: document.querySelector("#telephone"),
+  customerEmail: document.querySelector("#customerEmail"),
   form: document.querySelector("#routeForm"),
   swap: document.querySelector("#swapRoute"),
   map: document.querySelector("#mapFrame"),
@@ -217,8 +240,14 @@ const elements = {
   duration: document.querySelector("#durationValue"),
   price: document.querySelector("#priceValue"),
   note: document.querySelector("#routeNote"),
-  whatsapp: document.querySelector("#whatsappButton"),
   email: document.querySelector("#emailButton"),
+  bothWays: document.querySelector("#bothWays"),
+  pickupDate: document.querySelector("#pickupDate"),
+  pickupTime: document.querySelector("#pickupTime"),
+  returnSchedule: document.querySelector("#returnSchedule"),
+  returnDate: document.querySelector("#returnDate"),
+  returnTime: document.querySelector("#returnTime"),
+  luggageCount: document.querySelector("#luggageCount"),
   langButtons: document.querySelectorAll(".lang-button"),
   navItems: document.querySelectorAll(".nav-item"),
   views: document.querySelectorAll(".app-view"),
@@ -317,10 +346,11 @@ function formatPrice(value) {
   return `CHF ${Math.round(value).toLocaleString("de-CH")}`;
 }
 
-function calculatePrice(distanceKm) {
-  const rate =
-    distanceKm <= SHORT_DISTANCE_LIMIT_KM ? SHORT_DISTANCE_RATE_CHF : LONG_DISTANCE_RATE_CHF;
-  return BASE_FARE_CHF + distanceKm * rate;
+function calculatePrice(distanceKm, vehicle, bothWays = false) {
+  const rates = VEHICLE_RATES[vehicle] || VEHICLE_RATES["Tesla Model Y"];
+  const rate = distanceKm <= SHORT_DISTANCE_LIMIT_KM ? rates.short : rates.long;
+  const oneWayPrice = rates.base + distanceKm * rate;
+  return oneWayPrice * (bothWays ? 2 : 1);
 }
 
 function getPhotonUrl(query, limit = 5) {
@@ -411,6 +441,8 @@ async function getDrivingRoute(pickup, destination) {
   return {
     distanceKm: route.distance / 1000,
     durationSeconds: route.duration,
+    origin,
+    target,
   };
 }
 
@@ -419,8 +451,7 @@ function setRouteSummary(route) {
   elements.distance.textContent = route.distance;
   elements.duration.textContent = route.duration;
   elements.price.textContent = route.price;
-  elements.whatsapp.disabled = false;
-  elements.email.disabled = false;
+  updateEmailState();
 }
 
 function resetRouteSummary() {
@@ -428,7 +459,6 @@ function resetRouteSummary() {
   elements.distance.textContent = "--";
   elements.duration.textContent = "--";
   elements.price.textContent = "--";
-  elements.whatsapp.disabled = true;
   elements.email.disabled = true;
 }
 
@@ -442,8 +472,35 @@ function getRouteInputs() {
 function getContactInputs() {
   return {
     name: elements.customerName.value.trim(),
+    email: elements.customerEmail.value.trim(),
     telephone: elements.telephone.value.trim(),
   };
+}
+
+function getBookingDetails() {
+  return {
+    vehicle: document.querySelector('[name="vehicle"]:checked')?.value || "Tesla Model Y",
+    pickupDate: elements.pickupDate.value,
+    pickupTime: elements.pickupTime.value,
+    bothWays: elements.bothWays.checked,
+    returnDate: elements.returnDate.value,
+    returnTime: elements.returnTime.value,
+    luggage: Number(elements.luggageCount.value || 1),
+  };
+}
+
+function updateEmailState() {
+  const details = getBookingDetails();
+  const scheduleReady = details.pickupDate && details.pickupTime && (!details.bothWays || (details.returnDate && details.returnTime));
+  elements.email.disabled = !(state.route && scheduleReady);
+}
+
+function refreshPublicPrice() {
+  if (!state.route?.distanceKm) return;
+  const details = getBookingDetails();
+  state.route.price = formatPrice(calculatePrice(state.route.distanceKm, details.vehicle, details.bothWays));
+  elements.price.textContent = state.route.price;
+  updateEmailState();
 }
 
 function getInquiryPayload() {
@@ -453,13 +510,13 @@ function getInquiryPayload() {
 
   const contact = getContactInputs();
 
-  if (!contact.name || !contact.telephone) {
+  if (!contact.name || !contact.email || !contact.telephone) {
     setNote(t("missingContact"), true);
-    (contact.name ? elements.telephone : elements.customerName).focus();
+    (!contact.name ? elements.customerName : !contact.email ? elements.customerEmail : elements.telephone).focus();
     return null;
   }
 
-  return { ...state.route, ...contact };
+  return { ...state.route, ...contact, ...getBookingDetails() };
 }
 
 function getInquiryMessage(payload) {
@@ -661,7 +718,6 @@ async function handleRouteSubmit(event) {
     return;
   }
 
-  updateMap(pickup, destination);
   resetRouteSummary();
   setNote(t("calculating"));
 
@@ -669,11 +725,14 @@ async function handleRouteSubmit(event) {
     const route = await getDrivingRoute(pickup, destination);
     const distance = formatDistance(route.distanceKm);
     const duration = formatDuration(route.durationSeconds);
-    const price = formatPrice(calculatePrice(route.distanceKm));
+    const details = getBookingDetails();
+    const price = formatPrice(calculatePrice(route.distanceKm, details.vehicle, details.bothWays));
+    updateMap(`${route.origin.lat},${route.origin.lon}`, `${route.target.lat},${route.target.lon}`);
 
-    setRouteSummary({ pickup, destination, distance, duration, price });
+    setRouteSummary({ pickup, destination, distance, duration, price, distanceKm: route.distanceKm });
     setNote(t("calculated"));
   } catch (error) {
+    updateMap(pickup, destination);
     setRouteSummary({
       pickup,
       destination,
@@ -685,29 +744,20 @@ async function handleRouteSubmit(event) {
   }
 }
 
-function openWhatsApp() {
+async function openEmail() {
   const payload = getInquiryPayload();
 
   if (!payload) {
     return;
   }
 
-  const message = getInquiryMessage(payload);
-  const baseUrl = WHATSAPP_NUMBER
-    ? `https://wa.me/${WHATSAPP_NUMBER}`
-    : "https://wa.me/";
-  const separator = WHATSAPP_NUMBER ? "?text=" : "?text=";
-  window.open(`${baseUrl}${separator}${encodeURIComponent(message)}`, "_blank", "noopener");
-}
-
-function openEmail() {
-  const payload = getInquiryPayload();
-
-  if (!payload) {
-    return;
-  }
-
-  window.location.href = getMailtoUrl(payload);
+  elements.email.disabled = true;
+  setNote("Sending your request…");
+  const start = new Date(`${payload.pickupDate}T${payload.pickupTime}:00`);
+  const numericPrice = Number(String(payload.price || "").replace(/[^0-9.]/g, "")) || null;
+  const { error } = await supabase.rpc("submit_ride_request", { payload: { service_type: "transfer", scheduled_start_at: start.toISOString(), scheduled_end_at: new Date(start.getTime() + 90 * 60000).toISOString(), duration_minutes: 90, customer_name: payload.name, customer_email: payload.email, customer_phone: payload.telephone, pickup_name: payload.pickup, pickup_address: payload.pickup, destination_name: payload.destination, destination_address: payload.destination, passenger_count: 1, luggage: `${payload.luggage} pieces`, requested_vehicle_class: payload.vehicle, estimated_price: numericPrice, currency: "CHF", special_requests: payload.bothWays ? `Return ${payload.returnDate} at ${payload.returnTime}` : "" } });
+  elements.email.disabled = false;
+  setNote(error ? `We could not submit the request: ${error.message}` : "Request received. Space Drive will send your final offer shortly.", !!error);
 }
 
 function initNavigation() {
@@ -1137,6 +1187,73 @@ function initSwapButton() {
   });
 }
 
+function populateQuarterHourOptions(select) {
+  for (let totalMinutes = 0; totalMinutes < 24 * 60; totalMinutes += 15) {
+    const hours = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+    const minutes = String(totalMinutes % 60).padStart(2, "0");
+    const value = `${hours}:${minutes}`;
+    select.add(new Option(value, value));
+  }
+}
+
+function initPublicBookingOptions() {
+  const today = new Date().toISOString().slice(0, 10);
+  let luggage = 1;
+  [elements.pickupTime, elements.returnTime].forEach(populateQuarterHourOptions);
+  elements.pickupDate.min = today;
+  elements.returnDate.min = today;
+
+  const syncSchedule = (input) => {
+    if (input === elements.pickupDate) {
+      elements.returnDate.min = elements.pickupDate.value || today;
+      if (elements.returnDate.value && elements.returnDate.value < elements.returnDate.min) elements.returnDate.value = "";
+    }
+    if (input === elements.returnDate && elements.returnDate.value && elements.returnDate.value < elements.returnDate.min) {
+      elements.returnDate.value = "";
+    }
+    updateEmailState();
+  };
+
+  document.querySelectorAll("[data-public-picker]").forEach((control) => {
+    const input = control.querySelector("input, select");
+    control.addEventListener("click", (event) => {
+      if (event.target === input) return;
+      event.preventDefault();
+      input.focus({ preventScroll: true });
+      try {
+        input.showPicker?.();
+      } catch (error) {
+        input.click();
+      }
+    });
+    input.addEventListener("input", () => syncSchedule(input));
+    input.addEventListener("change", () => {
+      syncSchedule(input);
+      input.blur();
+    });
+  });
+
+  elements.bothWays.addEventListener("change", () => {
+    elements.returnSchedule.hidden = !elements.bothWays.checked;
+    elements.returnDate.required = elements.bothWays.checked;
+    elements.returnTime.required = elements.bothWays.checked;
+    if (!elements.bothWays.checked) {
+      elements.returnDate.value = "";
+      elements.returnTime.value = "";
+    }
+    refreshPublicPrice();
+    updateEmailState();
+  });
+
+  document.querySelectorAll("[data-public-luggage]").forEach((button) => button.addEventListener("click", () => {
+    luggage = Math.min(8, Math.max(0, luggage + Number(button.dataset.publicLuggage)));
+    elements.luggageCount.value = String(luggage);
+    document.querySelector("#luggageUnit").textContent = luggage === 1 ? "piece" : "pieces";
+  }));
+
+  document.querySelectorAll('[name="vehicle"]').forEach((input) => input.addEventListener("change", refreshPublicPrice));
+}
+
 function initApp() {
   document.querySelectorAll(".brand-mark img").forEach((logo) => {
     logo.src = "spacedrive-monogram-header.png";
@@ -1153,8 +1270,8 @@ function initApp() {
     initAutocomplete(elements.pickup, elements.pickupSuggestions);
     initAutocomplete(elements.destination, elements.destinationSuggestions);
     initSwapButton();
+    initPublicBookingOptions();
     elements.form.addEventListener("submit", handleRouteSubmit);
-    elements.whatsapp.addEventListener("click", openWhatsApp);
     elements.email.addEventListener("click", openEmail);
   }
 

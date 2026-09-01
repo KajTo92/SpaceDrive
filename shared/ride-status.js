@@ -1,5 +1,5 @@
 export const rideStatusLabels = Object.freeze({
-  requested: "Requested",
+  under_review: "Under review",
   confirmed: "Confirmed",
   driver_assigned: "Driver assigned",
   driver_on_the_way: "Driver on the way",
@@ -8,13 +8,15 @@ export const rideStatusLabels = Object.freeze({
   completed: "Completed",
   cancelled: "Cancelled",
   pending_review: "Pending review",
+  request_received: "Request received",
   offer_sent: "Offer sent",
+  awaiting_customer: "Awaiting customer",
   awaiting_confirmation: "Awaiting confirmation",
   declined: "Declined",
 });
 
 export const journeyStages = Object.freeze([
-  ["requested", "Requested"],
+  ["request_received", "Requested"],
   ["confirmed", "Confirmed"],
   ["driver_assigned", "Driver assigned"],
   ["driver_on_the_way", "On the way"],
@@ -24,7 +26,6 @@ export const journeyStages = Object.freeze([
 ]);
 
 export const driverRideActions = Object.freeze({
-  confirmed: { nextStatus: "driver_on_the_way", label: "Start driving to passenger", icon: "navigation" },
   driver_assigned: { nextStatus: "driver_on_the_way", label: "Start driving to passenger", icon: "navigation" },
   driver_on_the_way: { nextStatus: "driver_arrived", label: "I have arrived", icon: "map-pin-check" },
   driver_arrived: { nextStatus: "passenger_onboard", label: "Passenger on board", icon: "user-check" },

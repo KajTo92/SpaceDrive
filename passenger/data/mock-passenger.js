@@ -15,15 +15,14 @@ export const vehicles = {
 };
 
 export const assignedDriver = {
-  id: "driver-alan",
-  name: "Alan Karadaghi",
-  shortName: "Alan K.",
+  id: "driver-jan-rejnowicz",
+  name: "Jan Rejnowicz",
+  shortName: "Jan R.",
   role: "Professional Chauffeur",
-  photo: "passenger/assets/alan-karadaghi.png",
+  photo: "driver/janrejnowicz/jan.jpg",
   rating: 4.96,
   completedTrips: 153,
   languages: ["German", "English", "Italian"],
-  vehicle: vehicles.sClass,
 };
 
 export const passenger = {
@@ -164,7 +163,7 @@ export const rideRequests = [
 ];
 
 export const notifications = [
-  { id: "note-1", title: "Driver assigned", body: "Alan K. has been assigned to your journey tomorrow.", createdAt: "2026-08-28T17:10:00Z", read: false, rideId: "sd-240829" },
+  { id: "note-1", title: "Driver assigned", body: "Jan R. has been assigned to your journey tomorrow.", createdAt: "2026-08-28T17:10:00Z", read: false, rideId: "sd-240829" },
   { id: "note-2", title: "Journey confirmed", body: "Your journey tomorrow at 08:30 is confirmed.", createdAt: "2026-08-28T09:20:00Z", read: false, rideId: "sd-240829" },
   { id: "note-3", title: "New offer", body: "Your transfer request to Davos has a new offer.", createdAt: "2026-08-27T15:45:00Z", read: true },
 ];

@@ -1,8 +1,10 @@
-import { assignedDriver } from "../../passenger/data/mock-passenger.js?v=3";
+import { assignedDriver } from "../../passenger/data/mock-passenger.js?v=5";
 
 export const currentDriver = {
   ...assignedDriver,
-  email: "alan@spacedrive.ch",
+  email: "jan@spacedrive.ch",
+  phone: "+41 79 506 71 42",
+  preferredVehicleId: "veh-s",
   availability: "available",
   notificationsEnabled: true,
 };

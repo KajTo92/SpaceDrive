@@ -9,7 +9,7 @@
     <link rel="icon" href="spacedrive-monogram.png" type="image/png" />
     <link rel="preload" href="scroll-poster.jpg?v=2" as="image" type="image/jpeg" />
     <link rel="preload" href="spacedrive-monogram-header.png" as="image" type="image/png" />
-    <link rel="stylesheet" href="styles.css?v=10" />
+    <link rel="stylesheet" href="styles.css?v=21" />
   </head>
   <body>
     <div class="site-loader" data-loader role="status" aria-live="polite">
@@ -26,7 +26,7 @@
       <a class="brand-mark" href="index.html" aria-label="Space Drive home"><img src="spacedrive-monogram-header.png" alt="" width="426" height="640" /><span>Space Drive</span></a>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="primaryNav" data-menu-toggle><span class="menu-line"></span><span class="menu-line"></span><span class="sr-only">Menu</span></button>
       <nav class="primary-nav" id="primaryNav" aria-label="Primary navigation">
-        <a href="info.html" data-i18n="navInfo">Info</a><a href="pricing.html" data-i18n="navPricing">Pricing</a><a class="nav-login" href="login.html" data-i18n="navLogin">Login</a><a class="nav-cta" href="#booking" data-i18n="navBook">Book a ride</a>
+        <a href="info.html" data-i18n="navInfo">Info</a><a class="nav-login" href="login.html" data-i18n="navLogin">Login</a><a class="nav-cta" href="#booking" data-i18n="navBook">Book a ride</a>
         <div class="language-switch" aria-label="Language"><button class="lang-button is-active" type="button" data-lang="en">EN</button><button class="lang-button" type="button" data-lang="de">DE</button></div>
       </nav>
     </header>
@@ -65,8 +65,11 @@
                 </div>
                 <div class="finale-conversion">
                   <div class="finale-actions" aria-label="Choose how to book">
-                    <button class="finale-action finale-action--primary" type="button" data-reveal-booking data-i18n="bookOneRide">Book one ride</button>
-                    <a class="finale-action finale-action--secondary" href="login.html" data-i18n="passengerAccessCta">Login to access multiple rides, city tours, chat and live monitoring features</a>
+                    <button class="finale-action finale-action--primary" type="button" data-reveal-booking data-i18n="bookOneRide">Book single transfer</button>
+                    <div class="finale-login-option">
+                      <a class="finale-action finale-action--secondary" href="login.html" data-i18n="passengerAccessCta">Login</a>
+                      <p data-i18n="passengerAccessDescription">By logging in you can access features like City Tours, Multiple rides, Live monitoring and many more.</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -82,8 +85,8 @@
       <section class="booking-section" id="booking" data-booking-section hidden>
         <div class="booking-heading">
           <p class="eyebrow" data-i18n="eyebrow">Private transfers in Switzerland</p>
-          <h1 data-i18n="headline">Book your ride</h1>
-          <p data-i18n="bookingIntro">Tell us where you are going. We will calculate the route and prepare your private transfer.</p>
+          <h1 data-i18n="headline">Book single transfer</h1>
+          <p class="booking-intro" data-i18n="bookingIntro">Tell us where you are going. We will calculate the route and prepare your private transfer.</p>
         </div>
         <div class="booking-grid">
           <div class="booking-panel">
@@ -91,6 +94,20 @@
               <label class="field"><span data-i18n="pickupLabel">Pickup location</span><i data-lucide="map-pin" aria-hidden="true"></i><input id="pickup" name="pickup" type="text" autocomplete="off" aria-autocomplete="list" aria-controls="pickupSuggestions" aria-expanded="false" placeholder="Zurich Airport" data-i18n-placeholder="pickupPlaceholder" required /><div class="autocomplete-list" id="pickupSuggestions" role="listbox" hidden></div></label>
               <button class="swap-button" type="button" id="swapRoute" aria-label="Swap route"><i data-lucide="arrow-up-down" aria-hidden="true"></i></button>
               <label class="field"><span data-i18n="destinationLabel">Destination</span><i data-lucide="flag" aria-hidden="true"></i><input id="destination" name="destination" type="text" autocomplete="off" aria-autocomplete="list" aria-controls="destinationSuggestions" aria-expanded="false" placeholder="St. Moritz" data-i18n-placeholder="destinationPlaceholder" required /><div class="autocomplete-list" id="destinationSuggestions" role="listbox" hidden></div></label>
+              <label class="public-both-ways"><input id="bothWays" type="checkbox" name="bothWays"><span class="public-both-ways__control"><i data-lucide="repeat-2" aria-hidden="true"></i><span><strong data-i18n="bothWaysLabel">Both Ways</strong><small data-i18n="bothWaysText">Add a return journey on the same route</small></span><span class="public-both-ways__switch" aria-hidden="true"></span></span></label>
+              <div class="public-schedule">
+                <label class="public-schedule-field"><span data-i18n="dateLabel">Date</span><span class="public-schedule-control" data-public-picker><i data-lucide="calendar-days" aria-hidden="true"></i><input id="pickupDate" type="date" name="pickupDate" required></span></label>
+                <label class="public-schedule-field"><span data-i18n="timeLabel">Time</span><span class="public-schedule-control" data-public-picker><i data-lucide="clock-3" aria-hidden="true"></i><select id="pickupTime" name="pickupTime" required><option value="">--:--</option></select></span></label>
+              </div>
+              <div class="public-schedule public-schedule--return" id="returnSchedule" hidden>
+                <label class="public-schedule-field"><span data-i18n="returnDateLabel">Return date</span><span class="public-schedule-control" data-public-picker><i data-lucide="calendar-days" aria-hidden="true"></i><input id="returnDate" type="date" name="returnDate"></span></label>
+                <label class="public-schedule-field"><span data-i18n="returnTimeLabel">Return time</span><span class="public-schedule-control" data-public-picker><i data-lucide="clock-3" aria-hidden="true"></i><select id="returnTime" name="returnTime"><option value="">--:--</option></select></span></label>
+              </div>
+              <fieldset class="public-booking-fieldset"><legend data-i18n="luggageLabel">Luggage</legend><div class="public-luggage-stepper"><button type="button" data-public-luggage="-1" aria-label="Remove one piece of luggage"><i data-lucide="minus"></i></button><output id="luggageCount">1</output><span id="luggageUnit">piece</span><button type="button" data-public-luggage="1" aria-label="Add one piece of luggage"><i data-lucide="plus"></i></button></div></fieldset>
+              <fieldset class="public-booking-fieldset"><legend data-i18n="vehicleLabel">Choose your vehicle</legend><div class="public-vehicles">
+                <label class="public-vehicle"><input type="radio" name="vehicle" value="Tesla Model Y" checked><span><img src="y2025.png" alt="Tesla Model Y" width="1200" height="800"><strong>Tesla Model Y</strong><small>Up to 4 passengers</small></span></label>
+                <label class="public-vehicle"><input type="radio" name="vehicle" value="Mercedes V-Class"><span><img src="vclass.png" alt="Mercedes V-Class" width="1200" height="800"><strong>Mercedes V-Class</strong><small>Up to 7 passengers</small></span></label>
+              </div></fieldset>
               <p class="route-note" id="routeNote" data-i18n="routeNote">Enter pickup and destination to calculate route.</p>
               <button class="primary-button" type="submit"><i data-lucide="route" aria-hidden="true"></i><span data-i18n="calculateButton">Show route and price</span></button>
             </form>
@@ -98,20 +115,16 @@
           </div>
           <div class="map-column">
             <div class="map-wrap" aria-label="Route map"><iframe id="mapFrame" title="Google Maps route" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?output=embed&q=Switzerland"></iframe></div>
-            <a class="ride-tracking-cta" href="login.html">
-              <span data-i18n="trackRideCta">Login to track your ride</span>
-              <i data-lucide="arrow-up-right" aria-hidden="true"></i>
-            </a>
+            <button class="email-request-cta" type="button" id="emailButton" disabled><span data-i18n="emailButton">Send inquiry by email</span><i data-lucide="mail" aria-hidden="true"></i></button>
           </div>
           <div class="contact-panel">
-            <div class="contact-intro"><h2 data-i18n="requestHeadline">Request availability</h2><p data-i18n="requestText">Add your contact details and choose how you would like to send the inquiry.</p></div>
-            <div class="contact-fields"><label class="field"><span data-i18n="nameLabel">Name</span><i data-lucide="user" aria-hidden="true"></i><input id="customerName" name="customerName" type="text" autocomplete="name" placeholder="Alex Morgan" data-i18n-placeholder="namePlaceholder" /></label><label class="field"><span data-i18n="telephoneLabel">Telephone number</span><i data-lucide="phone" aria-hidden="true"></i><input id="telephone" name="telephone" type="tel" autocomplete="tel" placeholder="+41 79 123 45 67" data-i18n-placeholder="telephonePlaceholder" /></label></div>
-            <div class="contact-actions"><button class="whatsapp-button" type="button" id="whatsappButton" disabled><i data-lucide="message-circle" aria-hidden="true"></i><span data-i18n="whatsappButton">Send inquiry on WhatsApp</span></button><button class="email-button" type="button" id="emailButton" disabled><i data-lucide="mail" aria-hidden="true"></i><span data-i18n="emailButton">Send inquiry by email</span></button></div>
+            <div class="contact-intro"><h2 data-i18n="requestHeadline">Your contact details</h2><p data-i18n="requestText">Add your details before sending the email inquiry.</p></div>
+            <div class="contact-fields"><label class="field"><span data-i18n="nameLabel">Name</span><i data-lucide="user" aria-hidden="true"></i><input id="customerName" name="customerName" type="text" autocomplete="name" placeholder="Alex Morgan" /></label><label class="field"><span>Email</span><i data-lucide="mail" aria-hidden="true"></i><input id="customerEmail" name="customerEmail" type="email" autocomplete="email" placeholder="alex@example.com" /></label><label class="field"><span data-i18n="telephoneLabel">Telephone number</span><i data-lucide="phone" aria-hidden="true"></i><input id="telephone" name="telephone" type="tel" autocomplete="tel" placeholder="+41 79 123 45 67" /></label></div>
           </div>
         </div>
       </section>
     </main>
-    <footer class="site-footer" data-post-booking hidden><div class="footer-brand" aria-label="Space Drive"><img src="spacedrive-monogram-header.png" alt="" width="426" height="640" /><span>Space Drive</span></div><p data-i18n="footerText">Private chauffeur service across Switzerland.</p><div class="footer-links"><a href="info.html" data-i18n="navInfo">Info</a><a href="pricing.html" data-i18n="navPricing">Pricing</a></div></footer>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script><script src="app.js?v=9"></script>
+    <footer class="site-footer" data-post-booking hidden><div class="footer-brand" aria-label="Space Drive"><img src="spacedrive-monogram-header.png" alt="" width="426" height="640" /><span>Space Drive</span></div><p data-i18n="footerText">Private chauffeur service across Switzerland.</p><div class="footer-links"><a href="info.html" data-i18n="navInfo">Info</a></div></footer>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script><script type="module" src="app.js?v=16"></script>
   </body>
 </html>
