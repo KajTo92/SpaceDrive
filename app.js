@@ -1,4 +1,6 @@
 import { supabase } from "./shared/supabase-client.js";
+import headerLogoUrl from "./spacedrive-monogram-header.png";
+import scrollVideoUrl from "./scrollnowy.mp4?url";
 const INQUIRY_EMAIL = "jan@spacecode.ch";
 const SHORT_DISTANCE_LIMIT_KM = 20;
 const VEHICLE_RATES = {
@@ -888,7 +890,7 @@ function initScrollHero() {
     !/(Chrome|Chromium|Edg|OPR|Android)/i.test(navigator.userAgent);
 
   const loadSeekableVideo = async () => {
-    const sourceUrl = scrollVideo.dataset.scrollSrc;
+    const sourceUrl = scrollVideoUrl;
 
     if (!sourceUrl) {
       releaseLoader();
@@ -1256,7 +1258,7 @@ function initPublicBookingOptions() {
 
 function initApp() {
   document.querySelectorAll(".brand-mark img").forEach((logo) => {
-    logo.src = "spacedrive-monogram-header.png";
+    logo.src = headerLogoUrl;
     logo.width = 426;
     logo.height = 640;
   });
