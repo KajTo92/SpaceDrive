@@ -67,13 +67,16 @@ export function JourneyStatus(status) {
 }
 
 export function NextJourneyCard(ride) {
+  const vehicleBrand = ride.vehicle?.brand || "Vehicle";
+  const vehicleModel = ride.vehicle?.model || "Assignment pending";
+  const driverName = ride.driver?.shortName || ride.driver?.name || "Driver pending";
   return `
     <section class="next-journey" aria-labelledby="nextJourneyTitle">
       <div class="next-journey__primary">
         <div class="next-journey__heading"><div><p>Your next journey</p><h2 id="nextJourneyTitle">${ride.pickup.name}<span>${icon("arrow-right")}</span>${ride.destination.name}</h2></div><span class="status-badge status-badge--${ride.status}">${statusLabel(ride.status)}</span></div>
         <div class="journey-time"><div><span>Tomorrow, ${formatDate(ride.pickupDate, { weekday: "long", day: "numeric", month: "long" })}</span><strong>${ride.pickupTime}</strong></div><div><span>Estimated duration</span><strong>${ride.estimatedDuration}</strong></div><div><span>Passengers</span><strong>${ride.passengers}</strong></div><div><span>Luggage</span><strong>${ride.luggage}</strong></div></div>
         <div class="next-journey__status"><span>Journey status</span>${JourneyStatus(ride.status)}</div>
-        <div class="next-journey__footer"><div><span>${ride.vehicle.brand}</span><strong>${ride.vehicle.model}</strong><small>with ${ride.driver.shortName}</small></div><div class="journey-price"><span>Journey total</span><strong>${money(ride)}</strong></div></div>
+        <div class="next-journey__footer"><div><span>${vehicleBrand}</span><strong>${vehicleModel}</strong><small>${ride.driver ? `with ${driverName}` : driverName}</small></div><div class="journey-price"><span>Journey total</span><strong>${money(ride)}</strong></div></div>
         <div class="journey-actions"><a class="passenger-button passenger-button--primary" href="${tripUrl(ride.id)}">View journey</a><button class="passenger-button" type="button" data-demo-action="Contact driver">Contact driver</button><button class="passenger-button passenger-button--quiet" type="button" data-demo-action="Modify trip">Modify trip</button></div>
       </div>
       <div class="next-journey__map"><div class="live-trip-map" data-live-map data-ride-id="${ride.id}"></div><div class="map-caption"><span>${icon("navigation")} Route overview</span><small>Live driver location will appear before pickup.</small></div></div>
