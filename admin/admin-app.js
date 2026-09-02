@@ -188,6 +188,20 @@ function JourneyDetail(ride, drivers, vehicles) {
     <section class="notes-editor"><header><h3>Journey notes</h3><p>Passenger-visible, internal and driver notes stay separated.</p></header><form data-notes-form><label><span>Passenger-visible note</span><textarea name="passengerVisibleNote" rows="3">${escapeHtml(ride.passengerVisibleNote || "")}</textarea></label><label><span>Internal admin note</span><textarea name="internalNote" rows="3">${escapeHtml(ride.internalNote || "")}</textarea></label><label><span>Driver note</span><textarea name="driverNote" rows="3">${escapeHtml(ride.driverNote || "")}</textarea></label><button class="admin-button" type="submit">${icon("save")} Save notes</button></form></section>${ActivityLog(ride.activity)}`;
 }
 
+async function refreshJourneyDetailsInPlace(anchorSelector, focusSelector) {
+  const anchorTop = document.querySelector(anchorSelector)?.getBoundingClientRect().top;
+  const previousScroll = window.scrollY;
+  await renderJourneyDetails();
+  await new Promise((resolve) => requestAnimationFrame(resolve));
+  const nextAnchor = document.querySelector(anchorSelector);
+  if (nextAnchor && Number.isFinite(anchorTop)) {
+    window.scrollBy({ top: nextAnchor.getBoundingClientRect().top - anchorTop, left: 0, behavior: "auto" });
+  } else {
+    window.scrollTo({ top: previousScroll, left: 0, behavior: "auto" });
+  }
+  document.querySelector(focusSelector)?.focus({ preventScroll: true });
+}
+
 async function renderJourneyDetails() {
   const requestedId = new URLSearchParams(location.search).get("id");
   const id = requestedId?.replace(/^journey-/, "");
@@ -197,8 +211,8 @@ async function renderJourneyDetails() {
   await withLayout({ active: "journeys", title: "Journey details", subtitle: ride.id.toUpperCase(), content: JourneyDetail(ride, drivers, vehicles) });
   document.querySelector("[data-journey-status]")?.addEventListener("change", async (event) => { try { await updateJourneyStatus(ride.id, event.target.value); toast("Journey status updated."); await renderJourneyDetails(); } catch (error) { toast(error.message, "error"); } });
   document.querySelector("[data-payment-status]")?.addEventListener("change", async (event) => { try { await updatePaymentStatus(ride.id, event.target.value); toast("Payment status updated."); await renderJourneyDetails(); } catch (error) { toast(error.message, "error"); } });
-  document.querySelectorAll("[data-assign-driver]").forEach((button) => button.addEventListener("click", async () => { try { await assignDriver(ride.id, button.dataset.assignDriver); toast("Driver assigned."); await renderJourneyDetails(); } catch (error) { toast(error.message, "error"); } }));
-  document.querySelectorAll("[data-assign-vehicle]").forEach((button) => button.addEventListener("click", async () => { try { await assignVehicle(ride.id, button.dataset.assignVehicle); toast("Vehicle assigned."); await renderJourneyDetails(); } catch (error) { toast(error.message, "error"); } }));
+  document.querySelectorAll("[data-assign-driver]").forEach((button) => button.addEventListener("click", async () => { try { const driverId = button.dataset.assignDriver; await assignDriver(ride.id, driverId); toast("Driver assigned."); await refreshJourneyDetailsInPlace('[data-assignment-selector="driver"]', `[data-assign-driver="${driverId}"]`); } catch (error) { toast(error.message, "error"); } }));
+  document.querySelectorAll("[data-assign-vehicle]").forEach((button) => button.addEventListener("click", async () => { try { const vehicleId = button.dataset.assignVehicle; await assignVehicle(ride.id, vehicleId); toast("Vehicle assigned."); await refreshJourneyDetailsInPlace('[data-assignment-selector="vehicle"]', `[data-assign-vehicle="${vehicleId}"]`); } catch (error) { toast(error.message, "error"); } }));
   document.querySelector("[data-notes-form]")?.addEventListener("submit", async (event) => { event.preventDefault(); try { await updateJourneyNotes(ride.id, Object.fromEntries(new FormData(event.currentTarget))); toast("Notes saved."); await renderJourneyDetails(); } catch (error) { toast(error.message, "error"); } });
   document.querySelector("[data-delete-journey]")?.addEventListener("click", async () => { if (!window.confirm("Delete this journey permanently? This action cannot be undone.")) return; try { await deleteJourney(ride.id); location.href = adminUrl("journeys/"); } catch (error) { toast(error.message, "error"); } });
 }
