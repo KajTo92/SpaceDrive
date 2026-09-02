@@ -22,6 +22,23 @@ function icon(name) {
 const escapeHtml = (value = "") => String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]);
 const passengerInitials = (passenger) => [passenger?.firstName, passenger?.lastName].filter(Boolean).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "SD";
 
+function journeyPlace(location = {}) {
+  const name = String(location.name || "").trim();
+  const address = String(location.address || "").trim();
+  let headline = name || address;
+  let detail = address && address !== name ? address : "";
+
+  if (!detail && headline.includes(",")) {
+    const [first, ...rest] = headline.split(",");
+    headline = first.trim();
+    detail = rest.join(",").trim();
+  } else if (detail.toLocaleLowerCase().startsWith(`${headline.toLocaleLowerCase()},`)) {
+    detail = detail.slice(headline.length + 1).trim();
+  }
+
+  return `<span class="journey-route-place"><strong>${escapeHtml(headline)}</strong>${detail ? `<small>${escapeHtml(detail)}</small>` : ""}</span>`;
+}
+
 export function PassengerLayout({ active, title, subtitle, passenger, notifications, content }) {
   const unread = notifications.filter((item) => !item.read).length;
   const nav = [
@@ -77,7 +94,7 @@ export function NextJourneyCard(ride) {
   return `
     <section class="next-journey" aria-labelledby="nextJourneyTitle">
       <div class="next-journey__primary">
-        <div class="next-journey__heading"><div><p>Your next journey</p><h2 id="nextJourneyTitle">${ride.pickup.name}<span>${icon("arrow-right")}</span>${ride.destination.name}</h2></div><span class="status-badge status-badge--${ride.status}">${statusLabel(ride.status)}</span></div>
+        <div class="next-journey__heading"><div><p>Your next journey</p><h2 id="nextJourneyTitle">${journeyPlace(ride.pickup)}<span class="journey-route-arrow">${icon("arrow-right")}</span>${journeyPlace(ride.destination)}</h2></div><span class="status-badge status-badge--${ride.status}">${statusLabel(ride.status)}</span></div>
         <div class="journey-time"><div><span>Tomorrow, ${formatDate(ride.pickupDate, { weekday: "long", day: "numeric", month: "long" })}</span><strong>${ride.pickupTime}</strong></div><div><span>Estimated duration</span><strong>${ride.estimatedDuration}</strong></div><div><span>Passengers</span><strong>${ride.passengers}</strong></div><div><span>Luggage</span><strong>${ride.luggage}</strong></div></div>
         <div class="next-journey__status"><span>Journey status</span>${JourneyStatus(ride.status)}</div>
         <div class="next-journey__footer"><div><span>${vehicleBrand}</span><strong>${vehicleModel}</strong><small>${ride.driver ? `with ${driverName}` : driverName}</small></div><div class="journey-price"><span>Journey total</span><strong>${money(ride)}</strong></div></div>
@@ -103,7 +120,7 @@ export function VehicleCard(vehicle, expanded = false) {
 }
 
 export function EmptyState(title, body, glyph = "calendar") {
-  return `<div class="empty-state">${icon(glyph)}<h3>${title}</h3><p>${body}</p><a class="passenger-button passenger-button--primary" href="${assetUrl("index.html#booking")}">Request a ride</a></div>`;
+  return `<div class="empty-state">${icon(glyph)}<h3>${title}</h3><p>${body}</p><a class="passenger-button passenger-button--primary" href="${passengerUrl("requests/")}">Request a ride</a></div>`;
 }
 
 export function LoadingSkeleton(type = "dashboard") {

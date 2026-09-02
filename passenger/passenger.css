@@ -74,8 +74,11 @@ img { max-width: 100%; }
 .next-journey__primary { display: flex; min-width: 0; flex-direction: column; padding: clamp(28px,4.2vw,58px); }
 .next-journey__heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
 .next-journey__heading p { margin: 0 0 18px; color: var(--portal-gold-light); font-size: .7rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
-.next-journey__heading h2 { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; max-width: 640px; min-width: 0; margin: 0; overflow-wrap: anywhere; font-size: clamp(1.75rem,3vw,3.4rem); font-weight: 440; letter-spacing: -.05em; line-height: 1; }
-.next-journey__heading h2 span { grid-row: span 2; align-self: center; margin: 0 16px; color: var(--portal-dim); }
+.next-journey__heading h2 { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; max-width: 640px; min-width: 0; margin: 0; overflow-wrap: anywhere; font-size: clamp(1.35rem,2.25vw,2.45rem); letter-spacing: -.035em; line-height: 1.08; }
+.journey-route-place { display: grid; min-width: 0; gap: 7px; }
+.journey-route-place strong { overflow-wrap: anywhere; font: inherit; font-weight: 720; }
+.journey-route-place small { color: var(--portal-muted); font-size: clamp(.68rem,.85vw,.82rem); font-weight: 430; letter-spacing: 0; line-height: 1.4; }
+.next-journey__heading h2 .journey-route-arrow { align-self: center; margin: 0 16px; color: var(--portal-dim); }
 .next-journey__heading h2 svg { width: 25px; }
 .status-badge { display: inline-flex; align-items: center; min-height: 30px; width: max-content; padding: 0 11px; border: 1px solid rgba(221,225,226,.16); border-radius: 999px; background: rgba(255,255,255,.04); color: #c4c8ca; font-size: .69rem; font-weight: 750; white-space: nowrap; }
 .status-badge--driver_assigned, .status-badge--confirmed, .status-badge--offer_sent { border-color: rgba(240,208,127,.25); background: rgba(212,166,75,.1); color: var(--portal-gold-light); }
@@ -591,6 +594,10 @@ img { max-width: 100%; }
 .confirmation-modal h2 { margin: 13px 0 0; font-size: 2rem; font-weight: 520; letter-spacing: -.04em; }
 .confirmation-modal p { color: var(--portal-muted); line-height: 1.6; }
 .confirmation-modal > div { display: flex; gap: 8px; margin-top: 28px; }
+.confirmation-modal--success { overflow: hidden; border-color: rgba(240,208,127,.28); background: radial-gradient(circle at 12% 0,rgba(212,166,75,.13),transparent 42%),#17191b; }
+.confirmation-modal--success .confirmation-modal__icon { display: grid; width: 54px; height: 54px; margin: 0 0 25px; place-items: center; border: 1px solid rgba(240,208,127,.35); border-radius: 50%; background: rgba(212,166,75,.12); color: var(--portal-gold-light); }
+.confirmation-modal--success .confirmation-modal__icon svg { width: 25px; height: 25px; stroke-width: 2.2; }
+.confirmation-modal--success > div:last-child { justify-content: flex-start; }
 .modal-close { position: absolute; top: 16px; right: 16px; }
 .passenger-toast { position: fixed; right: 24px; bottom: 24px; z-index: 120; max-width: min(390px,calc(100% - 32px)); padding: 14px 18px; border: 1px solid rgba(240,208,127,.25); border-radius: 11px; background: #202225; color: #e8e9e9; box-shadow: 0 24px 60px rgba(0,0,0,.4); opacity: 0; transform: translateY(15px); transition: opacity .2s ease,transform .2s ease; }
 .passenger-toast.is-visible { opacity: 1; transform: translateY(0); }
@@ -662,7 +669,9 @@ img { max-width: 100%; }
   .next-journey { min-height: 0; }
   .next-journey__primary { min-height: 670px; padding: 26px 20px; }
   .next-journey__heading { display: grid; }
-  .next-journey__heading h2 { font-size: clamp(2.4rem,11vw,4rem); }
+  .next-journey__heading h2 { grid-template-columns: 1fr; gap: 9px; font-size: clamp(1.55rem,7vw,2.4rem); }
+  .next-journey__heading h2 .journey-route-arrow { margin: 1px 0; transform: rotate(90deg); }
+  .journey-route-place { gap: 4px; }
   .next-journey__heading .status-badge { grid-row: 1; }
   .journey-time { margin-top: 38px; }
   .journey-status__step small { display: none; }

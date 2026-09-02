@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { NextJourneyCard, PassengerLayout, assetUrl, setPassengerRoot } from "../passenger/components/passenger-components.js";
+import { EmptyState, NextJourneyCard, PassengerLayout, assetUrl, setPassengerRoot } from "../passenger/components/passenger-components.js";
 
 test("next journey renders before driver and vehicle assignment", () => {
   const html = NextJourneyCard({
@@ -20,6 +20,28 @@ test("next journey renders before driver and vehicle assignment", () => {
 
   assert.match(html, /Assignment pending/);
   assert.match(html, /Driver pending/);
+});
+
+test("next journey separates the place name from the rest of the address", () => {
+  const html = NextJourneyCard({
+    id: "ride-addresses",
+    pickup: { name: "Zurich Airport, Flughafenstrasse, 8058 Zürich" },
+    destination: { name: "Eichlistrasse 10, 8155 Niederhasli" },
+    pickupDate: "2026-09-26",
+    pickupTime: "20:00",
+    passengers: 1,
+    luggage: "1 piece",
+    status: "confirmed",
+    price: 120,
+    currency: "CHF",
+  });
+
+  assert.match(html, /<strong>Zurich Airport<\/strong><small>Flughafenstrasse, 8058 Zürich<\/small>/);
+  assert.match(html, /<strong>Eichlistrasse 10<\/strong><small>8155 Niederhasli<\/small>/);
+});
+
+test("empty passenger states link ride requests to the portal request section", () => {
+  assert.match(EmptyState("No trips", "Start here"), /href="[^\"]*passenger\/requests\/"/);
 });
 
 test("passenger layout uses the authenticated passenger identity", () => {

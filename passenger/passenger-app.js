@@ -31,7 +31,7 @@ import {
   setPassengerRoot,
   statusLabel,
   tripUrl,
-} from "./components/passenger-components.js?v=7";
+} from "./components/passenger-components.js?v=8";
 import { LiveTripMap } from "./components/live-trip-map.js?v=5";
 import {
   CITY_TOUR_MAX_HOURS,
@@ -156,6 +156,10 @@ function detailsList(ride) {
 
 function deletionModal(ride) {
   return `<div class="modal-backdrop" data-modal-backdrop hidden><div class="confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle"><button class="icon-button modal-close" type="button" aria-label="Close dialog" data-modal-close><i data-lucide="x"></i></button><span>Journey ${ride.id.toUpperCase()}</span><h2 id="deleteTitle">Delete this journey?</h2><p>This permanently removes the journey and its related updates. This action cannot be undone.</p><div><button class="passenger-button" type="button" data-modal-close>Keep journey</button><button class="passenger-button passenger-button--danger" type="button" data-confirm-delete>Delete journey</button></div></div></div>`;
+}
+
+function requestSuccessModal() {
+  return `<div class="modal-backdrop" data-request-success hidden><div class="confirmation-modal confirmation-modal--success" role="dialog" aria-modal="true" aria-labelledby="requestSuccessTitle"><button class="icon-button modal-close" type="button" aria-label="Close dialog" data-request-success-close><i data-lucide="x"></i></button><div class="confirmation-modal__icon"><i data-lucide="check"></i></div><span>Request received</span><h2 id="requestSuccessTitle">Your journey request is on its way.</h2><p>Dispatch will review availability and send the trip details to your passenger portal.</p><div><a class="passenger-button passenger-button--primary" href="${passengerUrl("trips/")}">View your trips <i data-lucide="arrow-right"></i></a></div></div></div>`;
 }
 
 async function renderTripDetails() {
@@ -357,7 +361,7 @@ async function renderRequests() {
     </section>`;
   const cityTourBooking = renderCityTourBooking();
   const hourlyBooking = renderHourlyConciergeBooking();
-  const content = `<div class="request-screen" data-request-screen><section class="page-heading request-heading"><p>Book a journey</p><h2>How would you like to travel?</h2><span>Choose a service to begin your private journey request.</span></section><section class="service-grid" aria-label="Journey services">${cards}</section>${booking}${cityTourBooking}${hourlyBooking}</div>`;
+  const content = `<div class="request-screen" data-request-screen><section class="page-heading request-heading"><p>Book a journey</p><h2>How would you like to travel?</h2><span>Choose a service to begin your private journey request.</span></section><section class="service-grid" aria-label="Journey services">${cards}</section>${booking}${cityTourBooking}${hourlyBooking}</div>${requestSuccessModal()}`;
   await withLayout({ active: "requests", title: "Request a journey", subtitle: "Private concierge", content });
   bindRequestBooking();
   bindCityTourBooking();
@@ -380,6 +384,7 @@ function bindRequestBooking() {
   const totalOutput = document.querySelector("[data-transfer-total]");
   const map = document.querySelector("[data-transfer-map]");
   const requestButton = document.querySelector("[data-request-availability]");
+  const successModal = document.querySelector("[data-request-success]");
   const luggageOutput = document.querySelector("[data-luggage-count]");
   const bothWays = form.querySelector("[name=bothWays]");
   const dateInput = form.querySelector("[name=pickupDate]");
@@ -396,6 +401,18 @@ function bindRequestBooking() {
   let routeReady = false;
   let basePrice = null;
   let routeDistanceKm = null;
+  const closeSuccessModal = () => {
+    successModal.hidden = true;
+    requestButton.focus();
+  };
+  const openSuccessModal = () => {
+    successModal.hidden = false;
+    refreshIcons();
+    successModal.querySelector("a").focus();
+  };
+  successModal.querySelectorAll("[data-request-success-close]").forEach((button) => button.addEventListener("click", closeSuccessModal));
+  successModal.addEventListener("click", (event) => { if (event.target === successModal) closeSuccessModal(); });
+  successModal.addEventListener("keydown", (event) => { if (event.key === "Escape") closeSuccessModal(); });
   bindPassengerAddressAutocomplete(form);
   [timeInput, returnTimeInput].forEach(populateQuarterHourOptions);
   const today = new Date().toISOString().slice(0, 10);
@@ -562,10 +579,18 @@ function bindRequestBooking() {
   requestButton.addEventListener("click", async () => {
     if (!routeReady) return;
     const vehicle = form.querySelector("[name=vehicle]:checked").value;
-    const returnDetails = bothWays.checked ? ` Return: ${returnDateInput.value} at ${returnTimeInput.value}.` : "";
     const estimate = basePrice === null ? undefined : Math.round(basePrice * (bothWays.checked ? 2 : 1));
-    await createRideRequest({ requestType: "transfer", pickup: { name: pickup.value, address: pickup.value }, destination: { name: destination.value, address: destination.value }, pickupDate: dateInput.value, pickupTime: timeInput.value, passengers: 1, luggage: `${luggage} ${luggage === 1 ? "piece" : "pieces"}`, requestedVehicle: vehicle, calculatedPrice: estimate, specialRequests: bothWays.checked ? [`Return ${returnDateInput.value} at ${returnTimeInput.value}`] : [] });
-    toast(`Request sent to Dispatch for ${dateInput.value} at ${timeInput.value}.${returnDetails}`);
+    requestButton.disabled = true;
+    requestButton.setAttribute("aria-busy", "true");
+    try {
+      await createRideRequest({ requestType: "transfer", pickup: { name: pickup.value, address: pickup.value }, destination: { name: destination.value, address: destination.value }, pickupDate: dateInput.value, pickupTime: timeInput.value, passengers: 1, luggage: `${luggage} ${luggage === 1 ? "piece" : "pieces"}`, requestedVehicle: vehicle, calculatedPrice: estimate, specialRequests: bothWays.checked ? [`Return ${returnDateInput.value} at ${returnTimeInput.value}`] : [] });
+      openSuccessModal();
+    } catch (error) {
+      toast(error.message || "We could not send your request. Please try again.");
+    } finally {
+      requestButton.removeAttribute("aria-busy");
+      updateAvailabilityState();
+    }
   });
 }
 
