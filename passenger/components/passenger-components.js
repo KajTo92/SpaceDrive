@@ -103,10 +103,13 @@ export function NextJourneyCard(ride) {
   const routeMarkup = route.single ? `<span class="journey-route-place journey-route-place--single"><strong>${escapeHtml(route.single)}</strong><small>Private city itinerary</small></span>` : `${journeyPlace(ride.pickup)}<span class="journey-route-arrow">${icon("arrow-right")}</span>${journeyPlace(ride.destination)}`;
   const driverPhoto = ride.driver?.photo ? `<img src="${assetUrl(ride.driver.photo)}" alt="Portrait of ${escapeHtml(driverName)}">` : `<span>${passengerInitials({ firstName: driverName })}</span>`;
   const vehicleImage = ride.vehicle?.image ? `<img src="${assetUrl(ride.vehicle.image)}" alt="${escapeHtml(`${vehicleBrand} ${vehicleModel}`)}">` : `<span class="next-journey__vehicle-placeholder">${icon("car-front")}</span>`;
+  const confirmedStatuses = new Set(["confirmed", "driver_assigned", "driver_on_the_way", "driver_arrived", "passenger_onboard"]);
+  const fullyConfirmed = confirmedStatuses.has(ride.status) && Boolean(ride.driver && ride.vehicle);
+  const confirmation = fullyConfirmed ? `<span class="journey-confirmation journey-confirmation--confirmed">${icon("circle-check")} Confirmed</span>` : `<span class="journey-confirmation journey-confirmation--pending">${icon("clock-3")} Not yet confirmed</span>`;
   return `
-    <section class="next-journey" aria-labelledby="nextJourneyTitle">
+    <section class="next-journey next-journey--${fullyConfirmed ? "confirmed" : "pending"}" aria-labelledby="nextJourneyTitle">
       <div class="next-journey__primary">
-        <div class="next-journey__heading"><div><p>Your next journey</p>${ServiceTypeBadge(ride)}<h2 id="nextJourneyTitle"${route.single ? ' class="is-single-route"' : ""}>${routeMarkup}</h2></div><span class="status-badge status-badge--${ride.status}">${statusLabel(ride.status)}</span></div>
+        <div class="next-journey__heading"><div><p>Your next journey</p>${ServiceTypeBadge(ride)}<h2 id="nextJourneyTitle"${route.single ? ' class="is-single-route"' : ""}>${routeMarkup}</h2></div><div class="next-journey__badges">${confirmation}<span class="status-badge status-badge--${ride.status}">${statusLabel(ride.status)}</span></div></div>
         <div class="journey-time"><div><span>Tomorrow, ${formatDate(ride.pickupDate, { weekday: "long", day: "numeric", month: "long" })}</span><strong>${ride.pickupTime}</strong></div><div><span>Estimated duration</span><strong>${ride.estimatedDuration}</strong></div><div><span>Passengers</span><strong>${ride.passengers}</strong></div><div><span>Luggage</span><strong>${ride.luggage}</strong></div></div>
         <div class="next-journey__status"><span>Journey status</span>${JourneyStatus(ride.status)}</div>
         <div class="next-journey__footer"><div><span>${vehicleBrand}</span><strong>${vehicleModel}</strong><small>${ride.driver ? `with ${driverName}` : driverName}</small></div><div class="journey-price"><span>Journey total</span><strong>${money(ride)}</strong></div></div>

@@ -21,6 +21,8 @@ test("next journey renders before driver and vehicle assignment", () => {
   assert.match(html, /Assignment pending/);
   assert.match(html, /Driver pending/);
   assert.match(html, /Simple Transfer/);
+  assert.match(html, /next-journey--pending/);
+  assert.match(html, /Not yet confirmed/);
 });
 
 test("passenger journeys identify city tour and hourly concierge services", () => {
@@ -57,6 +59,8 @@ test("next journey includes assigned chauffeur and vehicle imagery", () => {
   assert.match(html, />Pay<\/button>/);
   assert.match(html, /action=cancel">Cancel<\/a>/);
   assert.doesNotMatch(html, /Modify trip/);
+  assert.match(html, /next-journey--confirmed/);
+  assert.match(html, /> Confirmed<\/span>/);
 });
 
 test("next journey separates the place name from the rest of the address", () => {
