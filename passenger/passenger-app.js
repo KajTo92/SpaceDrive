@@ -152,7 +152,7 @@ function detailsList(ride) {
 }
 
 function deletionModal(ride) {
-  return `<div class="modal-backdrop" data-modal-backdrop hidden><div class="confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle"><button class="icon-button modal-close" type="button" aria-label="Close dialog" data-modal-close><i data-lucide="x"></i></button><span>Journey ${ride.id.toUpperCase()}</span><h2 id="deleteTitle">Delete this journey?</h2><p>This permanently removes the journey and its related updates. This action cannot be undone.</p><div><button class="passenger-button" type="button" data-modal-close>Keep journey</button><button class="passenger-button passenger-button--danger" type="button" data-confirm-delete>Delete journey</button></div></div></div>`;
+  return `<div class="modal-backdrop" data-modal-backdrop hidden><div class="confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle"><button class="icon-button modal-close" type="button" aria-label="Close dialog" data-modal-close><i data-lucide="x"></i></button><span>Journey ${ride.id.toUpperCase()}</span><h2 id="deleteTitle">Cancel this journey?</h2><p>This permanently removes the journey and its related updates. This action cannot be undone.</p><div><button class="passenger-button" type="button" data-modal-close>Keep journey</button><button class="passenger-button passenger-button--danger" type="button" data-confirm-delete>Cancel journey</button></div></div></div>`;
 }
 
 function requestSuccessModal() {
@@ -175,7 +175,7 @@ async function renderTripDetails() {
     <section class="detail-map"><div class="live-trip-map" data-live-map data-ride-id="${ride.id}"></div></section>
     <section class="detail-pair">${DriverCard(ride.driver)}${VehicleCard(ride.vehicle)}</section>
     <section class="trip-information"><div><span>Journey details</span><h2>Everything arranged for you.</h2></div><div class="trip-information__list">${detailsList(ride)}</div></section>
-    <section class="trip-action-bar">${ride.status === "offer_sent" ? `<button class="passenger-button passenger-button--primary" type="button" data-accept-offer>Accept offer</button>` : ""}<button class="passenger-button" type="button" data-demo-action="Contact driver">Contact driver</button><button class="passenger-button" type="button" data-demo-action="Modify journey">Modify journey</button><button class="passenger-button passenger-button--danger-quiet" type="button" data-delete-journey>Delete journey</button></section>
+    <section class="trip-action-bar">${ride.status === "offer_sent" ? `<button class="passenger-button passenger-button--primary" type="button" data-accept-offer>Accept offer</button>` : ""}<button class="passenger-button passenger-button--primary" type="button" data-demo-action="Payment">Pay</button><button class="passenger-button" type="button" data-demo-action="Contact driver">Contact driver</button><button class="passenger-button passenger-button--danger-quiet" type="button" data-delete-journey>Cancel</button></section>
     ${deletionModal(ride)}`;
   await withLayout({ active: "trips", title: "Trip details", subtitle: ride.id.toUpperCase(), content });
   await mountMaps(ride);
@@ -200,6 +200,10 @@ async function renderTripDetails() {
     }
   });
   modal?.querySelector("[data-confirm-delete]")?.addEventListener("click", async () => { try { await deleteJourney(ride.id); location.href = passengerUrl("trips/"); } catch (error) { closeModal(); toast(error.message); } });
+  if (new URLSearchParams(location.search).get("action") === "cancel") {
+    history.replaceState(null, "", `${location.pathname}?id=${encodeURIComponent(ride.id)}`);
+    openModal();
+  }
 }
 
 function populateQuarterHourOptions(select) {

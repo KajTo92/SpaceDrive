@@ -54,6 +54,9 @@ test("next journey includes assigned chauffeur and vehicle imagery", () => {
   assert.match(html, /5\.0/);
   assert.match(html, /100\+ trips/);
   assert.equal((html.match(/data-lucide="star"/g) || []).length, 5);
+  assert.match(html, />Pay<\/button>/);
+  assert.match(html, /action=cancel">Cancel<\/a>/);
+  assert.doesNotMatch(html, /Modify trip/);
 });
 
 test("next journey separates the place name from the rest of the address", () => {
