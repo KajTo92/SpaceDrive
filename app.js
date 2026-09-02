@@ -246,6 +246,7 @@ const elements = {
   bothWays: document.querySelector("#bothWays"),
   pickupDate: document.querySelector("#pickupDate"),
   pickupTime: document.querySelector("#pickupTime"),
+  flightNumber: document.querySelector("#flightNumber"),
   returnSchedule: document.querySelector("#returnSchedule"),
   returnDate: document.querySelector("#returnDate"),
   returnTime: document.querySelector("#returnTime"),
@@ -487,6 +488,7 @@ function getBookingDetails() {
     vehicle: document.querySelector('[name="vehicle"]:checked')?.value || "Tesla Model Y",
     pickupDate: elements.pickupDate.value,
     pickupTime: elements.pickupTime.value,
+    flightNumber: elements.flightNumber.value.trim(),
     bothWays: elements.bothWays.checked,
     returnDate: elements.returnDate.value,
     returnTime: elements.returnTime.value,
@@ -760,7 +762,7 @@ async function openEmail() {
   setNote("Sending your request…");
   const start = new Date(`${payload.pickupDate}T${payload.pickupTime}:00`);
   const numericPrice = Number(String(payload.price || "").replace(/[^0-9.]/g, "")) || null;
-  const { error } = await supabase.rpc("submit_ride_request", { payload: { service_type: "transfer", scheduled_start_at: start.toISOString(), scheduled_end_at: new Date(start.getTime() + 90 * 60000).toISOString(), duration_minutes: 90, customer_name: payload.name, customer_email: payload.email, customer_phone: payload.telephone, pickup_name: payload.pickup.split(",")[0], pickup_address: payload.pickup, pickup_latitude: payload.origin?.lat, pickup_longitude: payload.origin?.lon, destination_name: payload.destination.split(",")[0], destination_address: payload.destination, destination_latitude: payload.target?.lat, destination_longitude: payload.target?.lon, passenger_count: 1, luggage: `${payload.luggage} pieces`, requested_vehicle_class: payload.vehicle, estimated_price: numericPrice, currency: "CHF", special_requests: payload.bothWays ? `Return ${payload.returnDate} at ${payload.returnTime}` : "" } });
+  const { error } = await supabase.rpc("submit_ride_request", { payload: { service_type: "transfer", scheduled_start_at: start.toISOString(), scheduled_end_at: new Date(start.getTime() + 90 * 60000).toISOString(), duration_minutes: 90, customer_name: payload.name, customer_email: payload.email, customer_phone: payload.telephone, pickup_name: payload.pickup.split(",")[0], pickup_address: payload.pickup, pickup_latitude: payload.origin?.lat, pickup_longitude: payload.origin?.lon, destination_name: payload.destination.split(",")[0], destination_address: payload.destination, destination_latitude: payload.target?.lat, destination_longitude: payload.target?.lon, passenger_count: 1, luggage: `${payload.luggage} pieces`, flight_number: payload.flightNumber, requested_vehicle_class: payload.vehicle, estimated_price: numericPrice, currency: "CHF", special_requests: payload.bothWays ? `Return ${payload.returnDate} at ${payload.returnTime}` : "" } });
   elements.email.disabled = false;
   setNote(error ? `We could not submit the request: ${error.message}` : "Request received. Space Drive will send your final offer shortly.", !!error);
 }

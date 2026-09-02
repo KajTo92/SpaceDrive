@@ -34,8 +34,23 @@ test("passenger journeys identify city tour and hourly concierge services", () =
     status: "confirmed",
     currency: "CHF",
   };
-  assert.match(NextJourneyCard({ ...base, serviceType: "city_tour" }), /City Tour/);
+  const cityTour = NextJourneyCard({ ...base, serviceType: "city_tour", tourDetails: { region: "Zürich" } });
+  assert.match(cityTour, /City Tour/);
+  assert.match(cityTour, /<strong>Zürich<\/strong><small>Private city itinerary<\/small>/);
+  assert.doesNotMatch(cityTour, /journey-route-arrow/);
   assert.match(NextJourneyCard({ ...base, serviceType: "hourly_concierge" }), /Hourly Concierge/);
+});
+
+test("next journey includes assigned chauffeur and vehicle imagery", () => {
+  const html = NextJourneyCard({
+    id: "ride-with-crew", pickup: { name: "Zürich" }, destination: { name: "Bern" }, pickupDate: "2026-09-26", pickupTime: "20:00",
+    passengers: 1, luggage: "1 piece", status: "confirmed", currency: "CHF",
+    driver: { name: "Jan Rejnowicz", photo: "https://example.com/driver.jpg" },
+    vehicle: { brand: "Tesla", model: "Model Y", image: "https://example.com/car.png" },
+  });
+  assert.match(html, /driver\.jpg/);
+  assert.match(html, /car\.png/);
+  assert.match(html, /Your chauffeur/);
 });
 
 test("next journey separates the place name from the rest of the address", () => {

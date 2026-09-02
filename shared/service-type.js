@@ -10,3 +10,10 @@ export function serviceType(ride = {}) {
 }
 
 export const serviceTypeLabel = (ride) => serviceType(ride).label;
+
+export function journeyRoute(ride = {}) {
+  if (serviceType(ride).key === "city_tour") {
+    return { single: ride.tourDetails?.region || ride.pickup?.name || ride.destination?.name || "City Tour" };
+  }
+  return { pickup: ride.pickup?.name || "Pickup", destination: ride.destination?.name || "Destination" };
+}

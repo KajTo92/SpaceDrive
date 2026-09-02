@@ -1,6 +1,6 @@
 import { getDriverRideAction, journeyStages, statusLabel } from "../../shared/ride-status.js?v=2";
 import { resolveAssetUrl } from "../../shared/asset-url.js";
-import { serviceType } from "../../shared/service-type.js";
+import { journeyRoute, serviceType } from "../../shared/service-type.js";
 
 let rootPath = "../";
 export const setDriverRoot = (path) => { rootPath = path; };
@@ -115,9 +115,11 @@ export function DriverRideAction(ride, sticky = false) {
 
 export function DriverMissionCard(ride) {
   const passenger = ride.passenger?.name || "Passenger details pending";
+  const route = journeyRoute(ride);
+  const routeMarkup = route.single ? `<div><span>City Tour</span><h2 id="missionTitle">${route.single}</h2><small>Private city itinerary</small></div>` : `<div><span>Pickup</span><h2 id="missionTitle">${ride.pickup.name}</h2><small>${ride.pickup.address}</small></div>`;
   return `<section class="driver-mission" aria-labelledby="missionTitle" data-current-ride-id="${ride.id}">
     <header class="driver-mission__header"><div><span>Next journey</span><p>${nextRideCountdown(ride)}</p></div><div class="driver-mission__badges">${DriverServiceBadge(ride)}<span class="driver-status-badge driver-status-badge--${ride.status}" data-current-ride-status>${statusLabel(ride.status)}</span></div></header>
-    <div class="driver-mission__route"><div><span>Pickup</span><h2 id="missionTitle">${ride.pickup.name}</h2><small>${ride.pickup.address}</small></div><time><small>${formatDate(ride.pickupDate, { weekday: "short", day: "numeric", month: "short" })}</small><strong>${ride.pickupTime}</strong></time><div><span>Destination</span><h3>${ride.destination.name}</h3><small>${ride.estimatedDuration || "Duration pending"}</small></div></div>
+    <div class="driver-mission__route">${routeMarkup}<time><small>${formatDate(ride.pickupDate, { weekday: "short", day: "numeric", month: "short" })}</small><strong>${ride.pickupTime}</strong></time>${route.single ? "" : `<div><span>Destination</span><h3>${ride.destination.name}</h3><small>${ride.estimatedDuration || "Duration pending"}</small></div>`}</div>
     <div class="driver-mission__brief"><div>${icon("user-round")}<span><small>Passenger</small><strong>${passenger}</strong></span></div><div>${icon("users-round")}<span><small>Passengers</small><strong>${ride.passengers}</strong></span></div><div>${icon("luggage")}<span><small>Luggage</small><strong>${ride.luggage || "Not provided"}</strong></span></div><div>${icon("plane")}<span><small>Flight</small><strong>${ride.flight?.flightNumber || ride.flightNumber || "Not provided"}</strong></span></div></div>
     <div class="driver-mission__status"><span>Journey progress</span><div data-journey-progress>${JourneyStatus(ride.status)}</div></div>
     ${DriverRideAction(ride)}
@@ -125,7 +127,8 @@ export function DriverMissionCard(ride) {
 }
 
 export function DriverTripMap(ride) {
-  return `<section class="driver-map-section"><div class="driver-map-header"><div><span>Route</span><h2>${ride.pickup.name} to ${ride.destination.name}</h2></div>${DriverServiceBadge(ride)}</div><div class="driver-trip-map live-trip-map" data-live-map data-ride-id="${ride.id}"></div><div class="driver-map-actions"><button type="button" data-navigation data-destination="pickup">${icon("map-pin")} Pickup</button><button type="button" data-navigation data-destination="destination">${icon("flag")} Destination</button></div></section>`;
+  const route = journeyRoute(ride);
+  return `<section class="driver-map-section"><div class="driver-map-header"><div><span>Route</span><h2>${route.single || `${route.pickup} to ${route.destination}`}</h2></div>${DriverServiceBadge(ride)}</div><div class="driver-trip-map live-trip-map" data-live-map data-ride-id="${ride.id}"></div><div class="driver-map-actions"><button type="button" data-navigation data-destination="pickup">${icon("map-pin")} Pickup</button><button type="button" data-navigation data-destination="destination">${icon("flag")} Destination</button></div></section>`;
 }
 
 export function PassengerPreferencesCard(ride) {
@@ -157,11 +160,13 @@ export function RideIssueModal(ride) {
 
 export function DriverRideCard(ride, label) {
   const passenger = ride.passenger?.name || "Passenger pending";
-  return `<article class="driver-ride-card"><a href="${driverRideUrl(ride.id)}"><time><strong>${ride.pickupTime}</strong><span>${formatDate(ride.pickupDate, { weekday: "short", day: "numeric", month: "short" })}</span></time><div class="driver-ride-card__route"><span>${ride.pickup.name}</span>${icon("arrow-right")}<strong>${ride.destination.name}</strong><small>${passenger}<br>${ride.vehicle ? `${ride.vehicle.brand} ${ride.vehicle.model}` : "Vehicle pending"}</small></div><span class="driver-ride-card__badges">${DriverServiceBadge(ride)}<span class="driver-status-badge driver-status-badge--${ride.status}">${label || statusLabel(ride.status)}</span></span>${icon("chevron-right")}</a></article>`;
+  const route = journeyRoute(ride);
+  const routeMarkup = route.single ? `<strong>${route.single}</strong>` : `<span>${route.pickup}</span>${icon("arrow-right")}<strong>${route.destination}</strong>`;
+  return `<article class="driver-ride-card"><a href="${driverRideUrl(ride.id)}"><time><strong>${ride.pickupTime}</strong><span>${formatDate(ride.pickupDate, { weekday: "short", day: "numeric", month: "short" })}</span></time><div class="driver-ride-card__route">${routeMarkup}<small>${passenger}<br>${ride.vehicle ? `${ride.vehicle.brand} ${ride.vehicle.model}` : "Vehicle pending"}</small></div><span class="driver-ride-card__badges">${DriverServiceBadge(ride)}<span class="driver-status-badge driver-status-badge--${ride.status}">${label || statusLabel(ride.status)}</span></span>${icon("chevron-right")}</a></article>`;
 }
 
 export function DriverSchedule(rides) {
-  return `<div class="driver-schedule">${rides.length ? rides.map((ride) => `<div class="schedule-event"><time>${ride.pickupTime}</time><span></span><div><a href="${driverRideUrl(ride.id)}"><strong>${ride.pickup.name}</strong>${icon("arrow-right")}<strong>${ride.destination.name}</strong></a><p>${ride.passenger?.name || "Passenger pending"}</p></div><span class="schedule-event__badges">${DriverServiceBadge(ride)}<span class="driver-status-badge driver-status-badge--${ride.status}">${statusLabel(ride.status)}</span></span></div>`).join("") : EmptyState("No rides in this period", "You're all clear for now.", "calendar-check")}</div>`;
+  return `<div class="driver-schedule">${rides.length ? rides.map((ride) => { const route = journeyRoute(ride); return `<div class="schedule-event"><time>${ride.pickupTime}</time><span></span><div><a href="${driverRideUrl(ride.id)}">${route.single ? `<strong>${route.single}</strong>` : `<strong>${route.pickup}</strong>${icon("arrow-right")}<strong>${route.destination}</strong>`}</a><p>${ride.passenger?.name || "Passenger pending"}</p></div><span class="schedule-event__badges">${DriverServiceBadge(ride)}<span class="driver-status-badge driver-status-badge--${ride.status}">${statusLabel(ride.status)}</span></span></div>`; }).join("") : EmptyState("No rides in this period", "You're all clear for now.", "calendar-check")}</div>`;
 }
 
 export function LocationPermissionCard(permission, tracking = false) {

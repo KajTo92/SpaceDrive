@@ -14,6 +14,7 @@ import {
 } from "./services/passenger-service.js?v=9";
 import "./config.js";
 import { requireRole, signOut } from "../shared/supabase-client.js";
+import { journeyRoute } from "../shared/service-type.js";
 import {
   DriverCard,
   EmptyState,
@@ -111,19 +112,14 @@ async function mountMaps(rides) {
 }
 
 async function renderDashboard() {
-  const [currentRide, trips, driver, passenger] = await Promise.all([getCurrentRide(), getPassengerTrips(), getAssignedDriver(), getPassenger()]);
+  const [currentRide, passenger] = await Promise.all([getCurrentRide(), getPassenger()]);
   if (!currentRide) {
     await withLayout({ active: "home", title: `Welcome, ${passenger.firstName}.`, subtitle: "Passenger portal", content: EmptyState("No upcoming journeys", "Your next journey starts here.", "calendar-days") });
     return;
   }
-  const upcoming = trips.filter((ride) => ride.id !== currentRide.id && !["completed", "cancelled"].includes(ride.status));
   const content = `
     <div class="dashboard-heading"><div><p>Welcome, ${passenger.firstName}.</p><h2>Your private travel, arranged.</h2></div><time>${formatDate(new Date().toISOString().slice(0,10), { weekday: "long", day: "numeric", month: "long" })}</time></div>
-    ${NextJourneyCard(currentRide)}
-    <section class="dashboard-lower">
-      <div class="upcoming-section"><header class="section-heading"><h2>Upcoming journeys</h2><a href="${passengerUrl("trips/")}">View all</a></header><div class="upcoming-list">${upcoming.length ? upcoming.map((ride) => RideCard(ride)).join("") : EmptyState("No upcoming journeys", "Your next journey starts here.")}</div></div>
-      <div class="dashboard-driver">${DriverCard(driver)}</div>
-    </section>`;
+    ${NextJourneyCard(currentRide)}`;
   await withLayout({ active: "home", title: "Home", subtitle: "Passenger portal", content });
   await mountMaps(currentRide);
 }
@@ -170,9 +166,11 @@ async function renderTripDetails() {
     await withLayout({ active: "trips", title: "Trip details", subtitle: "Journey not found", content: ErrorState("We could not find this journey", "The trip ID is invalid or the journey is no longer available.") });
     return;
   }
+  const route = journeyRoute(ride);
+  const routeTitle = route.single ? escapeHtml(route.single) : `${escapeHtml(route.pickup)}<i data-lucide="arrow-right"></i>${escapeHtml(route.destination)}`;
   const content = `
     <a class="back-link" href="${passengerUrl("trips/")}"><i data-lucide="arrow-left"></i> Back to trips</a>
-    <section class="trip-hero"><div><span>${formatDate(ride.pickupDate, { weekday: "long", day: "numeric", month: "long" })} at ${ride.pickupTime}</span>${ServiceTypeBadge(ride)}<h2>${ride.pickup.name}<i data-lucide="arrow-right"></i>${ride.destination.name}</h2></div><div><span class="status-badge status-badge--${ride.status}">${statusLabel(ride.status)}</span><strong>${money(ride)}</strong></div></section>
+    <section class="trip-hero"><div><span>${formatDate(ride.pickupDate, { weekday: "long", day: "numeric", month: "long" })} at ${ride.pickupTime}</span>${ServiceTypeBadge(ride)}<h2>${routeTitle}</h2></div><div><span class="status-badge status-badge--${ride.status}">${statusLabel(ride.status)}</span><strong>${money(ride)}</strong></div></section>
     <section class="detail-status"><header class="section-heading"><h2>Journey status</h2><span>${statusLabel(ride.status)}</span></header>${JourneyStatus(ride.status)}</section>
     <section class="detail-map"><div class="live-trip-map" data-live-map data-ride-id="${ride.id}"></div></section>
     <section class="detail-pair">${DriverCard(ride.driver)}${VehicleCard(ride.vehicle)}</section>
@@ -234,6 +232,7 @@ function renderCityTourBooking() {
           <section class="city-tour-form-section city-tour-when">
             <label class="city-tour-field"><span>Date</span><span class="city-tour-control" data-city-tour-picker><i data-lucide="calendar-days" aria-hidden="true"></i><input type="date" name="cityTourDate" required></span></label>
             <label class="city-tour-field"><span>Start time</span><span class="city-tour-control"><i data-lucide="clock-3" aria-hidden="true"></i><select name="cityTourTime" required><option value="">--:--</option></select></span></label>
+            <label class="city-tour-field"><span>Flight number <small>Optional</small></span><span class="city-tour-control"><i data-lucide="plane" aria-hidden="true"></i><input type="text" name="cityTourFlightNumber" autocomplete="off" placeholder="LX123"></span></label>
           </section>
           <fieldset class="city-tour-form-section"><legend>How long would you like your tour?</legend><div class="city-tour-choice-grid city-tour-choice-grid--duration">${durationChoices}<label class="city-tour-choice"><input type="radio" name="cityTourDuration" value="custom"><span>Custom</span></label></div><label class="city-tour-custom-duration" data-city-tour-custom-duration hidden><span>Number of hours</span><input type="number" name="cityTourCustomHours" min="${CITY_TOUR_MIN_HOURS}" max="${CITY_TOUR_MAX_HOURS}" step="1" value="4" inputmode="numeric"></label></fieldset>
           <fieldset class="city-tour-form-section"><legend>Passengers</legend><div class="city-tour-passengers"><button type="button" data-city-tour-passengers="-1" aria-label="Remove one passenger"><i data-lucide="minus"></i></button><output data-city-tour-passenger-count>1</output><span data-city-tour-passenger-unit>passenger</span><button type="button" data-city-tour-passengers="1" aria-label="Add one passenger"><i data-lucide="plus"></i></button></div><small>Maximum 7 passengers</small></fieldset>
@@ -286,6 +285,7 @@ function renderHourlyConciergeBooking() {
           <section class="hourly-form-section hourly-when">
             <label class="hourly-field"><span>Date</span><span class="hourly-control" data-hourly-picker><i data-lucide="calendar-days" aria-hidden="true"></i><input type="date" name="hourlyDate" required></span></label>
             <label class="hourly-field"><span>Start time</span><span class="hourly-control"><i data-lucide="clock-3" aria-hidden="true"></i><select name="hourlyTime" required><option value="">--:--</option></select></span></label>
+            <label class="hourly-field"><span>Flight number <small>Optional</small></span><span class="hourly-control"><i data-lucide="plane" aria-hidden="true"></i><input type="text" name="hourlyFlightNumber" autocomplete="off" placeholder="LX123"></span></label>
           </section>
           <fieldset class="hourly-form-section"><legend>Duration</legend><div class="hourly-choice-grid hourly-duration">${durationChoices}<label class="hourly-choice"><input type="radio" name="hourlyDuration" value="custom"><span>Custom</span></label></div><label class="hourly-custom-duration" data-hourly-custom-duration hidden><span>Number of hours</span><input type="number" name="hourlyCustomHours" min="${HOURLY_CONCIERGE_MIN_HOURS}" max="${HOURLY_CONCIERGE_MAX_HOURS}" step="1" value="5" inputmode="numeric"></label><small>Minimum 3 hours, maximum 12 hours.</small></fieldset>
           <section class="hourly-form-section">
@@ -341,6 +341,7 @@ async function renderRequests() {
             <label class="transfer-schedule-field"><span>Date</span><span class="transfer-schedule-control" data-picker-control><i data-lucide="calendar-days" aria-hidden="true"></i><input type="date" name="pickupDate" required></span></label>
             <label class="transfer-schedule-field"><span>Time</span><span class="transfer-schedule-control" data-picker-control><i data-lucide="clock-3" aria-hidden="true"></i><select name="pickupTime" required><option value="">--:--</option></select></span></label>
           </div>
+          <label class="transfer-field transfer-field--flight"><span>Flight number <small>Optional</small></span><i data-lucide="plane" aria-hidden="true"></i><input name="flightNumber" type="text" autocomplete="off" placeholder="LX123"></label>
           <div class="transfer-schedule transfer-schedule--return" data-return-schedule hidden>
             <label class="transfer-schedule-field"><span>Return date</span><span class="transfer-schedule-control" data-picker-control><i data-lucide="calendar-days" aria-hidden="true"></i><input type="date" name="returnDate"></span></label>
             <label class="transfer-schedule-field"><span>Return time</span><span class="transfer-schedule-control" data-picker-control><i data-lucide="clock-3" aria-hidden="true"></i><select name="returnTime"><option value="">--:--</option></select></span></label>
@@ -599,7 +600,7 @@ function bindRequestBooking() {
     requestButton.disabled = true;
     requestButton.setAttribute("aria-busy", "true");
     try {
-      await createRideRequest({ requestType: "transfer", pickup: locationFromInput(pickup, routeFrom), destination: locationFromInput(destination, routeTo), pickupDate: dateInput.value, pickupTime: timeInput.value, passengers: 1, luggage: `${luggage} ${luggage === 1 ? "piece" : "pieces"}`, requestedVehicle: vehicle, calculatedPrice: estimate, specialRequests: bothWays.checked ? [`Return ${returnDateInput.value} at ${returnTimeInput.value}`] : [] });
+      await createRideRequest({ requestType: "transfer", pickup: locationFromInput(pickup, routeFrom), destination: locationFromInput(destination, routeTo), pickupDate: dateInput.value, pickupTime: timeInput.value, flightNumber: form.querySelector("[name=flightNumber]").value.trim(), passengers: 1, luggage: `${luggage} ${luggage === 1 ? "piece" : "pieces"}`, requestedVehicle: vehicle, calculatedPrice: estimate, specialRequests: bothWays.checked ? [`Return ${returnDateInput.value} at ${returnTimeInput.value}`] : [] });
       openSuccessModal();
     } catch (error) {
       toast(error.message || "We could not send your request. Please try again.");
@@ -730,7 +731,7 @@ function bindCityTourBooking() {
     }
 
     const estimate = calculateCityTourPrice(selectedVehicle(), hours);
-    await createRideRequest({ requestType: "city_tour", pickup: { name: regionInput.value, address: `Pickup in ${regionInput.value}` }, destination: { name: regionInput.value, address: "Private city itinerary" }, pickupDate: dateInput.value, pickupTime: timeInput.value, passengers, luggage: "Not provided", requestedVehicle: selectedVehicle(), calculatedPrice: estimate?.total, specialRequests: form.querySelector("[name=cityTourNotes]").value.trim() ? [form.querySelector("[name=cityTourNotes]").value.trim()] : [], tourDetails: { region: regionInput.value, durationHours: hours, style } });
+    await createRideRequest({ requestType: "city_tour", pickup: { name: regionInput.value, address: `Pickup in ${regionInput.value}` }, destination: { name: regionInput.value, address: "Private city itinerary" }, pickupDate: dateInput.value, pickupTime: timeInput.value, flightNumber: form.querySelector("[name=cityTourFlightNumber]").value.trim(), passengers, luggage: "Not provided", requestedVehicle: selectedVehicle(), calculatedPrice: estimate?.total, specialRequests: form.querySelector("[name=cityTourNotes]").value.trim() ? [form.querySelector("[name=cityTourNotes]").value.trim()] : [], tourDetails: { region: regionInput.value, durationHours: hours, style } });
     content.hidden = true;
     success.hidden = false;
     success.focus({ preventScroll: true });
@@ -925,7 +926,7 @@ function bindHourlyConciergeBooking() {
         estimatedEndAt: bookingEndAt,
         passengers,
         luggage: "Not provided",
-        requestedVehicleId: vehicleId,
+        flightNumber: form.querySelector("[name=hourlyFlightNumber]").value.trim(),
         requestedVehicle: estimate.vehicleName,
         calculatedPrice: estimate.total,
         plannedStops,

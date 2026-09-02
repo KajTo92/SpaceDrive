@@ -1,6 +1,6 @@
 import { journeyStages, statusLabel } from "../../shared/ride-status.js?v=2";
 import { resolveAssetUrl } from "../../shared/asset-url.js";
-import { serviceType } from "../../shared/service-type.js";
+import { journeyRoute, serviceType } from "../../shared/service-type.js";
 
 let rootPath = "../";
 
@@ -97,21 +97,27 @@ export function NextJourneyCard(ride) {
   const vehicleBrand = ride.vehicle?.brand || "Vehicle";
   const vehicleModel = ride.vehicle?.model || "Assignment pending";
   const driverName = ride.driver?.shortName || ride.driver?.name || "Driver pending";
+  const route = journeyRoute(ride);
+  const routeMarkup = route.single ? `<span class="journey-route-place journey-route-place--single"><strong>${escapeHtml(route.single)}</strong><small>Private city itinerary</small></span>` : `${journeyPlace(ride.pickup)}<span class="journey-route-arrow">${icon("arrow-right")}</span>${journeyPlace(ride.destination)}`;
+  const driverPhoto = ride.driver?.photo ? `<img src="${assetUrl(ride.driver.photo)}" alt="Portrait of ${escapeHtml(driverName)}">` : `<span>${passengerInitials({ firstName: driverName })}</span>`;
+  const vehicleImage = ride.vehicle?.image ? `<img src="${assetUrl(ride.vehicle.image)}" alt="${escapeHtml(`${vehicleBrand} ${vehicleModel}`)}">` : `<span class="next-journey__vehicle-placeholder">${icon("car-front")}</span>`;
   return `
     <section class="next-journey" aria-labelledby="nextJourneyTitle">
       <div class="next-journey__primary">
-        <div class="next-journey__heading"><div><p>Your next journey</p>${ServiceTypeBadge(ride)}<h2 id="nextJourneyTitle">${journeyPlace(ride.pickup)}<span class="journey-route-arrow">${icon("arrow-right")}</span>${journeyPlace(ride.destination)}</h2></div><span class="status-badge status-badge--${ride.status}">${statusLabel(ride.status)}</span></div>
+        <div class="next-journey__heading"><div><p>Your next journey</p>${ServiceTypeBadge(ride)}<h2 id="nextJourneyTitle"${route.single ? ' class="is-single-route"' : ""}>${routeMarkup}</h2></div><span class="status-badge status-badge--${ride.status}">${statusLabel(ride.status)}</span></div>
         <div class="journey-time"><div><span>Tomorrow, ${formatDate(ride.pickupDate, { weekday: "long", day: "numeric", month: "long" })}</span><strong>${ride.pickupTime}</strong></div><div><span>Estimated duration</span><strong>${ride.estimatedDuration}</strong></div><div><span>Passengers</span><strong>${ride.passengers}</strong></div><div><span>Luggage</span><strong>${ride.luggage}</strong></div></div>
         <div class="next-journey__status"><span>Journey status</span>${JourneyStatus(ride.status)}</div>
         <div class="next-journey__footer"><div><span>${vehicleBrand}</span><strong>${vehicleModel}</strong><small>${ride.driver ? `with ${driverName}` : driverName}</small></div><div class="journey-price"><span>Journey total</span><strong>${money(ride)}</strong></div></div>
         <div class="journey-actions"><a class="passenger-button passenger-button--primary" href="${tripUrl(ride.id)}">View journey</a><button class="passenger-button" type="button" data-demo-action="Contact driver">Contact driver</button><button class="passenger-button passenger-button--quiet" type="button" data-demo-action="Modify trip">Modify trip</button></div>
       </div>
-      <div class="next-journey__map"><div class="live-trip-map" data-live-map data-ride-id="${ride.id}"></div><div class="map-caption"><span>${icon("navigation")} Route overview</span><small>Live driver location will appear before pickup.</small></div></div>
+      <div class="next-journey__visual"><div class="next-journey__crew"><div class="next-journey__vehicle-image">${vehicleImage}</div><div class="next-journey__crew-caption"><div class="next-journey__driver-photo">${driverPhoto}</div><div><span>Your chauffeur</span><strong>${escapeHtml(driverName)}</strong><small>${escapeHtml(`${vehicleBrand} ${vehicleModel}`)}</small></div></div></div><div class="next-journey__map"><div class="live-trip-map" data-live-map data-ride-id="${ride.id}"></div><div class="map-caption"><span>${icon("navigation")} Route overview</span></div></div></div>
     </section>`;
 }
 
 export function RideCard(ride, completed = false) {
-  return `<article class="ride-card"><a class="ride-card__main" href="${tripUrl(ride.id)}"><time><strong>${formatDate(ride.pickupDate, { day: "2-digit" })}</strong><span>${formatDate(ride.pickupDate, { month: "short" })}</span><small>${ride.pickupTime}</small></time><div class="ride-card__route"><span>${ride.pickup.name}</span>${icon("arrow-right")}<strong>${ride.destination.name}</strong><small>${ride.vehicle?.brand || "Vehicle"} ${ride.vehicle?.model || "pending"}</small></div><div class="ride-card__meta">${ServiceTypeBadge(ride)}<span class="status-badge status-badge--${ride.status}">${statusLabel(ride.status)}</span><strong>${money(ride)}</strong><small>${ride.driver?.shortName || "Driver pending"}</small></div></a>${completed ? `<div class="ride-card__actions"><button type="button" data-demo-action="Book again">Book again</button><button type="button" data-demo-action="Invoice">Invoice</button><a href="${tripUrl(ride.id)}">Details</a></div>` : ""}</article>`;
+  const route = journeyRoute(ride);
+  const routeMarkup = route.single ? `<strong>${escapeHtml(route.single)}</strong>` : `<span>${escapeHtml(route.pickup)}</span>${icon("arrow-right")}<strong>${escapeHtml(route.destination)}</strong>`;
+  return `<article class="ride-card"><a class="ride-card__main" href="${tripUrl(ride.id)}"><time><strong>${formatDate(ride.pickupDate, { day: "2-digit" })}</strong><span>${formatDate(ride.pickupDate, { month: "short" })}</span><small>${ride.pickupTime}</small></time><div class="ride-card__route">${routeMarkup}<small>${ride.vehicle?.brand || "Vehicle"} ${ride.vehicle?.model || "pending"}</small></div><div class="ride-card__meta">${ServiceTypeBadge(ride)}<span class="status-badge status-badge--${ride.status}">${statusLabel(ride.status)}</span><strong>${money(ride)}</strong><small>${ride.driver?.shortName || "Driver pending"}</small></div></a>${completed ? `<div class="ride-card__actions"><button type="button" data-demo-action="Book again">Book again</button><button type="button" data-demo-action="Invoice">Invoice</button><a href="${tripUrl(ride.id)}">Details</a></div>` : ""}</article>`;
 }
 
 export function DriverCard(driver, expanded = false) {
