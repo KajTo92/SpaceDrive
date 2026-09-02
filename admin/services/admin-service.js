@@ -3,7 +3,7 @@ import { mapRide, rideSelect } from "../../shared/services/ride-mapper.js";
 export const MIN_TURNAROUND_MINUTES=30;
 export const OPERATIONS_DATE=new Date().toISOString().slice(0,10);
 const fail=e=>{if(e)throw e;};
-const driverMap=p=>({id:p.id,name:`${p.first_name||""} ${p.last_name||""}`.trim(),shortName:p.first_name||"",email:p.email||"",phone:p.phone||"",photo:p.avatar_url||"",languages:p.driver_profiles?.[0]?.languages||[],availability:p.driver_profiles?.[0]?.availability_status||"offline",completedTrips:0,role:"Chauffeur"});
+const driverMap=p=>({id:p.id,name:`${p.first_name||""} ${p.last_name||""}`.trim(),shortName:p.first_name||"",email:p.email||"",phone:p.phone||"",photo:p.avatar_url||"",languages:p.driver_profiles?.[0]?.languages||[],availability:p.driver_profiles?.[0]?.availability_status||"offline",rating:5,completedTrips:100,role:"Chauffeur"});
 const vehicleMap=v=>({id:v.id,brand:v.brand,model:v.model,year:v.year,category:v.category,plate:v.plate||"Not provided",seats:v.seat_capacity||"—",luggageCapacity:v.luggage_capacity||"Not provided",image:v.image_url||"",status:v.operational_status,active:v.active,serviceDate:null,notes:""});
 export async function getRideRequests(){const{data,error}=await supabase.from("rides").select(rideSelect).in("status",["request_received","under_review","offer_sent","declined"]).order("created_at",{ascending:false});fail(error);return(data||[]).map(mapRide);}
 export async function getRequestById(id){return getJourneyById(id);}
