@@ -11,7 +11,7 @@ import {
   subscribeToPassengerRides,
   acceptOffer,
   deleteJourney,
-} from "./services/passenger-service.js?v=8";
+} from "./services/passenger-service.js?v=9";
 import "./config.js";
 import { requireRole, signOut } from "../shared/supabase-client.js";
 import {
@@ -23,6 +23,7 @@ import {
   NextJourneyCard,
   PassengerLayout,
   RideCard,
+  ServiceTypeBadge,
   VehicleCard,
   assetUrl,
   formatDate,
@@ -31,8 +32,8 @@ import {
   setPassengerRoot,
   statusLabel,
   tripUrl,
-} from "./components/passenger-components.js?v=8";
-import { LiveTripMap } from "./components/live-trip-map.js?v=5";
+} from "./components/passenger-components.js?v=9";
+import { LiveTripMap } from "./components/live-trip-map.js?v=6";
 import {
   CITY_TOUR_MAX_HOURS,
   CITY_TOUR_MIN_HOURS,
@@ -171,7 +172,7 @@ async function renderTripDetails() {
   }
   const content = `
     <a class="back-link" href="${passengerUrl("trips/")}"><i data-lucide="arrow-left"></i> Back to trips</a>
-    <section class="trip-hero"><div><span>${formatDate(ride.pickupDate, { weekday: "long", day: "numeric", month: "long" })} at ${ride.pickupTime}</span><h2>${ride.pickup.name}<i data-lucide="arrow-right"></i>${ride.destination.name}</h2></div><div><span class="status-badge status-badge--${ride.status}">${statusLabel(ride.status)}</span><strong>${money(ride)}</strong></div></section>
+    <section class="trip-hero"><div><span>${formatDate(ride.pickupDate, { weekday: "long", day: "numeric", month: "long" })} at ${ride.pickupTime}</span>${ServiceTypeBadge(ride)}<h2>${ride.pickup.name}<i data-lucide="arrow-right"></i>${ride.destination.name}</h2></div><div><span class="status-badge status-badge--${ride.status}">${statusLabel(ride.status)}</span><strong>${money(ride)}</strong></div></section>
     <section class="detail-status"><header class="section-heading"><h2>Journey status</h2><span>${statusLabel(ride.status)}</span></header>${JourneyStatus(ride.status)}</section>
     <section class="detail-map"><div class="live-trip-map" data-live-map data-ride-id="${ride.id}"></div></section>
     <section class="detail-pair">${DriverCard(ride.driver)}${VehicleCard(ride.vehicle)}</section>
@@ -401,6 +402,8 @@ function bindRequestBooking() {
   let routeReady = false;
   let basePrice = null;
   let routeDistanceKm = null;
+  let routeFrom = null;
+  let routeTo = null;
   const closeSuccessModal = () => {
     successModal.hidden = true;
     requestButton.focus();
@@ -439,6 +442,8 @@ function bindRequestBooking() {
     routeReady = false;
     basePrice = null;
     routeDistanceKm = null;
+    routeFrom = null;
+    routeTo = null;
     updateAvailabilityState();
     distanceOutput.textContent = "--";
     durationOutput.textContent = "--";
@@ -474,7 +479,16 @@ function bindRequestBooking() {
 
   cards.forEach((card) => card.addEventListener("click", () => selectService(card)));
   document.querySelector("[data-transfer-swap]").addEventListener("click", () => {
+    const locationFields = ["locationName", "locationAddress", "latitude", "longitude"];
+    const pickupLocation = Object.fromEntries(locationFields.map((field) => [field, pickup.dataset[field]]));
+    const destinationLocation = Object.fromEntries(locationFields.map((field) => [field, destination.dataset[field]]));
     [pickup.value, destination.value] = [destination.value, pickup.value];
+    locationFields.forEach((field) => {
+      if (destinationLocation[field] === undefined) delete pickup.dataset[field];
+      else pickup.dataset[field] = destinationLocation[field];
+      if (pickupLocation[field] === undefined) delete destination.dataset[field];
+      else destination.dataset[field] = pickupLocation[field];
+    });
     resetEstimate();
     note.textContent = "Route changed. Calculate again to update the estimate.";
   });
@@ -555,6 +569,8 @@ function bindRequestBooking() {
       const minutes = totalMinutes % 60;
       const duration = hours ? `${hours} hr ${minutes} min` : `${minutes} min`;
       routeDistanceKm = route.distanceKm;
+      routeFrom = route.from;
+      routeTo = route.to;
       distanceOutput.textContent = distance;
       durationOutput.textContent = duration;
       updateEstimatedPrice();
@@ -583,7 +599,7 @@ function bindRequestBooking() {
     requestButton.disabled = true;
     requestButton.setAttribute("aria-busy", "true");
     try {
-      await createRideRequest({ requestType: "transfer", pickup: { name: pickup.value, address: pickup.value }, destination: { name: destination.value, address: destination.value }, pickupDate: dateInput.value, pickupTime: timeInput.value, passengers: 1, luggage: `${luggage} ${luggage === 1 ? "piece" : "pieces"}`, requestedVehicle: vehicle, calculatedPrice: estimate, specialRequests: bothWays.checked ? [`Return ${returnDateInput.value} at ${returnTimeInput.value}`] : [] });
+      await createRideRequest({ requestType: "transfer", pickup: locationFromInput(pickup, routeFrom), destination: locationFromInput(destination, routeTo), pickupDate: dateInput.value, pickupTime: timeInput.value, passengers: 1, luggage: `${luggage} ${luggage === 1 ? "piece" : "pieces"}`, requestedVehicle: vehicle, calculatedPrice: estimate, specialRequests: bothWays.checked ? [`Return ${returnDateInput.value} at ${returnTimeInput.value}`] : [] });
       openSuccessModal();
     } catch (error) {
       toast(error.message || "We could not send your request. Please try again.");
@@ -952,6 +968,10 @@ function bindPassengerAddressAutocomplete(form) {
       const suggestion = suggestions[index];
       if (!suggestion) return;
       input.value = suggestion.value;
+      input.dataset.locationName = suggestion.title;
+      input.dataset.locationAddress = suggestion.value;
+      input.dataset.latitude = String(suggestion.latitude);
+      input.dataset.longitude = String(suggestion.longitude);
       closeList();
       input.dispatchEvent(new Event("change", { bubbles: true }));
     };
@@ -968,6 +988,10 @@ function bindPassengerAddressAutocomplete(form) {
     };
 
     input.addEventListener("input", () => {
+      delete input.dataset.locationName;
+      delete input.dataset.locationAddress;
+      delete input.dataset.latitude;
+      delete input.dataset.longitude;
       window.clearTimeout(timer);
       const query = input.value.trim();
       if (query.length < 3) {
@@ -1023,10 +1047,25 @@ async function getPassengerAddressSuggestions(query) {
   const data = await response.json();
   return (data.features || []).filter((feature) => feature.properties?.countrycode === "CH").map((feature) => {
     const properties = feature.properties || {};
-    const title = properties.name || [properties.street, properties.housenumber].filter(Boolean).join(" ") || properties.city || "Switzerland";
-    const detail = [properties.street, properties.housenumber, properties.postcode, properties.city, properties.state].filter(Boolean).join(", ");
-    return { title, detail: detail || "Switzerland", value: [title, detail].filter(Boolean).join(", ") };
+    const street = [properties.street, properties.housenumber].filter(Boolean).join(" ");
+    const title = properties.name || street || properties.city || "Switzerland";
+    const locality = [properties.postcode, properties.city].filter(Boolean).join(" ");
+    const detail = [street && street.toLocaleLowerCase() !== title.toLocaleLowerCase() ? street : "", locality, properties.state].filter((part, index, parts) => part && parts.indexOf(part) === index).join(", ");
+    const [longitude, latitude] = feature.geometry?.coordinates || [];
+    return { title, detail: detail || "Switzerland", value: [title, detail].filter(Boolean).join(", "), latitude: Number(latitude), longitude: Number(longitude) };
   });
+}
+
+function locationFromInput(input, routePoint) {
+  const value = input.value.trim();
+  const latitude = routePoint?.lat ?? Number(input.dataset.latitude);
+  const longitude = routePoint?.lon ?? Number(input.dataset.longitude);
+  return {
+    name: input.dataset.locationName || value.split(",")[0].trim() || value,
+    address: input.dataset.locationAddress || value,
+    latitude: Number.isFinite(latitude) ? latitude : undefined,
+    longitude: Number.isFinite(longitude) ? longitude : undefined,
+  };
 }
 
 async function calculatePassengerRoute(pickup, destination) {

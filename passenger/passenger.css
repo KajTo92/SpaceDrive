@@ -80,6 +80,10 @@ img { max-width: 100%; }
 .journey-route-place small { color: var(--portal-muted); font-size: clamp(.68rem,.85vw,.82rem); font-weight: 430; letter-spacing: 0; line-height: 1.4; }
 .next-journey__heading h2 .journey-route-arrow { align-self: center; margin: 0 16px; color: var(--portal-dim); }
 .next-journey__heading h2 svg { width: 25px; }
+.service-type-badge { display: inline-flex; align-items: center; width: max-content; min-height: 25px; gap: 6px; padding: 0 9px; border: 1px solid rgba(240,208,127,.25); border-radius: 999px; background: rgba(212,166,75,.08); color: var(--portal-gold-light); font-size: .59rem; font-weight: 780; letter-spacing: .04em; text-transform: uppercase; white-space: nowrap; }
+.service-type-badge svg { width: 13px; height: 13px; }
+.next-journey__heading .service-type-badge { margin-bottom: 13px; }
+.trip-hero .service-type-badge { margin-top: 14px; }
 .status-badge { display: inline-flex; align-items: center; min-height: 30px; width: max-content; padding: 0 11px; border: 1px solid rgba(221,225,226,.16); border-radius: 999px; background: rgba(255,255,255,.04); color: #c4c8ca; font-size: .69rem; font-weight: 750; white-space: nowrap; }
 .status-badge--driver_assigned, .status-badge--confirmed, .status-badge--offer_sent { border-color: rgba(240,208,127,.25); background: rgba(212,166,75,.1); color: var(--portal-gold-light); }
 .status-badge--completed { color: #b9c9bc; }
@@ -161,6 +165,7 @@ img { max-width: 100%; }
 .ride-card__route svg { width: 15px; color: var(--portal-dim); }
 .ride-card__route small { grid-column: 1 / -1; margin-top: 7px; color: var(--portal-dim); font-size: .67rem; }
 .ride-card__meta { display: grid; justify-items: end; min-width: 116px; }
+.ride-card__meta .service-type-badge { margin-bottom: 7px; }
 .ride-card__meta > strong { margin-top: 12px; font-size: .86rem; }
 .ride-card__meta > small { margin-top: 3px; color: var(--portal-dim); font-size: .64rem; }
 .ride-card__actions { display: flex; justify-content: flex-end; gap: 5px; padding: 0 16px 13px; }

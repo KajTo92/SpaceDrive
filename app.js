@@ -374,8 +374,11 @@ function getPlaceTitle(properties) {
 }
 
 function getPlaceDetail(properties) {
-  return [properties.street, properties.housenumber, properties.postcode, properties.city]
-    .filter(Boolean)
+  const title = getPlaceTitle(properties).toLocaleLowerCase();
+  const street = [properties.street, properties.housenumber].filter(Boolean).join(" ");
+  const locality = [properties.postcode, properties.city].filter(Boolean).join(" ");
+  return [street.toLocaleLowerCase() === title ? "" : street, locality]
+    .filter((part, index, parts) => part && parts.indexOf(part) === index)
     .join(", ");
 }
 
@@ -731,7 +734,7 @@ async function handleRouteSubmit(event) {
     const price = formatPrice(calculatePrice(route.distanceKm, details.vehicle, details.bothWays));
     updateMap(`${route.origin.lat},${route.origin.lon}`, `${route.target.lat},${route.target.lon}`);
 
-    setRouteSummary({ pickup, destination, distance, duration, price, distanceKm: route.distanceKm });
+    setRouteSummary({ pickup, destination, distance, duration, price, distanceKm: route.distanceKm, origin: route.origin, target: route.target });
     setNote(t("calculated"));
   } catch (error) {
     updateMap(pickup, destination);
@@ -757,7 +760,7 @@ async function openEmail() {
   setNote("Sending your request…");
   const start = new Date(`${payload.pickupDate}T${payload.pickupTime}:00`);
   const numericPrice = Number(String(payload.price || "").replace(/[^0-9.]/g, "")) || null;
-  const { error } = await supabase.rpc("submit_ride_request", { payload: { service_type: "transfer", scheduled_start_at: start.toISOString(), scheduled_end_at: new Date(start.getTime() + 90 * 60000).toISOString(), duration_minutes: 90, customer_name: payload.name, customer_email: payload.email, customer_phone: payload.telephone, pickup_name: payload.pickup, pickup_address: payload.pickup, destination_name: payload.destination, destination_address: payload.destination, passenger_count: 1, luggage: `${payload.luggage} pieces`, requested_vehicle_class: payload.vehicle, estimated_price: numericPrice, currency: "CHF", special_requests: payload.bothWays ? `Return ${payload.returnDate} at ${payload.returnTime}` : "" } });
+  const { error } = await supabase.rpc("submit_ride_request", { payload: { service_type: "transfer", scheduled_start_at: start.toISOString(), scheduled_end_at: new Date(start.getTime() + 90 * 60000).toISOString(), duration_minutes: 90, customer_name: payload.name, customer_email: payload.email, customer_phone: payload.telephone, pickup_name: payload.pickup.split(",")[0], pickup_address: payload.pickup, pickup_latitude: payload.origin?.lat, pickup_longitude: payload.origin?.lon, destination_name: payload.destination.split(",")[0], destination_address: payload.destination, destination_latitude: payload.target?.lat, destination_longitude: payload.target?.lon, passenger_count: 1, luggage: `${payload.luggage} pieces`, requested_vehicle_class: payload.vehicle, estimated_price: numericPrice, currency: "CHF", special_requests: payload.bothWays ? `Return ${payload.returnDate} at ${payload.returnTime}` : "" } });
   elements.email.disabled = false;
   setNote(error ? `We could not submit the request: ${error.message}` : "Request received. Space Drive will send your final offer shortly.", !!error);
 }

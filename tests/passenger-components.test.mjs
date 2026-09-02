@@ -20,6 +20,22 @@ test("next journey renders before driver and vehicle assignment", () => {
 
   assert.match(html, /Assignment pending/);
   assert.match(html, /Driver pending/);
+  assert.match(html, /Simple Transfer/);
+});
+
+test("passenger journeys identify city tour and hourly concierge services", () => {
+  const base = {
+    id: "service-badge",
+    pickup: { name: "Zürich" },
+    destination: { name: "Zürich" },
+    pickupDate: "2026-09-26",
+    pickupTime: "20:00",
+    passengers: 1,
+    status: "confirmed",
+    currency: "CHF",
+  };
+  assert.match(NextJourneyCard({ ...base, serviceType: "city_tour" }), /City Tour/);
+  assert.match(NextJourneyCard({ ...base, serviceType: "hourly_concierge" }), /Hourly Concierge/);
 });
 
 test("next journey separates the place name from the rest of the address", () => {
