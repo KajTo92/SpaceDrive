@@ -97,7 +97,7 @@ export function NextJourneyCard(ride) {
   const vehicleBrand = ride.vehicle?.brand || "Vehicle";
   const vehicleModel = ride.vehicle?.model || "Assignment pending";
   const driverName = ride.driver?.shortName || ride.driver?.name || "Driver pending";
-  const driverRating = ride.driver ? "5.0" : "—";
+  const driverRating = ride.driver ? "5.0" : "Pending";
   const driverTrips = ride.driver ? "100+ trips" : "Assignment pending";
   const route = journeyRoute(ride);
   const routeMarkup = route.single ? `<span class="journey-route-place journey-route-place--single"><strong>${escapeHtml(route.single)}</strong><small>Private city itinerary</small></span>` : `${journeyPlace(ride.pickup)}<span class="journey-route-arrow">${icon("arrow-right")}</span>${journeyPlace(ride.destination)}`;
@@ -112,7 +112,7 @@ export function NextJourneyCard(ride) {
         <div class="next-journey__footer"><div><span>${vehicleBrand}</span><strong>${vehicleModel}</strong><small>${ride.driver ? `with ${driverName}` : driverName}</small></div><div class="journey-price"><span>Journey total</span><strong>${money(ride)}</strong></div></div>
         <div class="journey-actions"><a class="passenger-button passenger-button--primary" href="${tripUrl(ride.id)}">View journey</a><button class="passenger-button" type="button" data-demo-action="Contact driver">Contact driver</button><button class="passenger-button passenger-button--quiet" type="button" data-demo-action="Modify trip">Modify trip</button></div>
       </div>
-      <div class="next-journey__visual"><div class="next-journey__crew"><section class="next-journey__chauffeur" aria-label="Assigned chauffeur"><div class="next-journey__driver-photo">${driverPhoto}</div><div class="next-journey__crew-caption"><span>Your chauffeur</span><strong>${escapeHtml(driverName)}</strong><div class="next-journey__driver-stats"><span aria-label="${driverRating} out of 5 stars"><b>${icon("star")}${icon("star")}${icon("star")}${icon("star")}${icon("star")}</b>${driverRating}</span><span>${driverTrips}</span></div></div></section><section class="next-journey__vehicle" aria-label="Assigned vehicle"><div class="next-journey__vehicle-image">${vehicleImage}</div><div class="next-journey__vehicle-caption"><span>Your vehicle</span><strong>${escapeHtml(`${vehicleBrand} ${vehicleModel}`)}</strong></div></section></div><div class="next-journey__map"><div class="live-trip-map" data-live-map data-ride-id="${ride.id}"></div><div class="map-caption"><span>${icon("navigation")} Route overview</span></div></div></div>
+      <div class="next-journey__visual"><div class="next-journey__crew" aria-label="Assigned chauffeur and vehicle"><div class="next-journey__driver-photo">${driverPhoto}</div><div class="next-journey__vehicle-image">${vehicleImage}</div><div class="next-journey__crew-details"><div class="next-journey__crew-caption"><span>Your chauffeur</span><strong>${escapeHtml(driverName)}</strong><div class="next-journey__driver-stats"><span aria-label="${driverRating} out of 5 stars"><b>${icon("star")}${icon("star")}${icon("star")}${icon("star")}${icon("star")}</b>${driverRating}</span><span>${driverTrips}</span></div></div><div class="next-journey__vehicle-caption"><span>Your vehicle</span><strong>${escapeHtml(`${vehicleBrand} ${vehicleModel}`)}</strong></div></div></div><div class="next-journey__map"><div class="live-trip-map" data-live-map data-ride-id="${ride.id}"></div><div class="map-caption"><span>${icon("navigation")} Route overview</span></div></div></div>
     </section>`;
 }
 
