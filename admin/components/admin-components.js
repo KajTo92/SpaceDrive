@@ -27,7 +27,7 @@ export function AdminLayout({ active, title, subtitle, notifications = [], conte
     ["requests", "requests/", "inbox", "Requests"],
     ["journeys", "journeys/", "route", "Journeys"],
     ["dispatch", "dispatch/", "radio-tower", "Dispatch"],
-    ["drivers", "drivers/", "steering-wheel", "Drivers"],
+    ["drivers", "drivers/", "users-round", "Drivers"],
     ["vehicles", "vehicles/", "car-front", "Vehicles"],
     ["passengers", "passengers/", "users-round", "Passengers"],
   ];
@@ -75,7 +75,7 @@ export function LoadingSkeleton(page = "dashboard") {
 }
 
 export function DriverAssignmentSelector({ ride, drivers, checks }) {
-  return `<div class="assignment-selector" data-assignment-selector="driver"><header><div>${icon("steering-wheel")}<span><strong>Driver assignment</strong><small>Availability includes overlaps and a 30-minute turnaround.</small></span></div>${ride.driver ? `<span class="assignment-current">${escapeHtml(ride.driver.name)}</span>` : StatusBadge("unassigned", "Not assigned")}</header><div class="assignment-options">${drivers.map((driver) => {
+  return `<div class="assignment-selector" data-assignment-selector="driver"><header><div>${icon("users-round")}<span><strong>Driver assignment</strong><small>Availability includes overlaps and a 30-minute turnaround.</small></span></div>${ride.driver ? `<span class="assignment-current">${escapeHtml(ride.driver.name)}</span>` : StatusBadge("unassigned", "Not assigned")}</header><div class="assignment-options">${drivers.map((driver) => {
     const check = checks[driver.id];
     const selected = ride.driverId === driver.id;
     return `<button class="assignment-option assignment-option--${check.level}${selected ? " is-selected" : ""}" type="button" data-assign-driver="${driver.id}"${check.level === "conflict" ? " disabled" : ""}><span class="assignment-avatar">${driver.photo ? `<img src="${assetUrl(driver.photo)}" alt="">` : initials(driver.name)}</span><span><strong>${escapeHtml(driver.name)}</strong><small>${escapeHtml(driver.availability || "available")}</small></span><span class="assignment-signal">${icon(check.level === "available" ? "circle-check" : check.level === "warning" ? "triangle-alert" : "circle-x")}<strong>${check.level === "available" ? "Available" : check.level === "warning" ? "Warning" : "Conflict"}</strong><small>${escapeHtml(check.message)}</small></span></button>`;
