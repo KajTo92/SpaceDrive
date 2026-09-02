@@ -101,8 +101,8 @@ export function NextJourneyCard(ride) {
   const driverTrips = ride.driver ? "100+ trips" : "Assignment pending";
   const route = journeyRoute(ride);
   const routeMarkup = route.single ? `<span class="journey-route-place journey-route-place--single"><strong>${escapeHtml(route.single)}</strong><small>Private city itinerary</small></span>` : `${journeyPlace(ride.pickup)}<span class="journey-route-arrow">${icon("arrow-right")}</span>${journeyPlace(ride.destination)}`;
-  const driverPhoto = ride.driver?.photo ? `<img src="${assetUrl(ride.driver.photo)}" alt="Portrait of ${escapeHtml(driverName)}">` : `<span>${passengerInitials({ firstName: driverName })}</span>`;
-  const vehicleImage = ride.vehicle?.image ? `<img src="${assetUrl(ride.vehicle.image)}" alt="${escapeHtml(`${vehicleBrand} ${vehicleModel}`)}">` : `<span class="next-journey__vehicle-placeholder">${icon("car-front")}</span>`;
+  const driverPhoto = ride.driver?.photo ? `<img src="${assetUrl(ride.driver.photo)}" alt="Portrait of ${escapeHtml(driverName)}">` : ride.driver ? `<span>${passengerInitials({ firstName: driverName })}</span>` : "";
+  const vehicleImage = ride.vehicle?.image ? `<img src="${assetUrl(ride.vehicle.image)}" alt="${escapeHtml(`${vehicleBrand} ${vehicleModel}`)}">` : ride.vehicle ? `<span class="next-journey__vehicle-placeholder">${icon("car-front")}</span>` : "";
   const confirmedStatuses = new Set(["confirmed", "driver_assigned", "driver_on_the_way", "driver_arrived", "passenger_onboard"]);
   const fullyConfirmed = confirmedStatuses.has(ride.status) && Boolean(ride.driver && ride.vehicle);
   const confirmation = fullyConfirmed ? `<span class="journey-confirmation journey-confirmation--confirmed">${icon("circle-check")} Confirmed</span>` : `<span class="journey-confirmation journey-confirmation--pending">${icon("clock-3")} Not yet confirmed</span>`;

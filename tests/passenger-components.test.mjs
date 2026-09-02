@@ -23,6 +23,9 @@ test("next journey renders before driver and vehicle assignment", () => {
   assert.match(html, /Simple Transfer/);
   assert.match(html, /next-journey--pending/);
   assert.match(html, /Not yet confirmed/);
+  assert.match(html, /next-journey__driver-photo"><\/div>/);
+  assert.match(html, /next-journey__vehicle-image"><\/div>/);
+  assert.doesNotMatch(html, /next-journey__vehicle-placeholder/);
 });
 
 test("passenger journeys identify city tour and hourly concierge services", () => {
