@@ -16,7 +16,7 @@ export function mapRide(row) {
     estimatedEndAt: end?.toISOString(), passengers: row.passenger_count, luggage: row.luggage,
     flightNumber: row.flight_number, driverId: row.driver_id, vehicleId: row.vehicle_id,
     requestedVehicleId: row.requested_vehicle_id, requestedVehicle: row.requested_vehicle_class,
-    driver: driverProfile ? { id: driverProfile.id, name: `${driverProfile.first_name || ""} ${driverProfile.last_name || ""}`.trim(), email: driverProfile.email, phone: driverProfile.phone, languages: row.driver_profile?.languages || [] } : null,
+    driver: driverProfile ? { id: driverProfile.id, name: `${driverProfile.first_name || ""} ${driverProfile.last_name || ""}`.trim(), shortName: driverProfile.first_name || "", email: driverProfile.email, phone: driverProfile.phone, photo: driverProfile.avatar_url || "", languages: driverProfile.driver_profiles?.[0]?.languages || [], role: "Chauffeur", rating: null, completedTrips: 0 } : null,
     vehicle: row.vehicle ? { id: row.vehicle.id, brand: row.vehicle.brand, model: row.vehicle.model, year: row.vehicle.year, category: row.vehicle.category, plate: row.vehicle.plate, seats: row.vehicle.seat_capacity, luggageCapacity: row.vehicle.luggage_capacity, image: row.vehicle.image_url, status: row.vehicle.operational_status } : null,
     price: row.final_price ?? row.estimated_price, finalPrice: row.final_price, calculatedPrice: row.estimated_price,
     currency: row.currency, status: row.status, paymentStatus: row.payment_status, source: row.booking_source,
@@ -27,4 +27,4 @@ export function mapRide(row) {
   };
 }
 
-export const rideSelect = `*, passenger:profiles!rides_passenger_id_fkey(id,first_name,last_name,email,phone), driver:profiles!rides_driver_id_fkey(id,first_name,last_name,email,phone), vehicle:vehicles!rides_vehicle_id_fkey(*), city_tour_details(*), hourly_concierge_details(*), ride_stops(*), ride_activity(*)`;
+export const rideSelect = `*, passenger:profiles!rides_passenger_id_fkey(id,first_name,last_name,email,phone), driver:profiles!rides_driver_id_fkey(id,first_name,last_name,email,phone,avatar_url,driver_profiles(languages)), vehicle:vehicles!rides_vehicle_id_fkey(*), city_tour_details(*), hourly_concierge_details(*), ride_stops(*), ride_activity(*)`;

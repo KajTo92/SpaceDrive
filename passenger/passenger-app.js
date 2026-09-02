@@ -10,6 +10,7 @@ import {
   saveJourneyPreferences,
   subscribeToPassengerRides,
   acceptOffer,
+  deleteJourney,
 } from "./services/passenger-service.js?v=8";
 import "./config.js";
 import { requireRole, signOut } from "../shared/supabase-client.js";
@@ -81,8 +82,14 @@ function bindSharedInteractions() {
   };
   trigger?.addEventListener("click", () => setNotificationsOpen(true));
   document.querySelectorAll("[data-notification-close]").forEach((item) => item.addEventListener("click", () => setNotificationsOpen(false)));
+  const accountTrigger = document.querySelector("[data-account-trigger]");
+  const accountMenu = document.querySelector("[data-account-menu]");
+  const setAccountMenu = (open) => { if (!accountMenu) return; accountMenu.hidden = !open; accountTrigger?.setAttribute("aria-expanded", String(open)); };
+  accountTrigger?.addEventListener("click", (event) => { event.stopPropagation(); setAccountMenu(accountMenu.hidden); });
+  document.querySelector("[data-account-signout]")?.addEventListener("click", signOut);
+  document.addEventListener("click", (event) => { if (!event.target.closest(".account-menu-wrap")) setAccountMenu(false); });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") setNotificationsOpen(false);
+    if (event.key === "Escape") { setNotificationsOpen(false); setAccountMenu(false); }
   });
   document.querySelectorAll("[data-demo-action]").forEach((button) => button.addEventListener("click", () => toast(`${button.dataset.demoAction} is ready for backend connection.`)));
   refreshIcons();
@@ -147,8 +154,8 @@ function detailsList(ride) {
   return rows.map(([label, value]) => `<div><span>${label}</span><strong>${value}</strong></div>`).join("");
 }
 
-function cancellationModal(ride) {
-  return `<div class="modal-backdrop" data-modal-backdrop hidden><div class="confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="cancelTitle"><button class="icon-button modal-close" type="button" aria-label="Close dialog" data-modal-close><i data-lucide="x"></i></button><span>Journey ${ride.id.toUpperCase()}</span><h2 id="cancelTitle">Cancel this journey?</h2><p>This demo will not change your booking. A connected version will show the cancellation policy before confirmation.</p><div><button class="passenger-button" type="button" data-modal-close>Keep journey</button><button class="passenger-button passenger-button--danger" type="button" data-confirm-cancel>Cancel journey</button></div></div></div>`;
+function deletionModal(ride) {
+  return `<div class="modal-backdrop" data-modal-backdrop hidden><div class="confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="deleteTitle"><button class="icon-button modal-close" type="button" aria-label="Close dialog" data-modal-close><i data-lucide="x"></i></button><span>Journey ${ride.id.toUpperCase()}</span><h2 id="deleteTitle">Delete this journey?</h2><p>This permanently removes the journey and its related updates. This action cannot be undone.</p><div><button class="passenger-button" type="button" data-modal-close>Keep journey</button><button class="passenger-button passenger-button--danger" type="button" data-confirm-delete>Delete journey</button></div></div></div>`;
 }
 
 async function renderTripDetails() {
@@ -165,15 +172,15 @@ async function renderTripDetails() {
     <section class="detail-map"><div class="live-trip-map" data-live-map data-ride-id="${ride.id}"></div></section>
     <section class="detail-pair">${DriverCard(ride.driver)}${VehicleCard(ride.vehicle)}</section>
     <section class="trip-information"><div><span>Journey details</span><h2>Everything arranged for you.</h2></div><div class="trip-information__list">${detailsList(ride)}</div></section>
-    <section class="trip-action-bar">${ride.status === "offer_sent" ? `<button class="passenger-button passenger-button--primary" type="button" data-accept-offer>Accept offer</button>` : ""}<button class="passenger-button" type="button" data-demo-action="Contact driver">Contact driver</button><button class="passenger-button" type="button" data-demo-action="Modify journey">Modify journey</button><button class="passenger-button passenger-button--danger-quiet" type="button" data-cancel-journey>Cancel journey</button></section>
-    ${cancellationModal(ride)}`;
+    <section class="trip-action-bar">${ride.status === "offer_sent" ? `<button class="passenger-button passenger-button--primary" type="button" data-accept-offer>Accept offer</button>` : ""}<button class="passenger-button" type="button" data-demo-action="Contact driver">Contact driver</button><button class="passenger-button" type="button" data-demo-action="Modify journey">Modify journey</button><button class="passenger-button passenger-button--danger-quiet" type="button" data-delete-journey>Delete journey</button></section>
+    ${deletionModal(ride)}`;
   await withLayout({ active: "trips", title: "Trip details", subtitle: ride.id.toUpperCase(), content });
   await mountMaps(ride);
   document.querySelector("[data-accept-offer]")?.addEventListener("click", async () => { try { await acceptOffer(ride.id); toast("Offer accepted. Your journey is confirmed."); await renderTripDetails(); } catch (error) { toast(error.message); } });
   const modal = document.querySelector("[data-modal-backdrop]");
   const openModal = () => { modal.hidden = false; modal.querySelector("[data-modal-close]").focus(); };
-  const closeModal = () => { modal.hidden = true; document.querySelector("[data-cancel-journey]").focus(); };
-  document.querySelector("[data-cancel-journey]")?.addEventListener("click", openModal);
+  const closeModal = () => { modal.hidden = true; document.querySelector("[data-delete-journey]")?.focus(); };
+  document.querySelector("[data-delete-journey]")?.addEventListener("click", openModal);
   modal?.querySelectorAll("[data-modal-close]").forEach((button) => button.addEventListener("click", closeModal));
   modal?.addEventListener("click", (event) => { if (event.target === modal) closeModal(); });
   modal?.addEventListener("keydown", (event) => {
@@ -189,7 +196,7 @@ async function renderTripDetails() {
       if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     }
   });
-  modal?.querySelector("[data-confirm-cancel]")?.addEventListener("click", () => { closeModal(); toast("Cancellation is a demo action. Your journey remains confirmed."); });
+  modal?.querySelector("[data-confirm-delete]")?.addEventListener("click", async () => { try { await deleteJourney(ride.id); location.href = passengerUrl("trips/"); } catch (error) { closeModal(); toast(error.message); } });
 }
 
 function populateQuarterHourOptions(select) {
@@ -1041,12 +1048,6 @@ async function renderProfile() {
     <section class="preferences-section"><div class="section-heading section-heading--stack"><h2>Journey preferences</h2><p>Saved securely to your Space Drive passenger profile.</p></div>${preferencesMarkup(preferences)}</section>
     <section class="profile-grid profile-grid--settings"><article class="profile-section"><header><h2>Notifications</h2></header><label class="setting-row"><span><strong>Journey updates</strong><small>Driver and booking status</small></span><span class="switch"><input type="checkbox" checked><span></span></span></label><label class="setting-row"><span><strong>New offers</strong><small>Ride request proposals</small></span><span class="switch"><input type="checkbox" checked><span></span></span></label></article><article class="profile-section"><header><h2>Security</h2></header><div class="security-summary"><i data-lucide="shield-check"></i><div><strong>Account protection</strong><p>Authentication and magic link settings will be connected with the backend.</p></div></div><button class="passenger-button" type="button" data-demo-action="Security settings">Security settings</button></article></section>`;
   await withLayout({ active: "profile", title: "Profile", subtitle: "Personal settings", content });
-  const signOutButton = document.createElement("button");
-  signOutButton.className = "passenger-button passenger-button--danger-quiet";
-  signOutButton.type = "button";
-  signOutButton.textContent = "Log out";
-  signOutButton.addEventListener("click", signOut);
-  document.querySelector(".profile-grid--settings")?.after(signOutButton);
   const form = document.querySelector("[data-preferences-form]");
   const range = form.querySelector("[name=temperature]");
   range.addEventListener("input", () => { form.querySelector("[data-temperature-output]").textContent = `${range.value}°C`; });

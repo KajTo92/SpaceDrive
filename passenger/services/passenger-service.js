@@ -13,4 +13,5 @@ export async function createRideRequest(input){const p=await currentProfile();co
 export async function saveJourneyPreferences(x){const p=await currentProfile();if(!p)throw new Error("Authentication required");const{error}=await supabase.from("passenger_preferences").upsert({passenger_id:p.id,ride_atmosphere:x.atmosphere,temperature:x.temperature,music:x.music,water:x.water,name_sign:!!x.airportNameSign,notes:x.notes});fail(error);return x;}
 export async function getSavedJourneyPreferences(fallback){try{return(await getPassenger()).preferences||fallback;}catch{return fallback;}}
 export async function acceptOffer(rideId){const{error}=await supabase.rpc("passenger_accept_offer",{ride_id:rideId});fail(error);}
+export async function deleteJourney(rideId){const{error}=await supabase.rpc("delete_journey",{p_ride:rideId});fail(error);}
 export function subscribeToPassengerRides(onChange){const c=supabase.channel("passenger-rides").on("postgres_changes",{event:"UPDATE",schema:"public",table:"rides"},onChange).subscribe();return()=>supabase.removeChannel(c);}

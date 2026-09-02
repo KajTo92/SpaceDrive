@@ -1,0 +1,30 @@
+.journey-detail-hero h2 {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: clamp(1.35rem, 2vw, 2.1rem);
+  letter-spacing: -.04em;
+}
+
+.driver-admin-photo {
+  display: grid;
+  flex: 0 0 48px;
+  place-items: center;
+  font-size: .6rem;
+  font-weight: 800;
+}
+
+.driver-admin-card > footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.driver-photo-upload {
+  cursor: pointer;
+}
+
+@media (max-width: 680px) {
+  .journey-detail-hero h2 {
+    font-size: 1.45rem;
+  }
+}

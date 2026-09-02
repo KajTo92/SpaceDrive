@@ -34,7 +34,7 @@ export function DriverLayout({ active, title, subtitle, driver, availability, no
           <div class="driver-header__actions">
             <div class="header-availability">${DriverAvailability(availability)}</div>
             <button class="driver-icon-button notification-trigger" type="button" aria-label="Open notifications" aria-expanded="false" data-notification-trigger>${icon("bell")}${unread ? `<span>${unread}</span>` : ""}</button>
-            <a class="driver-profile-chip" href="${driverUrl("profile/")}" aria-label="Open profile"><span>${initials}</span><strong>${driver.shortName || driver.name}</strong></a>
+            <div class="driver-account-wrap"><button class="driver-profile-chip" type="button" aria-label="Open account menu" aria-expanded="false" data-account-trigger><span>${initials}</span><strong>${driver.shortName || driver.name}</strong>${icon("chevron-down")}</button><div class="driver-account-menu" data-account-menu hidden><a href="${driverUrl("profile/")}">${icon("user-round")} Profile</a><button type="button" data-account-signout>${icon("log-out")} Log out</button></div></div>
           </div>
         </header>
         <main class="driver-content" id="driverContent">${content}</main>

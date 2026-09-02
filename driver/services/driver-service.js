@@ -10,6 +10,7 @@ export async function getDriverCurrentRide(){return(await getDriverRides()).find
 export async function getDriverRideById(id){const{data,error}=await supabase.from("rides").select(rideSelect).eq("id",id).maybeSingle();fail(error);return mapRide(data);}
 export async function getDriverSchedule(){return getDriverRides();}
 export async function updateRideStatus(id,status){const{error}=await supabase.rpc("driver_update_ride_status",{ride_id:id,target_status:status});fail(error);return getDriverRideById(id);}
+export async function deleteJourney(rideId){const{error}=await supabase.rpc("delete_journey",{p_ride:rideId});fail(error);}
 export function getDriverAvailability(){return availabilityCache;}
 export async function updateDriverAvailability(status){if(!["available","busy","offline"].includes(status))throw new Error("Invalid driver availability");const p=await currentProfile();const{error}=await supabase.from("driver_profiles").update({availability_status:status}).eq("user_id",p.id);fail(error);availabilityCache=status;return status;}
 export async function reportRideIssue({rideId,type,note="",waitingMinutes}){const p=await currentProfile();const{data,error}=await supabase.from("ride_notes").insert({ride_id:rideId,author_id:p.id,visibility:"internal_admin",note:`${type}: ${note}${waitingMinutes?` (${waitingMinutes} min)`:""}`}).select().single();fail(error);return data;}
