@@ -170,6 +170,8 @@ img { max-width: 100%; }
 .section-heading > a, .section-heading > span { color: var(--portal-gold-light); font-size: .75rem; text-decoration: none; }
 .upcoming-list, .trip-list { display: grid; gap: 10px; }
 .ride-card { overflow: hidden; border: 1px solid var(--portal-line); border-radius: 13px; background: rgba(255,255,255,.022); }
+.ride-card--confirmed { border-color: rgba(91,167,117,.34); background: linear-gradient(105deg,rgba(54,132,83,.18),rgba(54,132,83,.055) 52%,rgba(255,255,255,.018)); box-shadow: inset 3px 0 rgba(92,190,126,.58); }
+.ride-card--pending { border-color: rgba(212,166,75,.3); background: linear-gradient(105deg,rgba(212,166,75,.15),rgba(212,166,75,.045) 52%,rgba(255,255,255,.018)); box-shadow: inset 3px 0 rgba(212,166,75,.55); }
 .ride-card__main { display: grid; grid-template-columns: 76px minmax(0,1fr) auto; gap: 22px; align-items: center; min-height: 128px; padding: 19px 22px; text-decoration: none; transition: background .2s ease; }
 .ride-card__main:hover { background: rgba(255,255,255,.03); }
 .ride-card time { display: grid; justify-items: center; padding-right: 18px; border-right: 1px solid var(--portal-line); }
@@ -184,6 +186,7 @@ img { max-width: 100%; }
 .ride-card__route small { grid-column: 1 / -1; margin-top: 7px; color: var(--portal-dim); font-size: .67rem; }
 .ride-card__meta { display: grid; justify-items: end; min-width: 116px; }
 .ride-card__meta .service-type-badge { margin-bottom: 7px; }
+.journey-confirmation { display: inline-flex; align-items: center; width: max-content; gap: 5px; font-size: .62rem; font-weight: 790; white-space: nowrap; }.journey-confirmation svg { width: 13px; height: 13px; }.journey-confirmation--confirmed { color: #91d8a8; }.journey-confirmation--pending { color: var(--portal-gold-light); }
 .ride-card__meta > strong { margin-top: 12px; font-size: .86rem; }
 .ride-card__meta > small { margin-top: 3px; color: var(--portal-dim); font-size: .64rem; }
 .ride-card__actions { display: flex; justify-content: flex-end; gap: 5px; padding: 0 16px 13px; }

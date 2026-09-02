@@ -258,7 +258,7 @@ function renderCityTourBooking() {
           <small class="city-tour-price-note">Final price may vary depending on itinerary and additional requests.</small>
         </aside>
       </div>
-      <section class="city-tour-success" data-city-tour-success hidden tabindex="-1"><i data-lucide="circle-check-big" aria-hidden="true"></i><p>Private Chauffeur Tour</p><h2>Your private tour request has been received.</h2><span>We'll review your preferences and confirm the details shortly.</span></section>
+      <section class="city-tour-success" data-city-tour-success hidden tabindex="-1"><i data-lucide="circle-check-big" aria-hidden="true"></i><p>Private Chauffeur Tour</p><h2>Your private tour request has been received.</h2><span>We'll review your preferences and confirm the details shortly.</span><a class="passenger-button passenger-button--primary" href="${passengerUrl("trips/")}">View your trips <i data-lucide="arrow-right"></i></a></section>
     </section>`;
 }
 
@@ -314,7 +314,7 @@ function renderHourlyConciergeBooking() {
           <small class="hourly-price-note">Additional distance may be charged separately. Final availability will be confirmed by Space Drive.</small>
         </aside>
       </div>
-      <section class="hourly-success" data-hourly-success hidden tabindex="-1"><i data-lucide="circle-check-big" aria-hidden="true"></i><p>Hourly Concierge</p><h2>Your hourly concierge request has been received.</h2><span>We'll review your booking and confirm the details shortly.</span><a class="passenger-button" href="${passengerUrl("requests/")}">View my requests</a></section>
+      <section class="hourly-success" data-hourly-success hidden tabindex="-1"><i data-lucide="circle-check-big" aria-hidden="true"></i><p>Hourly Concierge</p><h2>Your hourly concierge request has been received.</h2><span>We'll review your booking and confirm the details shortly.</span><a class="passenger-button passenger-button--primary" href="${passengerUrl("trips/")}">View your trips <i data-lucide="arrow-right"></i></a></section>
     </section>`;
 }
 

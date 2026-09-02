@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { EmptyState, NextJourneyCard, PassengerLayout, assetUrl, setPassengerRoot } from "../passenger/components/passenger-components.js";
+import { EmptyState, NextJourneyCard, PassengerLayout, RideCard, assetUrl, setPassengerRoot } from "../passenger/components/passenger-components.js";
 
 test("next journey renders before driver and vehicle assignment", () => {
   const html = NextJourneyCard({
@@ -96,4 +96,14 @@ test("bundled and external image URLs are resolved safely", () => {
   assert.match(assetUrl("spacedrive-monogram-header.png"), /spacedrive-monogram-header\.png$/);
   assert.match(assetUrl("y2025.png"), /y2025\.png$/);
   assert.equal(assetUrl("https://example.com/avatar.png"), "https://example.com/avatar.png");
+});
+
+test("trip cards distinguish fully confirmed and awaiting journeys", () => {
+  const base = { id: "ride-state", pickup: { name: "Zürich" }, destination: { name: "Bern" }, pickupDate: "2026-09-26", pickupTime: "20:00", passengers: 1, status: "confirmed", currency: "CHF" };
+  const confirmed = RideCard({ ...base, driver: { name: "Anna" }, vehicle: { brand: "Tesla", model: "Model Y" } });
+  const awaiting = RideCard({ ...base, driver: null, vehicle: null });
+  assert.match(confirmed, /ride-card--confirmed/);
+  assert.match(confirmed, /Confirmed/);
+  assert.match(awaiting, /ride-card--pending/);
+  assert.match(awaiting, /Awaiting confirmation/);
 });
