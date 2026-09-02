@@ -12,3 +12,13 @@ test("Google Maps does not duplicate identical name and address", () => {
   const url = googleMapsRouteUrl(place, { name: "Zürich Airport", address: "Fromattweg, 8058 Zürich-Flughafen" });
   assert.doesNotMatch(decodeURIComponent(url), /Eichlistrasse 10, 8155 Niederhasli, Eichlistrasse 10/);
 });
+
+test("Google Maps automatically fits the viewport to the complete route", () => {
+  const url = googleMapsRouteUrl(
+    { latitude: 47.4582, longitude: 8.5555 },
+    { latitude: 47.3769, longitude: 8.5417 },
+  );
+  assert.doesNotMatch(url, /[?&]z=/);
+  assert.match(url, /saddr=47\.4582%2C8\.5555/);
+  assert.match(url, /daddr=47\.3769%2C8\.5417/);
+});

@@ -18,7 +18,7 @@ export function routePoint(place) {
 export function googleMapsRouteUrl(pickup, destination) {
   const start = encodeURIComponent(routePoint(pickup));
   const end = encodeURIComponent(routePoint(destination));
-  return `https://www.google.com/maps?output=embed&saddr=${start}&daddr=${end}&z=7`;
+  return `https://www.google.com/maps?output=embed&saddr=${start}&daddr=${end}`;
 }
 
 async function preciseRoutePoint(place) {
