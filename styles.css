@@ -270,7 +270,7 @@ html.is-loading .hero-scroll-cue, html.is-loading .hero-scroll-cue svg { animati
 .login-demo-link:hover { border-color: var(--gold-light); background: rgba(241,207,122,.09); }
 .login-demo-link:active { transform: translateY(1px); }
 .login-demo-link:focus-visible { outline: 2px solid var(--gold-light); outline-offset: 3px; }
-.login-demo-link[data-forgot-password] { min-height: 0; margin-top: 2px; padding: 2px 0; border: 0; border-radius: 0; background: transparent; color: rgba(232,230,224,.66); font-size: .72rem; font-weight: 520; text-decoration: underline; text-decoration-color: rgba(232,230,224,.28); text-underline-offset: 3px; }
+.login-demo-link[data-forgot-password] { display: inline; width: max-content; min-height: 0; justify-self: center; margin-top: 2px; padding: 2px 0; border: 0; border-radius: 0; background: transparent; color: rgba(232,230,224,.66); font-size: .72rem; font-weight: 520; text-decoration: underline; text-decoration-color: rgba(232,230,224,.28); text-underline-offset: 3px; }
 .login-demo-link[data-forgot-password]:hover { border-color: transparent; background: transparent; color: var(--gold-light); text-decoration-color: currentColor; }
 .login-message { min-height: 22px; margin: 18px 0 0; color: var(--gold-light); font-size: .82rem; line-height: 1.5; }
 .login-divider { position: relative; display: grid; place-items: center; min-height: 24px; color: #77736b; font-size: .7rem; }
