@@ -3,11 +3,35 @@ import { mapRide, rideSelect } from "../../shared/services/ride-mapper.js";
 import { isClosedRideStatus } from "../../shared/ride-status.js";
 const fail=e=>{if(e)throw e;};
 let availabilityCache="offline";
+function preferenceLabels(preference) {
+  if (!preference) return [];
+  const atmosphere = String(preference.ride_atmosphere || "normal").replaceAll("_", " ");
+  const music = String(preference.music || "none").replaceAll("_", " ");
+  const water = String(preference.water || "no preference").replaceAll("_", " ");
+  return [
+    `Ride atmosphere: ${atmosphere}`,
+    `Cabin temperature: ${preference.temperature ?? 21}°C`,
+    `Music: ${music}`,
+    `Water: ${water}`,
+    preference.name_sign ? "Airport name sign" : null,
+    preference.notes?.trim() || null,
+  ].filter(Boolean);
+}
+async function attachPassengerPreferences(rides) {
+  const items = Array.isArray(rides) ? rides : [rides];
+  const passengerIds = [...new Set(items.map((ride) => ride?.passengerId).filter(Boolean))];
+  if (!passengerIds.length) return rides;
+  const { data, error } = await supabase.from("passenger_preferences").select("*").in("passenger_id", passengerIds);
+  fail(error);
+  const preferences = new Map((data || []).map((item) => [item.passenger_id, preferenceLabels(item)]));
+  items.forEach((ride) => { if (ride) ride.preferences = preferences.get(ride.passengerId) || []; });
+  return rides;
+}
 export async function getDriverProfile(){const p=await currentProfile();if(!p)throw new Error("Authentication required");const{data,error}=await supabase.from("driver_profiles").select("*").eq("user_id",p.id).single();fail(error);availabilityCache=data.availability_status;return{id:p.id,name:`${p.first_name} ${p.last_name}`.trim(),shortName:p.first_name,photo:p.avatar_url,email:p.email,phone:p.phone,languages:data.languages,availability:data.availability_status,role:"Chauffeur"};}
 export async function getDriverNotifications(){const{data,error}=await supabase.from("notifications").select("*").order("created_at",{ascending:false});fail(error);return(data||[]).map(n=>({id:n.id,title:n.title,body:n.message,createdAt:n.created_at,read:!!n.read_at,rideId:n.ride_id}));}
-export async function getDriverRides(){const{data,error}=await supabase.from("rides").select(rideSelect).order("scheduled_start_at");fail(error);return(data||[]).map(mapRide);}
+export async function getDriverRides(){const{data,error}=await supabase.from("rides").select(rideSelect).order("scheduled_start_at");fail(error);return attachPassengerPreferences((data||[]).map(mapRide));}
 export async function getDriverCurrentRide(){return(await getDriverRides()).find(r=>!isClosedRideStatus(r.status))||null;}
-export async function getDriverRideById(id){const{data,error}=await supabase.from("rides").select(rideSelect).eq("id",id).maybeSingle();fail(error);return mapRide(data);}
+export async function getDriverRideById(id){const{data,error}=await supabase.from("rides").select(rideSelect).eq("id",id).maybeSingle();fail(error);return attachPassengerPreferences(mapRide(data));}
 export async function getDriverSchedule(){return getDriverRides();}
 export async function updateRideStatus(id,status){const{error}=await supabase.rpc("driver_update_ride_status",{ride_id:id,target_status:status});fail(error);return getDriverRideById(id);}
 export async function deleteJourney(rideId){const{error}=await supabase.rpc("delete_journey",{p_ride:rideId});fail(error);}

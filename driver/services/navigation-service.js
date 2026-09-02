@@ -1,15 +1,16 @@
 function validCoordinate(location) {
-  return Number.isFinite(location?.latitude) && Number.isFinite(location?.longitude);
+  return location?.latitude !== null && location?.latitude !== "" && location?.longitude !== null && location?.longitude !== "" && Number.isFinite(Number(location?.latitude)) && Number.isFinite(Number(location?.longitude));
 }
 
 export function buildNavigationUrl({ destination, provider = "google" }) {
-  if (!destination || !validCoordinate(destination)) throw new Error("Destination coordinates are unavailable");
-  const coordinate = `${destination.latitude},${destination.longitude}`;
+  if (!destination) throw new Error("Destination is unavailable");
+  const target = validCoordinate(destination) ? `${Number(destination.latitude)},${Number(destination.longitude)}` : String(destination.address || destination.name || "").trim();
+  if (!target) throw new Error("Destination is unavailable");
   if (provider === "apple") {
-    const params = new URLSearchParams({ daddr: coordinate, dirflg: "d" });
+    const params = new URLSearchParams({ daddr: target, dirflg: "d" });
     return `https://maps.apple.com/?${params}`;
   }
-  const params = new URLSearchParams({ api: "1", destination: coordinate, travelmode: "driving" });
+  const params = new URLSearchParams({ api: "1", destination: target, travelmode: "driving" });
   return `https://www.google.com/maps/dir/?${params}`;
 }
 

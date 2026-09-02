@@ -145,6 +145,7 @@ export function PassengerCard(ride) {
 
 export function FlightInfoCard(ride) {
   const flight = ride.flight;
+  if (!flight && ride.flightNumber) return `<article class="driver-info-card flight-card"><header>${icon("plane")}<div><span>Flight information</span><h2>${ride.flightNumber}</h2></div></header><p class="driver-muted">Flight number supplied by the passenger. Live arrival details are not connected.</p></article>`;
   if (!flight) return `<article class="driver-info-card flight-card"><header>${icon("plane")}<div><span>Flight information</span><h2>Not provided</h2></div></header><p class="driver-muted">No flight is linked to this journey.</p></article>`;
   return `<article class="driver-info-card flight-card"><header>${icon("plane")}<div><span>Flight information</span><h2>${flight.airline || "Flight"} ${flight.flightNumber}</h2></div><strong class="flight-state">${flight.status || "Status pending"}</strong></header><div class="flight-grid"><div><span>Scheduled arrival</span><strong>${flight.scheduledArrival || "Pending"}</strong></div><div><span>Estimated</span><strong>${flight.estimatedArrival || "Pending"}</strong></div><div><span>Terminal</span><strong>${flight.terminal || "Pending"}</strong></div></div></article>`;
 }
