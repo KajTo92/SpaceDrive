@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { EmptyState, NextJourneyCard, PassengerLayout, RideCard, assetUrl, setPassengerRoot } from "../passenger/components/passenger-components.js";
+import { EmptyState, JourneyServiceMedia, NextJourneyCard, PassengerLayout, RideCard, assetUrl, setPassengerRoot } from "../passenger/components/passenger-components.js";
 
 test("next journey renders before driver and vehicle assignment", () => {
   const html = NextJourneyCard({
@@ -51,6 +51,38 @@ test("passenger journeys identify city tour and hourly concierge services", () =
   assert.match(hourly, /Chauffeur by the hour/);
   assert.doesNotMatch(hourly, /journey-service-media__location/);
   assert.doesNotMatch(hourly, /data-live-map|At your disposal/);
+});
+
+test("hourly concierge artwork shows booking facts in trip details", () => {
+  const html = JourneyServiceMedia({
+    serviceType: "hourly_concierge",
+    pickupDate: "2026-09-26",
+    pickupTime: "20:00",
+    passengers: 3,
+    hourlyDetails: { duration_minutes: 240 },
+  }, { showBookingDetails: true });
+
+  assert.match(html, /26 September 2026/);
+  assert.match(html, /20:00/);
+  assert.match(html, /4 hours/);
+  assert.match(html, /<dt>Passengers<\/dt><dd>3<\/dd>/);
+});
+
+test("city tour artwork shows booking facts and destination in trip details", () => {
+  const html = JourneyServiceMedia({
+    serviceType: "city_tour",
+    pickupDate: "2026-10-04",
+    pickupTime: "09:30",
+    passengers: 2,
+    tourDetails: { region: "Luzern", durationHours: 6 },
+  }, { showBookingDetails: true });
+
+  assert.match(html, /journey-service-media__meta/);
+  assert.match(html, /Luzern/);
+  assert.match(html, /4 October 2026/);
+  assert.match(html, /09:30/);
+  assert.match(html, /6 hours/);
+  assert.match(html, /<dt>Passengers<\/dt><dd>2<\/dd>/);
 });
 
 test("next journey includes assigned chauffeur and vehicle imagery", () => {

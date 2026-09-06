@@ -25,14 +25,19 @@ export function ServiceTypeBadge(ride) {
   return `<span class="service-type-badge service-type-badge--${service.key}">${icon(service.icon)}${service.label}</span>`;
 }
 
-export function JourneyServiceMedia(ride) {
+export function JourneyServiceMedia(ride, { showBookingDetails = false } = {}) {
   const service = serviceType(ride);
   if (!["city_tour", "hourly_concierge"].includes(service.key)) return "";
   const city = service.key === "city_tour" ? String(ride.tourDetails?.region || "").trim() : "";
   const image = service.key === "city_tour" ? "passenger/assets/services/city-tour.png" : "passenger/assets/services/hourly-concierge.png";
   const description = service.key === "city_tour" ? "A private route through the city, paced around you." : "A chauffeur and vehicle reserved by the hour.";
   const context = city ? `<span class="journey-service-media__location">${icon("map-pin")} ${escapeHtml(city)}</span>` : "";
-  return `<figure class="journey-service-media journey-service-media--${service.key}"><img src="${assetUrl(image)}" alt="${escapeHtml(service.label)} service"><figcaption><div><span>Your service</span><strong>${escapeHtml(service.label)}</strong><small>${escapeHtml(description)}</small></div>${context}</figcaption></figure>`;
+  const details = service.key === "city_tour" ? ride.tourDetails : ride.hourlyDetails;
+  const durationMinutes = Number(details?.duration_minutes || 0);
+  const durationHours = Number(details?.durationHours) || (durationMinutes ? durationMinutes / 60 : 0);
+  const bookingDetails = showBookingDetails ? `<dl class="journey-service-media__booking" aria-label="${escapeHtml(service.label)} booking details"><div><dt>Date</dt><dd>${formatDate(ride.pickupDate, { day: "numeric", month: "long", year: "numeric" })}</dd></div><div><dt>Time</dt><dd>${escapeHtml(ride.pickupTime || "To confirm")}</dd></div><div><dt>Duration</dt><dd>${durationHours ? `${escapeHtml(durationHours)} ${durationHours === 1 ? "hour" : "hours"}` : "To confirm"}</dd></div><div><dt>Passengers</dt><dd>${escapeHtml(ride.passengers ?? "To confirm")}</dd></div></dl>` : "";
+  const meta = context || bookingDetails ? `<div class="journey-service-media__meta">${context}${bookingDetails}</div>` : "";
+  return `<figure class="journey-service-media journey-service-media--${service.key}${bookingDetails ? " journey-service-media--has-booking" : ""}"><img src="${assetUrl(image)}" alt="${escapeHtml(service.label)} service"><figcaption><div class="journey-service-media__copy"><span>Your service</span><strong>${escapeHtml(service.label)}</strong><small>${escapeHtml(description)}</small></div>${meta}</figcaption></figure>`;
 }
 
 const escapeHtml = (value = "") => String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]);
