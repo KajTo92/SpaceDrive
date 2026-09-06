@@ -15,5 +15,8 @@ export function journeyRoute(ride = {}) {
   if (serviceType(ride).key === "city_tour") {
     return { single: ride.tourDetails?.region || ride.pickup?.name || ride.destination?.name || "City Tour" };
   }
+  if (serviceType(ride).key === "hourly_concierge") {
+    return { single: "Hourly Concierge" };
+  }
   return { pickup: ride.pickup?.name || "Pickup", destination: ride.destination?.name || "Destination" };
 }

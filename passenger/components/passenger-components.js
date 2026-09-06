@@ -25,6 +25,16 @@ export function ServiceTypeBadge(ride) {
   return `<span class="service-type-badge service-type-badge--${service.key}">${icon(service.icon)}${service.label}</span>`;
 }
 
+export function JourneyServiceMedia(ride) {
+  const service = serviceType(ride);
+  if (!["city_tour", "hourly_concierge"].includes(service.key)) return "";
+  const city = service.key === "city_tour" ? String(ride.tourDetails?.region || "").trim() : "";
+  const image = service.key === "city_tour" ? "passenger/assets/services/city-tour.png" : "passenger/assets/services/hourly-concierge.png";
+  const description = service.key === "city_tour" ? "A private route through the city, paced around you." : "A chauffeur and vehicle reserved by the hour.";
+  const context = city ? `<span class="journey-service-media__location">${icon("map-pin")} ${escapeHtml(city)}</span>` : "";
+  return `<figure class="journey-service-media journey-service-media--${service.key}"><img src="${assetUrl(image)}" alt="${escapeHtml(service.label)} service"><figcaption><div><span>Your service</span><strong>${escapeHtml(service.label)}</strong><small>${escapeHtml(description)}</small></div>${context}</figcaption></figure>`;
+}
+
 const escapeHtml = (value = "") => String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" })[character]);
 const passengerInitials = (passenger) => [passenger?.firstName, passenger?.lastName].filter(Boolean).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "SD";
 
@@ -100,12 +110,14 @@ export function NextJourneyCard(ride) {
   const driverRating = ride.driver ? "5.0" : "Pending";
   const driverTrips = ride.driver ? "100+ trips" : "Assignment pending";
   const route = journeyRoute(ride);
-  const routeMarkup = route.single ? `<span class="journey-route-place journey-route-place--single"><strong>${escapeHtml(route.single)}</strong><small>Private city itinerary</small></span>` : `${journeyPlace(ride.pickup)}<span class="journey-route-arrow">${icon("arrow-right")}</span>${journeyPlace(ride.destination)}`;
+  const routeDetail = serviceType(ride).key === "hourly_concierge" ? "Chauffeur by the hour" : "Private city itinerary";
+  const routeMarkup = route.single ? `<span class="journey-route-place journey-route-place--single"><strong>${escapeHtml(route.single)}</strong><small>${routeDetail}</small></span>` : `${journeyPlace(ride.pickup)}<span class="journey-route-arrow">${icon("arrow-right")}</span>${journeyPlace(ride.destination)}`;
   const driverPhoto = ride.driver?.photo ? `<img src="${assetUrl(ride.driver.photo)}" alt="Portrait of ${escapeHtml(driverName)}">` : ride.driver ? `<span>${passengerInitials({ firstName: driverName })}</span>` : "";
   const vehicleImage = ride.vehicle?.image ? `<img src="${assetUrl(ride.vehicle.image)}" alt="${escapeHtml(`${vehicleBrand} ${vehicleModel}`)}">` : ride.vehicle ? `<span class="next-journey__vehicle-placeholder">${icon("car-front")}</span>` : "";
   const confirmedStatuses = new Set(["confirmed", "driver_assigned", "driver_on_the_way", "driver_arrived", "passenger_onboard"]);
   const fullyConfirmed = confirmedStatuses.has(ride.status) && Boolean(ride.driver && ride.vehicle);
   const confirmation = fullyConfirmed ? `<span class="journey-confirmation journey-confirmation--confirmed">${icon("circle-check")} Confirmed</span>` : `<span class="journey-confirmation journey-confirmation--pending">${icon("clock-3")} Not yet confirmed</span>`;
+  const serviceMedia = JourneyServiceMedia(ride);
   return `
     <section class="next-journey next-journey--${fullyConfirmed ? "confirmed" : "pending"}" aria-labelledby="nextJourneyTitle">
       <div class="next-journey__primary">
@@ -115,7 +127,7 @@ export function NextJourneyCard(ride) {
         <div class="next-journey__footer"><div><span>${vehicleBrand}</span><strong>${vehicleModel}</strong><small>${ride.driver ? `with ${driverName}` : driverName}</small></div><div class="journey-price"><span>Journey total</span><strong>${money(ride)}</strong></div></div>
         <div class="journey-actions"><a class="passenger-button passenger-button--primary" href="${tripUrl(ride.id)}">View journey</a><button class="passenger-button" type="button" data-demo-action="Payment">Pay</button><a class="passenger-button passenger-button--danger-quiet" href="${tripUrl(ride.id)}&action=cancel">Cancel</a></div>
       </div>
-      <div class="next-journey__visual"><div class="next-journey__crew" aria-label="Assigned chauffeur and vehicle"><div class="next-journey__driver-photo">${driverPhoto}</div><div class="next-journey__vehicle-image">${vehicleImage}</div><div class="next-journey__crew-details"><div class="next-journey__crew-caption"><span>Your chauffeur</span><strong>${escapeHtml(driverName)}</strong><div class="next-journey__driver-stats"><span aria-label="${driverRating} out of 5 stars"><b>${icon("star")}${icon("star")}${icon("star")}${icon("star")}${icon("star")}</b>${driverRating}</span><span>${driverTrips}</span></div></div><div class="next-journey__vehicle-caption"><span>Your vehicle</span><strong>${escapeHtml(`${vehicleBrand} ${vehicleModel}`)}</strong></div></div></div><div class="next-journey__map"><div class="live-trip-map" data-live-map data-ride-id="${ride.id}"></div><div class="map-caption"><span>${icon("navigation")} Route overview</span></div></div></div>
+      <div class="next-journey__visual${serviceMedia ? " next-journey__visual--service" : ""}"><div class="next-journey__crew" aria-label="Assigned chauffeur and vehicle"><div class="next-journey__driver-photo">${driverPhoto}</div><div class="next-journey__vehicle-image">${vehicleImage}</div><div class="next-journey__crew-details"><div class="next-journey__crew-caption"><span>Your chauffeur</span><strong>${escapeHtml(driverName)}</strong><div class="next-journey__driver-stats"><span aria-label="${driverRating} out of 5 stars"><b>${icon("star")}${icon("star")}${icon("star")}${icon("star")}${icon("star")}</b>${driverRating}</span><span>${driverTrips}</span></div></div><div class="next-journey__vehicle-caption"><span>Your vehicle</span><strong>${escapeHtml(`${vehicleBrand} ${vehicleModel}`)}</strong></div></div></div>${serviceMedia || `<div class="next-journey__map"><div class="live-trip-map" data-live-map data-ride-id="${ride.id}"></div><div class="map-caption"><span>${icon("navigation")} Route overview</span></div></div>`}</div>
     </section>`;
 }
 

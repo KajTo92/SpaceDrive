@@ -42,8 +42,15 @@ test("passenger journeys identify city tour and hourly concierge services", () =
   const cityTour = NextJourneyCard({ ...base, serviceType: "city_tour", tourDetails: { region: "Zürich" } });
   assert.match(cityTour, /City Tour/);
   assert.match(cityTour, /<strong>Zürich<\/strong><small>Private city itinerary<\/small>/);
+  assert.match(cityTour, /passenger\/assets\/services\/city-tour\.png/);
+  assert.match(cityTour, /journey-service-media__location/);
+  assert.doesNotMatch(cityTour, /data-live-map/);
   assert.doesNotMatch(cityTour, /journey-route-arrow/);
-  assert.match(NextJourneyCard({ ...base, serviceType: "hourly_concierge" }), /Hourly Concierge/);
+  const hourly = NextJourneyCard({ ...base, serviceType: "hourly_concierge" });
+  assert.match(hourly, /passenger\/assets\/services\/hourly-concierge\.png/);
+  assert.match(hourly, /Chauffeur by the hour/);
+  assert.doesNotMatch(hourly, /journey-service-media__location/);
+  assert.doesNotMatch(hourly, /data-live-map|At your disposal/);
 });
 
 test("next journey includes assigned chauffeur and vehicle imagery", () => {
