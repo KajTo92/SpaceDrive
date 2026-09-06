@@ -35,4 +35,5 @@ export async function createManualRide(input){const passengers=await getPassenge
 export async function setDriverUnavailable(id,p){const{data,error}=await supabase.from("driver_unavailability").insert({driver_id:id,starts_at:new Date(p.from).toISOString(),ends_at:new Date(p.to).toISOString(),reason:p.reason||"unavailable",notes:p.notes}).select().single();fail(error);return data;}
 export async function setVehicleUnavailable(id,p){const{data,error}=await supabase.from("vehicle_unavailability").insert({vehicle_id:id,starts_at:new Date(p.from).toISOString(),ends_at:new Date(p.to).toISOString(),reason:p.reason||"other",notes:p.notes}).select().single();fail(error);return data;}
 export async function resetAdminDemo(){return true;}
+export async function makePassengerDriver(userId){const{error}=await supabase.rpc("admin_make_passenger_driver",{p_user:userId});fail(error);}
 export function subscribeToAdminRides(onChange){const c=supabase.channel("admin-rides").on("postgres_changes",{event:"*",schema:"public",table:"rides"},onChange).subscribe();return()=>supabase.removeChannel(c);}

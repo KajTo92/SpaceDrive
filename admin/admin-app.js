@@ -2,7 +2,7 @@ import {
   MIN_TURNAROUND_MINUTES, OPERATIONS_DATE, approveRideRequest, assignDriver, assignVehicle, checkDriverConflict, checkVehicleConflict,
   createManualRide, declineRideRequest, getAdminDashboard, getDrivers, getJourneyById, getJourneys, getNotifications, getPassengers,
   getRequestById, getRideRequests, getVehicles, getDriverApplications, reviewDriverApplication, inviteDriver, markRequestUnderReview, sendRideOffer, setDriverUnavailable, setVehicleUnavailable,
-  updateJourneyNotes, updateJourneyStatus, updatePaymentStatus, updateRidePrice, subscribeToAdminRides, deleteJourney, uploadDriverPhoto,
+  updateJourneyNotes, updateJourneyStatus, updatePaymentStatus, updateRidePrice, subscribeToAdminRides, deleteJourney, uploadDriverPhoto, makePassengerDriver,
 } from "./services/admin-service.js?v=3";
 import { requireRole, signOut } from "../shared/supabase-client.js";
 import { journeyRoute as journeyRouteData, serviceType, serviceTypeLabel } from "../shared/service-type.js";
@@ -267,6 +267,21 @@ async function renderPassengers() {
     const history = journeys.filter((ride) => ride.passengerId === passenger.id);
     const content = `<a class="admin-back-link" href="${adminUrl("passengers/")}">${icon("arrow-left")} Back to passengers</a><section class="passenger-profile-hero"><span>${initials(passenger.name)}</span><div><h2>${escapeHtml(passenger.name)}</h2><p>${escapeHtml(passenger.email)}<br>${escapeHtml(passenger.phone)}</p></div><button class="admin-button admin-button--primary" type="button" data-modal-open="newPassengerJourney">${icon("plus")} Create journey</button></section><section class="passenger-profile-grid"><article class="detail-surface"><header><h3>Preferences</h3></header><div class="preference-tags">${passenger.preferences.map((item) => `<span>${escapeHtml(item)}</span>`).join("")}</div><h4>Internal notes</h4><p>${escapeHtml(passenger.internalNotes || "No internal notes")}</p></article><article class="passenger-stats"><div><strong>${passenger.completedRides}</strong><span>Completed rides</span></div><div><strong>${passenger.upcomingRides}</strong><span>Upcoming rides</span></div><div><strong>${formatMoney(passenger.totalSpend)}</strong><span>Total spend</span></div><div><strong>${formatDate(passenger.lastRide)}</strong><span>Last ride</span></div></article></section><section class="dashboard-today"><header><div><h2>Ride history</h2><p>Journeys linked to this passenger.</p></div></header><div class="journey-list">${history.length ? history.map(JourneyRow).join("") : EmptyState("No ride history", "Journeys will appear when they are created.")}</div></section>${Modal("newPassengerJourney", `Create journey for ${passenger.name}`, manualRideForm(passengers, drivers, vehicles), "wide")}`;
     await withLayout({ active: "passengers", title: passenger.name, subtitle: "Passenger profile", content });
+    document.querySelector(".passenger-profile-hero").insertAdjacentHTML("afterend", `<section class="detail-surface"><header><div><h3>Driver access</h3><p>Change this passenger account to a driver account. Email confirmation is still required to sign in.</p></div><button class="admin-button admin-button--positive" type="button" data-make-driver>Make driver</button></header><p data-driver-role-message role="status"></p></section>`);
+    document.querySelector("[data-make-driver]").addEventListener("click", async (event) => {
+      if (!window.confirm(`Give ${passenger.name} (${passenger.email}) access to the Driver Portal?`)) return;
+      const button = event.currentTarget;
+      button.disabled = true;
+      button.textContent = "Updating…";
+      try {
+        await makePassengerDriver(passenger.id);
+        location.href = adminUrl("drivers/");
+      } catch (error) {
+        document.querySelector("[data-driver-role-message]").textContent = error.message || "Unable to change role. Please try again.";
+        button.disabled = false;
+        button.textContent = "Make driver";
+      }
+    });
     bindModals();
     const form = document.querySelector("[data-manual-ride-form]"); if (form) form.querySelector("[name=passengerId]").value = passenger.id;
     form?.addEventListener("submit", async (event) => { event.preventDefault(); try { const ride = await createManualRide(Object.fromEntries(new FormData(form))); location.href = adminUrl(`journeys/detail.html?id=${ride.id}`); } catch (error) { toast(error.message, "error"); } });
