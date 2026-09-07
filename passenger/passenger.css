@@ -129,7 +129,7 @@ img { max-width: 100%; }
 .next-journey__visual { display: grid; min-width: 0; grid-template-rows: minmax(300px,1.15fr) minmax(250px,.85fr); border-left: 1px solid var(--portal-line); background: #0e1011; }
 .next-journey__crew { position: relative; isolation: isolate; min-height: 0; overflow: hidden; border-bottom: 1px solid var(--portal-line); background: #101214 url("../bgjourney.jpg") center / cover no-repeat; }
 .next-journey__crew::before { position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg,rgba(7,9,10,.18),transparent 44%,rgba(7,9,10,.1)),linear-gradient(0deg,rgba(7,8,9,.9),transparent 58%); content: ""; pointer-events: none; }
-.next-journey__vehicle-image { position: absolute; top: 8%; right: 0; bottom: 21%; z-index: 2; display: grid; width: 50%; place-items: center; padding: 0 14px; }
+.next-journey__vehicle-image { position: absolute; top: 16%; right: 0; bottom: 13%; z-index: 2; display: grid; width: 50%; place-items: center; padding: 0 14px; }
 .next-journey__vehicle-image > img { width: 100%; max-height: 100%; object-fit: contain; filter: drop-shadow(0 24px 28px rgba(0,0,0,.52)); }
 .next-journey__vehicle-placeholder { color: var(--portal-dim); }.next-journey__vehicle-placeholder svg { width: 64px; height: 64px; }
 .next-journey__driver-photo { position: absolute; inset: 3% 47% 0 0; z-index: 2; display: grid; place-items: end center; overflow: hidden; background: transparent; color: var(--portal-gold-light); font-size: 2rem; font-weight: 800; }
