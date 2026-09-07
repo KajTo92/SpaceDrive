@@ -1,6 +1,17 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { EmptyState, JourneyServiceMedia, NextJourneyCard, PassengerLayout, RideCard, assetUrl, setPassengerRoot } from "../passenger/components/passenger-components.js";
+import { nearestUpcomingRide } from "../shared/ride-selection.js";
+
+test("dashboard selects the nearest future journey instead of the last-created one", () => {
+  const rides = [
+    { id: "late", pickupDate: "2026-09-25", pickupTime: "12:00", status: "confirmed" },
+    { id: "nearest", pickupDate: "2026-09-12", pickupTime: "09:00", status: "confirmed" },
+    { id: "past", pickupDate: "2026-09-06", pickupTime: "09:00", status: "confirmed" },
+    { id: "cancelled", pickupDate: "2026-09-10", pickupTime: "09:00", status: "cancelled" },
+  ];
+  assert.equal(nearestUpcomingRide(rides, new Date("2026-09-07T00:00:00").getTime()).id, "nearest");
+});
 
 test("next journey renders before driver and vehicle assignment", () => {
   const html = NextJourneyCard({

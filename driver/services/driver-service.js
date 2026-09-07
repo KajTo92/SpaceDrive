@@ -33,6 +33,8 @@ export async function getDriverRides(){const{data,error}=await supabase.from("ri
 export async function getDriverCurrentRide(){return(await getDriverRides()).find(r=>!isClosedRideStatus(r.status))||null;}
 export async function getDriverRideById(id){const{data,error}=await supabase.from("rides").select(rideSelect).eq("id",id).maybeSingle();fail(error);return attachPassengerPreferences(mapRide(data));}
 export async function getDriverSchedule(){return getDriverRides();}
+export async function getDriverAvailabilityDays(start,end){const p=await currentProfile();if(!p)throw new Error("Authentication required");const{data,error}=await supabase.from("driver_availability_days").select("available_date").eq("driver_id",p.id).gte("available_date",start).lt("available_date",end).order("available_date");fail(error);return(data||[]).map(item=>item.available_date);}
+export async function setDriverAvailabilityDay(date,available){const p=await currentProfile();if(!p)throw new Error("Authentication required");const query=available?supabase.from("driver_availability_days").upsert({driver_id:p.id,available_date:date},{onConflict:"driver_id,available_date"}):supabase.from("driver_availability_days").delete().eq("driver_id",p.id).eq("available_date",date);const{error}=await query;fail(error);return available;}
 export async function updateRideStatus(id,status){const{error}=await supabase.rpc("driver_update_ride_status",{ride_id:id,target_status:status});fail(error);return getDriverRideById(id);}
 export async function deleteJourney(rideId){const{error}=await supabase.rpc("delete_journey",{p_ride:rideId});fail(error);}
 export function getDriverAvailability(){return availabilityCache;}

@@ -5,6 +5,35 @@
   letter-spacing: -.04em;
 }
 
+.journey-detail-hero .admin-service-badge {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 34px;
+  gap: 8px;
+  padding: 0 10px;
+  border-radius: 10px;
+  font-size: .58rem;
+  line-height: 1;
+}
+
+.journey-detail-hero .admin-service-badge svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  stroke-width: 1.8;
+}
+
+.journey-detail-hero > div:last-child > .admin-status {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0 13px;
+  font-size: .64rem;
+  line-height: 1;
+}
+
 .driver-admin-photo {
   display: grid;
   flex: 0 0 48px;
@@ -23,8 +52,307 @@
   cursor: pointer;
 }
 
+.admin-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.admin-metric--critical {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: rgba(196, 111, 106, .48);
+  background: linear-gradient(135deg, rgba(111, 28, 28, .58), rgba(51, 21, 22, .34) 58%, var(--admin-surface));
+  box-shadow: inset 0 2px 0 #db7770, inset 0 0 42px rgba(196, 55, 49, .13);
+}
+
+.admin-metric--critical::after {
+  position: absolute;
+  top: -45px;
+  right: -25px;
+  z-index: -1;
+  width: 145px;
+  height: 145px;
+  border-radius: 50%;
+  background: rgba(207, 66, 59, .15);
+  content: "";
+  filter: blur(2px);
+}
+
+.admin-metric--critical > span,
+.admin-metric--critical > span svg,
+.admin-metric--critical > small { color: #efb2ad; }
+.admin-metric--critical > strong { color: #fff2f0; }
+
+.dashboard-timeline { margin-top: 16px; }
+
+.admin-availability {
+  overflow: hidden;
+  margin-bottom: 16px;
+  border: 1px solid var(--admin-line);
+  border-radius: var(--admin-radius);
+  background: var(--admin-surface);
+}
+
+.admin-availability > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 19px 21px;
+  border-bottom: 1px solid var(--admin-line-soft);
+}
+
+.admin-availability > header h2,
+.admin-driver-calendar h3 { margin: 0; }
+.admin-availability > header h2 { font-size: .88rem; font-weight: 650; }
+.admin-availability > header p { margin: 4px 0 0; color: var(--admin-dim); font-size: .62rem; }
+.admin-availability__navigation { display: flex; align-items: center; gap: 9px; }
+.admin-availability__navigation button { display: grid; width: 34px; height: 34px; place-items: center; border: 1px solid var(--admin-line); border-radius: 8px; background: var(--admin-surface-2); color: var(--admin-muted); }
+.admin-availability__navigation button:active { transform: translateY(1px); }
+.admin-availability__navigation button svg { width: 14px; }
+.admin-availability__navigation strong { min-width: 120px; font-size: .66rem; text-align: center; }
+.admin-availability__scroll { overflow-x: auto; padding: 16px; scrollbar-width: thin; }
+.admin-availability__grid { display: grid; grid-auto-columns: 250px; grid-auto-flow: column; gap: 12px; min-width: min-content; }
+.admin-driver-calendar { width: 250px; overflow: hidden; border: 1px solid var(--admin-line-soft); border-radius: 12px; background: var(--admin-surface-2); }
+.admin-driver-calendar > header { display: flex; align-items: center; gap: 10px; padding: 13px; }
+.admin-driver-calendar__avatar { display: grid; width: 34px; height: 34px; flex: 0 0 auto; place-items: center; overflow: hidden; border-radius: 9px; background: var(--admin-surface-3); font-size: .56rem; font-weight: 820; }
+.admin-driver-calendar__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.admin-driver-calendar h3 { font-size: .67rem; }
+.admin-driver-calendar header p { margin: 4px 0 0; color: var(--admin-dim); font-size: .53rem; }
+.admin-driver-calendar__weekdays,
+.admin-driver-calendar__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; padding-inline: 9px; }
+.admin-driver-calendar__weekdays { padding-top: 7px; padding-bottom: 6px; color: var(--admin-dim); font-size: .48rem; font-weight: 760; text-align: center; }
+.admin-driver-calendar__grid { padding-bottom: 10px; }
+.admin-driver-calendar__day,
+.admin-driver-calendar__blank { display: grid; height: 27px; place-items: center; border-radius: 6px; color: var(--admin-muted); font-size: .53rem; font-variant-numeric: tabular-nums; }
+.admin-driver-calendar__day { border: 1px solid var(--admin-line-soft); background: #13181c; }
+.admin-driver-calendar__day.is-available { border-color: #477b60; background: #1d4935; color: #e6f5ec; font-weight: 760; }
+.admin-driver-calendar__day.is-today { box-shadow: inset 0 0 0 1px var(--admin-accent); }
+
+.journey-schedule-summary {
+  display: grid;
+  grid-template-columns: 1.45fr .55fr;
+  gap: 1px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  border: 1px solid var(--admin-line);
+  border-radius: var(--admin-radius);
+  background: var(--admin-line);
+}
+
+.journey-schedule-summary > div {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 92px;
+  padding: 19px 22px;
+  background: var(--admin-surface);
+}
+
+.journey-schedule-summary svg {
+  width: 22px;
+  color: var(--admin-accent-light);
+}
+
+.journey-schedule-summary span,
+.journey-schedule-summary strong { display: block; }
+.journey-schedule-summary span { color: var(--admin-dim); font-size: .58rem; font-weight: 760; text-transform: uppercase; }
+.journey-schedule-summary strong { margin-top: 7px; color: var(--admin-text); font-size: 1.02rem; font-weight: 620; letter-spacing: -.02em; text-transform: none; }
+.journey-schedule-summary > div:last-child strong { font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+
+.request-vehicle {
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px !important;
+  color: #c8d0d4 !important;
+  font-weight: 680;
+}
+
+.request-vehicle svg { width: 13px; color: var(--admin-accent-light); }
+
+.requested-vehicle-callout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 20px 0;
+  padding: 14px 16px;
+  border: 1px solid rgba(212,166,75,.3);
+  border-radius: 10px;
+  background: rgba(212,166,75,.07);
+}
+
+.requested-vehicle-callout > svg { width: 20px; color: var(--admin-accent-light); }
+.requested-vehicle-callout span,
+.requested-vehicle-callout strong { display: block; }
+.requested-vehicle-callout span { color: var(--admin-dim); font-size: .54rem; font-weight: 760; letter-spacing: .08em; text-transform: uppercase; }
+.requested-vehicle-callout strong { margin-top: 5px; font-size: .72rem; }
+
+.assignment-option--unavailable .assignment-signal { color: var(--admin-danger); }
+
+.driver-management {
+  overflow: hidden;
+  border: 1px solid var(--admin-line);
+  border-radius: var(--admin-radius);
+  background: var(--admin-surface);
+}
+
+.driver-management > header,
+.driver-recruitment > header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.driver-management > header {
+  padding: 24px 26px;
+  border-bottom: 1px solid var(--admin-line-soft);
+}
+
+.driver-management > header span,
+.driver-recruitment > header span {
+  color: var(--admin-accent-light);
+  font-size: .55rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.driver-management > header h2,
+.driver-recruitment > header h2 {
+  margin: 7px 0 0;
+  font-size: 1.18rem;
+  font-weight: 610;
+  letter-spacing: -.025em;
+}
+
+.driver-management > header p,
+.driver-recruitment > header p {
+  margin: 7px 0 0;
+  color: var(--admin-muted);
+  font-size: .64rem;
+  line-height: 1.5;
+}
+
+.driver-management__month {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.driver-management__month button {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid var(--admin-line);
+  border-radius: 9px;
+  background: var(--admin-surface-2);
+  color: var(--admin-muted);
+}
+
+.driver-management__month button:hover { border-color: #414a52; color: var(--admin-text); }
+.driver-management__month button svg { width: 15px; }
+.driver-management__month strong { min-width: 128px; font-size: .69rem; text-align: center; }
+
+.driver-management__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
+
+.driver-management-card {
+  overflow: hidden;
+  border: 1px solid var(--admin-line);
+  border-radius: 14px;
+  background: #0e1215;
+}
+
+.driver-management-card > header {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 22px;
+  border-bottom: 1px solid var(--admin-line-soft);
+}
+
+.driver-management-card__photo {
+  display: grid;
+  width: 70px;
+  height: 70px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #e9e5db, #899298);
+  color: #111518;
+  font-size: .82rem;
+  font-weight: 850;
+}
+
+.driver-management-card__photo img { width: 100%; height: 100%; object-fit: cover; }
+.driver-management-card > header > div > span { color: var(--admin-accent-light); font-size: .51rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.driver-management-card h2 { margin: 5px 0 0; font-size: 1rem; font-weight: 650; }
+.driver-management-card > header p { margin: 5px 0 0; color: var(--admin-muted); font-size: .6rem; }
+
+.driver-management-card__body { padding: 0 22px 22px; }
+.driver-management-card dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; margin: 0 -22px 20px; background: var(--admin-line-soft); }
+.driver-management-card dl > div { min-width: 0; padding: 15px 14px; background: var(--admin-surface); }
+.driver-management-card dt { color: var(--admin-dim); font-size: .52rem; }
+.driver-management-card dd { overflow: hidden; margin: 6px 0 0; font-size: .61rem; text-overflow: ellipsis; white-space: nowrap; }
+
+.driver-management-calendar { padding: 18px; border: 1px solid var(--admin-line-soft); border-radius: 12px; background: var(--admin-surface); }
+.driver-management-calendar > header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+.driver-management-calendar > header span,
+.driver-management-calendar > header strong { display: block; }
+.driver-management-calendar > header span { color: var(--admin-accent-light); font-size: .53rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.driver-management-calendar > header strong { margin-top: 5px; font-size: .68rem; }
+.driver-management-calendar > header small { color: var(--admin-dim); font-size: .52rem; }
+.driver-management-calendar__weekdays,
+.driver-management-calendar__grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.driver-management-calendar__weekdays { margin-bottom: 7px; color: var(--admin-dim); font-size: .48rem; font-weight: 760; text-align: center; text-transform: uppercase; }
+.driver-management-calendar__blank,
+.driver-management-calendar__day { aspect-ratio: 1; min-width: 0; }
+.driver-management-calendar__day { position: relative; display: grid; place-items: center; border: 1px solid var(--admin-line-soft); border-radius: 9px; background: #11171b; color: var(--admin-muted); font-size: .62rem; font-variant-numeric: tabular-nums; transition: border-color .16s, background .16s, color .16s, transform .16s; }
+.driver-management-calendar__day:hover { transform: translateY(-1px); border-color: #536069; color: var(--admin-text); }
+.driver-management-calendar__day.is-available { border-color: #4f8b69; background: #214c38; color: #effaf3; font-weight: 800; }
+.driver-management-calendar__day.is-today { box-shadow: inset 0 0 0 1px var(--admin-accent-light); }
+.driver-management-calendar__day svg { position: absolute; right: 4px; bottom: 4px; width: 9px; height: 9px; }
+
+.driver-management-card > footer { display: flex; flex-wrap: wrap; gap: 8px; padding: 17px 22px; border-top: 1px solid var(--admin-line-soft); }
+.driver-recruitment { margin-top: 72px; padding-top: 26px; border-top: 1px solid var(--admin-line); }
+.driver-recruitment > header { margin-bottom: 18px; }
+.driver-recruitment__grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 16px; }
+
 @media (max-width: 680px) {
+  .admin-metrics { grid-template-columns: 1fr; }
+  .admin-metric:last-child { grid-column: auto; }
   .journey-detail-hero h2 {
     font-size: 1.45rem;
   }
+
+  .admin-availability > header { align-items: flex-start; flex-direction: column; }
+  .admin-availability__navigation { width: 100%; justify-content: space-between; }
+  .journey-schedule-summary { grid-template-columns: 1fr; }
+  .journey-schedule-summary > div { min-height: 78px; }
+  .driver-management > header,
+  .driver-recruitment > header { align-items: flex-start; flex-direction: column; }
+  .driver-management__month { width: 100%; justify-content: space-between; }
+  .driver-management__grid { grid-template-columns: 1fr; padding: 10px; }
+  .driver-management-card > header { grid-template-columns: 56px minmax(0, 1fr); padding: 17px; }
+  .driver-management-card > header > .admin-status { grid-column: 2; justify-self: start; }
+  .driver-management-card__photo { width: 56px; height: 56px; border-radius: 13px; }
+  .driver-management-card__body { padding: 0 14px 14px; }
+  .driver-management-card dl { grid-template-columns: 1fr 1fr; margin-right: -14px; margin-left: -14px; }
+  .driver-management-calendar { padding: 12px; }
+  .driver-management-calendar__weekdays,
+  .driver-management-calendar__grid { gap: 4px; }
+  .driver-management-calendar__day { border-radius: 7px; }
+  .driver-management-card > footer { padding: 14px; }
+  .driver-recruitment { margin-top: 52px; }
+  .driver-recruitment__grid { grid-template-columns: 1fr; }
+}
+
+@media (min-width: 681px) and (max-width: 1180px) {
+  .driver-management__grid { grid-template-columns: 1fr; }
 }

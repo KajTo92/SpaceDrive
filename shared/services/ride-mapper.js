@@ -15,7 +15,7 @@ export function mapRide(row) {
     pickupTime: row.scheduled_start_at ? start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false }) : "",
     estimatedEndAt: end?.toISOString(), passengers: row.passenger_count, luggage: row.luggage,
     flightNumber: row.flight_number, driverId: row.driver_id, vehicleId: row.vehicle_id,
-    requestedVehicleId: row.requested_vehicle_id, requestedVehicle: row.requested_vehicle_class,
+    requestedVehicleId: row.requested_vehicle_id, requestedVehicle: row.requested_vehicle_class || row.requested_vehicle?.display_name || [row.requested_vehicle?.brand, row.requested_vehicle?.model].filter(Boolean).join(" "),
     driver: driverProfile ? { id: driverProfile.id, name: `${driverProfile.first_name || ""} ${driverProfile.last_name || ""}`.trim(), shortName: driverProfile.first_name || "", email: driverProfile.email, phone: driverProfile.phone, photo: driverProfile.avatar_url || "", languages: driverProfile.driver_profiles?.[0]?.languages || [], role: "Chauffeur", rating: 5, completedTrips: 100 } : null,
     vehicle: row.vehicle ? { id: row.vehicle.id, brand: row.vehicle.brand, model: row.vehicle.model, year: row.vehicle.year, category: row.vehicle.category, plate: row.vehicle.plate, seats: row.vehicle.seat_capacity, luggageCapacity: row.vehicle.luggage_capacity, image: row.vehicle.image_url, status: row.vehicle.operational_status } : null,
     price: row.final_price ?? row.estimated_price, finalPrice: row.final_price, calculatedPrice: row.estimated_price,
@@ -27,4 +27,4 @@ export function mapRide(row) {
   };
 }
 
-export const rideSelect = `*, passenger:profiles!rides_passenger_id_fkey(id,first_name,last_name,email,phone), driver:profiles!rides_driver_id_fkey(id,first_name,last_name,email,phone,avatar_url,driver_profiles(languages)), vehicle:vehicles!rides_vehicle_id_fkey(*), city_tour_details(*), hourly_concierge_details(*), ride_stops(*), ride_activity(*)`;
+export const rideSelect = `*, passenger:profiles!rides_passenger_id_fkey(id,first_name,last_name,email,phone), driver:profiles!rides_driver_id_fkey(id,first_name,last_name,email,phone,avatar_url,driver_profiles(languages)), vehicle:vehicles!rides_vehicle_id_fkey(*), requested_vehicle:vehicles!rides_requested_vehicle_id_fkey(id,display_name,brand,model,year), city_tour_details(*), hourly_concierge_details(*), ride_stops(*), ride_activity(*)`;

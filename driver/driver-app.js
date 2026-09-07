@@ -6,18 +6,21 @@ import {
   getDriverRideById,
   getDriverRides,
   getDriverSchedule,
+  getDriverAvailabilityDays,
   reportRideIssue,
+  setDriverAvailabilityDay,
   updateDriverAvailability,
   updateRideStatus,
   subscribeToDriverRides,
   deleteJourney,
-} from "./services/driver-service.js?v=5";
+} from "./services/driver-service.js?v=6";
 import "./config.js";
 import { currentProfile, requireRole, signOut, supabase } from "../shared/supabase-client.js";
 import { openNavigation } from "./services/navigation-service.js?v=2";
 import { LiveTripMap } from "../passenger/components/live-trip-map.js?v=6";
 import { isClosedRideStatus, isTrackingRideStatus, statusLabel } from "../shared/ride-status.js?v=2";
 import { journeyRoute } from "../shared/service-type.js";
+import { calendarCells, dateKey, monthBounds, monthLabel, shiftedMonth } from "../shared/availability-calendar.js";
 import {
   DriverLayout,
   DriverMissionCard,
@@ -278,17 +281,28 @@ async function renderRideDetails() {
 async function renderSchedulePage() {
   const rides = await getDriverSchedule();
   activeRide = rides.find((ride) => !isClosedRideStatus(ride.status)) || null;
-  const views = {
-    today: rides.filter((ride) => ride.pickupDate === "2026-08-29"),
-    tomorrow: rides.filter((ride) => ride.pickupDate === "2026-08-30"),
-    week: rides.filter((ride) => ride.pickupDate >= "2026-08-29" && ride.pickupDate <= "2026-09-04"),
+  const now = new Date();
+  let visibleMonth = { year: now.getFullYear(), month: now.getMonth() };
+  const renderCalendar = async () => {
+    const todayKey = dateKey(now.getFullYear(), now.getMonth(), now.getDate());
+    const bounds = monthBounds(visibleMonth.year, visibleMonth.month);
+    const availableDates = new Set(await getDriverAvailabilityDays(bounds.start, bounds.end));
+    const monthRides = rides.filter((ride) => ride.pickupDate >= bounds.start && ride.pickupDate < bounds.end);
+    const rideCounts = new Map();
+    monthRides.forEach((ride) => rideCounts.set(ride.pickupDate, (rideCounts.get(ride.pickupDate) || 0) + 1));
+    const cells = calendarCells(visibleMonth.year, visibleMonth.month).map((cell) => cell ? `<button class="driver-calendar__day${availableDates.has(cell.date) ? " is-available" : ""}${cell.date === todayKey ? " is-today" : ""}" type="button" data-availability-date="${cell.date}" aria-pressed="${availableDates.has(cell.date)}" aria-label="${cell.date}, ${availableDates.has(cell.date) ? "available" : "not available"}"><span>${cell.day}</span>${rideCounts.has(cell.date) ? `<small>${rideCounts.get(cell.date)} ${rideCounts.get(cell.date) === 1 ? "ride" : "rides"}</small>` : ""}</button>` : '<span class="driver-calendar__blank" aria-hidden="true"></span>').join("");
+    return `<section class="driver-calendar" aria-labelledby="driverCalendarTitle"><header><div><span>Availability</span><h2 id="driverCalendarTitle">${monthLabel(visibleMonth.year, visibleMonth.month)}</h2></div><div><button type="button" data-calendar-move="-1" aria-label="Previous month">${icon("chevron-left")}</button><button type="button" data-calendar-today>Today</button><button type="button" data-calendar-move="1" aria-label="Next month">${icon("chevron-right")}</button></div></header><p>Select every day when you are available to drive. Available days are shown in green.</p><div class="driver-calendar__weekdays" aria-hidden="true">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(day=>`<span>${day}</span>`).join("")}</div><div class="driver-calendar__grid">${cells}</div><footer><span><i></i> Available to drive</span><strong>${availableDates.size} days selected</strong></footer></section><section class="driver-month-rides"><header><span>Journeys in ${monthLabel(visibleMonth.year, visibleMonth.month)}</span><strong>${monthRides.length}</strong></header>${DriverSchedule(monthRides)}</section>`;
   };
-  const content = `<section class="driver-page-heading"><span>Working plan</span><h2>Schedule</h2><p>Your pickups and routes without calendar clutter.</p></section><div class="driver-segmented" role="tablist" aria-label="Schedule period">${Object.keys(views).map((key, index) => `<button class="${index === 0 ? "is-active" : ""}" type="button" role="tab" aria-selected="${index === 0}" data-schedule-filter="${key}">${key === "week" ? "This week" : key[0].toUpperCase() + key.slice(1)}</button>`).join("")}</div>${Object.entries(views).map(([key, list], index) => `<section data-schedule-panel="${key}"${index === 0 ? "" : " hidden"}>${DriverSchedule(list)}</section>`).join("")}`;
+  const content = `<section class="driver-page-heading"><span>Working plan</span><h2>Schedule</h2><p>Set the days when you are available and review your assigned journeys.</p></section><div data-driver-calendar>${await renderCalendar()}</div>`;
   await withLayout({ active: "schedule", title: "Schedule", subtitle: "Driver calendar", content });
-  document.querySelectorAll("[data-schedule-filter]").forEach((button) => button.addEventListener("click", () => {
-    document.querySelectorAll("[data-schedule-filter]").forEach((item) => { const selected = item === button; item.classList.toggle("is-active", selected); item.setAttribute("aria-selected", String(selected)); });
-    document.querySelectorAll("[data-schedule-panel]").forEach((panel) => { panel.hidden = panel.dataset.schedulePanel !== button.dataset.scheduleFilter; });
-  }));
+  const calendarRoot = document.querySelector("[data-driver-calendar]");
+  const updateCalendar = async () => { calendarRoot.innerHTML = await renderCalendar(); bindCalendar(); refreshIcons(); };
+  const bindCalendar = () => {
+    calendarRoot.querySelectorAll("[data-calendar-move]").forEach(button=>button.addEventListener("click",async()=>{visibleMonth=shiftedMonth(visibleMonth.year,visibleMonth.month,Number(button.dataset.calendarMove));await updateCalendar();}));
+    calendarRoot.querySelector("[data-calendar-today]")?.addEventListener("click",async()=>{const today=new Date();visibleMonth={year:today.getFullYear(),month:today.getMonth()};await updateCalendar();});
+    calendarRoot.querySelectorAll("[data-availability-date]").forEach(button=>button.addEventListener("click",async()=>{button.disabled=true;try{await setDriverAvailabilityDay(button.dataset.availabilityDate,button.getAttribute("aria-pressed")!=="true");await updateCalendar();toast("Availability calendar updated.");}catch(error){button.disabled=false;toast(error.message);}}));
+  };
+  bindCalendar();
 }
 
 async function renderPassengerPage() {

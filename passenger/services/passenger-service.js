@@ -1,9 +1,10 @@
 import { currentProfile, supabase } from "../../shared/supabase-client.js";
 import { mapRide, rideSelect } from "../../shared/services/ride-mapper.js";
+import { nearestUpcomingRide } from "../../shared/ride-selection.js";
 const fail=(error)=>{if(error)throw error;};
 export async function getPassenger(){const p=await currentProfile();if(!p)throw new Error("Authentication required");const{data}=await supabase.from("passenger_preferences").select("*").eq("passenger_id",p.id).maybeSingle();return{id:p.id,firstName:p.first_name,lastName:p.last_name,email:p.email,phone:p.phone,savedPlaces:[],preferences:data?{atmosphere:data.ride_atmosphere||"normal",temperature:data.temperature||21,music:data.music||"none",water:data.water||"no_preference",airportNameSign:data.name_sign,notes:data.notes}:{atmosphere:"normal",temperature:21,music:"none",water:"no_preference",airportNameSign:false}};}
 async function rides(){const{data,error}=await supabase.from("rides").select(rideSelect).order("scheduled_start_at",{ascending:false});fail(error);return(data||[]).map(mapRide);}
-export async function getCurrentRide(){return(await rides()).find(r=>!["completed","cancelled","declined"].includes(r.status))||null;}
+export async function getCurrentRide(){return nearestUpcomingRide(await rides());}
 export const getPassengerTrips=rides;
 export async function getRideById(id){const{data,error}=await supabase.from("rides").select(rideSelect).eq("id",id).maybeSingle();fail(error);return mapRide(data);}
 export async function getRideRequests(){return(await rides()).filter(r=>["request_received","under_review","offer_sent"].includes(r.status));}
