@@ -890,6 +890,11 @@ function initScrollHero() {
   let lastSeekAt = 0;
   let primed = false;
   let videoObjectUrl = "";
+  let autoplayElapsed = 0;
+  let lastAutoplayFrame = 0;
+  let manualScroll = false;
+  let touchStartY = null;
+  const autoplayDuration = 26000;
   const usesSafariMediaEngine =
     /AppleWebKit/i.test(navigator.userAgent) &&
     !/(Chrome|Chromium|Edg|OPR|Android)/i.test(navigator.userAgent);
@@ -986,10 +991,10 @@ function initScrollHero() {
   };
 
   const renderStory = (progress) => {
-    const welcomeOpacity = 1 - smoothstep(0.004, 0.055, progress);
-    const firstOpacity = getSceneOpacity(progress, 0.06, 0.13, 0.27, 0.34);
-    const secondOpacity = getSceneOpacity(progress, 0.37, 0.44, 0.62, 0.69);
-    const finalOpacity = smoothstep(0.74, 0.82, progress);
+    const welcomeOpacity = 1 - smoothstep(0.13, 0.2, progress);
+    const firstOpacity = getSceneOpacity(progress, 0.18, 0.26, 0.42, 0.49);
+    const secondOpacity = getSceneOpacity(progress, 0.47, 0.55, 0.7, 0.77);
+    const finalOpacity = smoothstep(0.75, 0.86, progress);
 
     renderScene(elements.heroSceneWelcome, welcomeOpacity, 0);
     renderScene(elements.heroSceneOne, firstOpacity, -1);
@@ -1019,7 +1024,10 @@ function initScrollHero() {
       return;
     }
 
-    const progress = getProgress();
+    if (!lastAutoplayFrame) lastAutoplayFrame = timestamp;
+    if (!manualScroll) autoplayElapsed = Math.min(autoplayDuration, autoplayElapsed + Math.min(50, Math.max(0, timestamp - lastAutoplayFrame)));
+    lastAutoplayFrame = timestamp;
+    const progress = manualScroll ? getProgress() : autoplayElapsed / autoplayDuration;
     const targetTime = getVideoProgress(progress) * Math.max(0.1, duration - 0.06);
 
     // Keep only the newest scroll position. Browsers coalesce an in-flight seek,
@@ -1040,7 +1048,8 @@ function initScrollHero() {
     renderMobileVideoFraming(targetTime);
     renderStory(progress);
 
-    frameId = window.requestAnimationFrame(updateFrame);
+    if (progress < 1) frameId = window.requestAnimationFrame(updateFrame);
+    else active = false;
   };
 
   const start = () => {
@@ -1048,6 +1057,7 @@ function initScrollHero() {
       return;
     }
     active = true;
+    lastAutoplayFrame = 0;
     frameId = window.requestAnimationFrame(updateFrame);
   };
 
@@ -1057,13 +1067,31 @@ function initScrollHero() {
     elements.header?.classList.remove("is-hero-finale");
   };
 
+  const activateManualScroll = () => {
+    if (manualScroll || reduceMotion) return;
+    const progress = autoplayElapsed / autoplayDuration;
+    const heroTop = window.scrollY + scrollHero.getBoundingClientRect().top;
+    const scrollDistance = Math.max(1, scrollHero.offsetHeight - window.innerHeight);
+    manualScroll = true;
+    window.scrollTo({ top: heroTop + progress * scrollDistance, behavior: "auto" });
+    start();
+  };
+
+  window.addEventListener("wheel", activateManualScroll, { passive: true, once: true });
+  window.addEventListener("touchstart", (event) => { touchStartY = event.touches[0]?.clientY ?? null; }, { passive: true });
+  window.addEventListener("touchmove", (event) => {
+    const currentY = event.touches[0]?.clientY;
+    if (touchStartY !== null && currentY !== undefined && Math.abs(currentY - touchStartY) > 8) activateManualScroll();
+  }, { passive: true });
+  window.addEventListener("scroll", () => { if (manualScroll) start(); }, { passive: true });
+
   scrollVideo.addEventListener("loadedmetadata", () => {
     duration = Number.isFinite(scrollVideo.duration) ? scrollVideo.duration : duration;
     mediaReady = true;
     scrollVideo.pause();
     scrollVideo.currentTime = reduceMotion
-      ? 0.01
-      : getVideoProgress(getProgress()) * Math.max(0.1, duration - 0.06);
+      ? Math.max(0.1, duration - 0.06)
+      : getVideoProgress(autoplayElapsed / autoplayDuration) * Math.max(0.1, duration - 0.06);
     renderMobileVideoFraming(scrollVideo.currentTime);
   });
 
@@ -1075,7 +1103,7 @@ function initScrollHero() {
     primed = true;
     scrollVideo.pause();
     scrollVideo.currentTime =
-      getVideoProgress(getProgress()) * Math.max(0.1, duration - 0.06);
+      getVideoProgress(autoplayElapsed / autoplayDuration) * Math.max(0.1, duration - 0.06);
   };
 
   scrollVideo.addEventListener("canplay", primeDecoder, { once: true });
@@ -1102,7 +1130,7 @@ function initScrollHero() {
       scrollVideo.load();
     } else if (scrollVideo.readyState >= 1) {
       mediaReady = true;
-      const progress = getProgress();
+      const progress = autoplayElapsed / autoplayDuration;
       const targetTime = getVideoProgress(progress) * Math.max(0.1, duration - 0.06);
       scrollVideo.pause();
       scrollVideo.currentTime = targetTime;
