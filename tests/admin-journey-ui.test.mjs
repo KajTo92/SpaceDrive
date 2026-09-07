@@ -18,6 +18,18 @@ test("request views expose the passenger vehicle choice", () => {
   assert.match(app, /requested-vehicle-callout/);
 });
 
+test("confirmed requests stay in the inbox until driver and vehicle are assigned", () => {
+  assert.match(service, /"offer_sent","confirmed","declined"/);
+  assert.match(service, /ride\.status!=="confirmed"\|\|!ride\.driverId\|\|!ride\.vehicleId/);
+  assert.match(service, /p_driver:driverId\|\|null,p_vehicle:ride\.vehicleId\|\|null/);
+  assert.match(service, /p_driver:ride\.driverId\|\|null,p_vehicle:vehicleId\|\|null/);
+});
+
+test("confirmed journeys without a complete assignment receive a critical overlay", () => {
+  assert.match(app, /ride\.status === "confirmed" && \(!ride\.driverId \|\| !ride\.vehicleId\)/);
+  assert.match(app, /journey-row--needs-assignment/);
+});
+
 test("driver assignment checks the selected calendar day", () => {
   assert.match(service, /driver_availability_days/);
   assert.match(service, /Not marked available on/);
