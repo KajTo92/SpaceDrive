@@ -9,7 +9,7 @@
     <link rel="icon" href="spacedrive-monogram.png" type="image/png" />
     <link rel="preload" href="scroll-poster.jpg?v=2" as="image" type="image/jpeg" />
     <link rel="preload" href="spacedrive-monogram-header.png" as="image" type="image/png" />
-    <link rel="stylesheet" href="styles.css?v=23" />
+    <link rel="stylesheet" href="styles.css?v=25" />
   </head>
   <body>
     <div class="site-loader" data-loader role="status" aria-live="polite">
@@ -99,7 +99,10 @@
                 <label class="public-schedule-field"><span data-i18n="returnDateLabel">Return date</span><span class="public-schedule-control" data-public-picker><i data-lucide="calendar-days" aria-hidden="true"></i><input id="returnDate" type="date" name="returnDate"></span></label>
                 <label class="public-schedule-field"><span data-i18n="returnTimeLabel">Return time</span><span class="public-schedule-control" data-public-picker><i data-lucide="clock-3" aria-hidden="true"></i><select id="returnTime" name="returnTime"><option value="">--:--</option></select></span></label>
               </div>
-              <fieldset class="public-booking-fieldset"><legend data-i18n="luggageLabel">Luggage</legend><div class="public-luggage-stepper"><button type="button" data-public-luggage="-1" aria-label="Remove one piece of luggage"><i data-lucide="minus"></i></button><output id="luggageCount">1</output><span id="luggageUnit">piece</span><button type="button" data-public-luggage="1" aria-label="Add one piece of luggage"><i data-lucide="plus"></i></button></div></fieldset>
+              <div class="public-party-fields">
+                <fieldset class="public-booking-fieldset"><legend data-i18n="passengersLabel">Passengers</legend><div class="public-booking-stepper"><button type="button" data-public-passengers="-1" aria-label="Remove one passenger"><i data-lucide="minus"></i></button><output id="passengerCount">1</output><span id="passengerUnit">passenger</span><button type="button" data-public-passengers="1" aria-label="Add one passenger"><i data-lucide="plus"></i></button></div></fieldset>
+                <fieldset class="public-booking-fieldset"><legend data-i18n="luggageLabel">Luggage</legend><div class="public-booking-stepper"><button type="button" data-public-luggage="-1" aria-label="Remove one piece of luggage"><i data-lucide="minus"></i></button><output id="luggageCount">1</output><span id="luggageUnit">piece</span><button type="button" data-public-luggage="1" aria-label="Add one piece of luggage"><i data-lucide="plus"></i></button></div></fieldset>
+              </div>
               <fieldset class="public-booking-fieldset"><legend data-i18n="vehicleLabel">Choose your vehicle</legend><div class="public-vehicles">
                 <label class="public-vehicle"><input type="radio" name="vehicle" value="Tesla Model Y" checked><span><img src="y2025.png" alt="Tesla Model Y" width="1200" height="800"><strong>Tesla Model Y</strong><small>Up to 4 passengers</small></span></label>
                 <label class="public-vehicle"><input type="radio" name="vehicle" value="Mercedes V-Class"><span><img src="vclass.png" alt="Mercedes V-Class" width="1200" height="800"><strong>Mercedes V-Class</strong><small>Up to 7 passengers</small></span></label>
@@ -121,6 +124,6 @@
       </section>
     </main>
     <footer class="site-footer" data-post-booking hidden><div class="footer-brand" aria-label="Space Drive"><img src="spacedrive-monogram-header.png" alt="" width="426" height="640" /><span>Space Drive</span></div><p data-i18n="footerText">Private chauffeur service across Switzerland.</p><div class="footer-links"><a href="info.html" data-i18n="navInfo">Info</a></div></footer>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script><script type="module" src="app.js?v=18"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script><script type="module" src="app.js?v=19"></script>
   </body>
 </html>

@@ -1,4 +1,3 @@
-import { supabase } from "./shared/supabase-client.js";
 import headerLogoUrl from "./spacedrive-monogram-header.png";
 import scrollVideoUrl from "./scrollnowy.mp4?url";
 const INQUIRY_EMAIL = "jan@spacecode.ch";
@@ -53,7 +52,7 @@ const translations = {
     calculated: "Estimated transfer price. Final quote will be confirmed by SpaceDrive.",
     geocodeError: "Route distance could not be calculated. You can still send the inquiry.",
     missingRoute: "Please enter both pickup and destination.",
-    missingContact: "Please enter your name and telephone number.",
+    missingContact: "Please enter your name, email address and telephone number.",
     searchingPlaces: "Searching...",
     noPlaces: "No matching place found",
     baseFare: "Base fare",
@@ -76,6 +75,7 @@ const translations = {
     timeLabel: "Time",
     returnDateLabel: "Return date",
     returnTimeLabel: "Return time",
+    passengersLabel: "Passengers",
     luggageLabel: "Luggage",
     vehicleLabel: "Choose your vehicle",
     footerText: "Private chauffeur service across Switzerland.",
@@ -113,8 +113,8 @@ const translations = {
     fleetText: "Modern comfort for city transfers and long-distance journeys.",
     fleetVClassCapacity: "7 seater",
     infoCta: "Your next journey starts here.",
-    whatsappMessage: ({ pickup, destination, distance, duration, price, name, telephone, vehicle, pickupDate, pickupTime, bothWays, returnDate, returnTime, luggage }) =>
-      `Hello SpaceDrive, I would like to request a transfer.\n\nName: ${name}\nTelephone: ${telephone}\nPickup: ${pickup}\nDestination: ${destination}\nDate: ${pickupDate} at ${pickupTime}${bothWays ? `\nReturn: ${returnDate} at ${returnTime}` : ""}\nVehicle: ${vehicle}\nLuggage: ${luggage}\nDistance: ${distance}\nTravel time: ${duration}\nEstimated price: ${price}\n\nPlease send me availability and a final quote.`,
+    whatsappMessage: ({ pickup, destination, distance, duration, price, name, email, telephone, vehicle, pickupDate, pickupTime, flightNumber, bothWays, returnDate, returnTime, passengers, luggage }) =>
+      `Hello SpaceDrive, I would like to request a transfer.\n\nName: ${name}\nEmail: ${email}\nTelephone: ${telephone}\nPickup: ${pickup}\nDestination: ${destination}\nDate: ${pickupDate} at ${pickupTime}${flightNumber ? `\nFlight number: ${flightNumber}` : ""}${bothWays ? `\nReturn: ${returnDate} at ${returnTime}` : ""}\nPassengers: ${passengers}\nVehicle: ${vehicle}\nLuggage: ${luggage}\nDistance: ${distance}\nTravel time: ${duration}\nEstimated price: ${price}\n\nPlease send me availability and a final quote.`,
   },
   de: {
     skipBooking: "Direkt zur Buchung",
@@ -159,7 +159,7 @@ const translations = {
     geocodeError:
       "Die Routendistanz konnte nicht berechnet werden. Sie können die Anfrage trotzdem senden.",
     missingRoute: "Bitte geben Sie Abholort und Ziel ein.",
-    missingContact: "Bitte geben Sie Ihren Namen und Ihre Telefonnummer ein.",
+    missingContact: "Bitte geben Sie Ihren Namen, Ihre E-Mail-Adresse und Ihre Telefonnummer ein.",
     searchingPlaces: "Suche...",
     noPlaces: "Kein passender Ort gefunden",
     baseFare: "Grundpreis",
@@ -217,10 +217,11 @@ const translations = {
     timeLabel: "Uhrzeit",
     returnDateLabel: "Rückfahrdatum",
     returnTimeLabel: "Rückfahrzeit",
+    passengersLabel: "Fahrgäste",
     luggageLabel: "Gepäck",
     vehicleLabel: "Fahrzeug wählen",
-    whatsappMessage: ({ pickup, destination, distance, duration, price, name, telephone, vehicle, pickupDate, pickupTime, bothWays, returnDate, returnTime, luggage }) =>
-      `Hallo SpaceDrive, ich möchte einen Transfer anfragen.\n\nName: ${name}\nTelefon: ${telephone}\nAbholung: ${pickup}\nZiel: ${destination}\nDatum: ${pickupDate} um ${pickupTime}${bothWays ? `\nRückfahrt: ${returnDate} um ${returnTime}` : ""}\nFahrzeug: ${vehicle}\nGepäck: ${luggage}\nDistanz: ${distance}\nFahrzeit: ${duration}\nGeschätzter Preis: ${price}\n\nBitte senden Sie mir Verfügbarkeit und ein finales Angebot.`,
+    whatsappMessage: ({ pickup, destination, distance, duration, price, name, email, telephone, vehicle, pickupDate, pickupTime, flightNumber, bothWays, returnDate, returnTime, passengers, luggage }) =>
+      `Hallo SpaceDrive, ich möchte einen Transfer anfragen.\n\nName: ${name}\nE-Mail: ${email}\nTelefon: ${telephone}\nAbholung: ${pickup}\nZiel: ${destination}\nDatum: ${pickupDate} um ${pickupTime}${flightNumber ? `\nFlugnummer: ${flightNumber}` : ""}${bothWays ? `\nRückfahrt: ${returnDate} um ${returnTime}` : ""}\nFahrgäste: ${passengers}\nFahrzeug: ${vehicle}\nGepäck: ${luggage}\nDistanz: ${distance}\nFahrzeit: ${duration}\nGeschätzter Preis: ${price}\n\nBitte senden Sie mir Verfügbarkeit und ein finales Angebot.`,
   },
 };
 
@@ -250,6 +251,7 @@ const elements = {
   returnSchedule: document.querySelector("#returnSchedule"),
   returnDate: document.querySelector("#returnDate"),
   returnTime: document.querySelector("#returnTime"),
+  passengerCount: document.querySelector("#passengerCount"),
   luggageCount: document.querySelector("#luggageCount"),
   langButtons: document.querySelectorAll(".lang-button"),
   navItems: document.querySelectorAll(".nav-item"),
@@ -492,6 +494,7 @@ function getBookingDetails() {
     bothWays: elements.bothWays.checked,
     returnDate: elements.returnDate.value,
     returnTime: elements.returnTime.value,
+    passengers: Number(elements.passengerCount.value || 1),
     luggage: Number(elements.luggageCount.value || 1),
   };
 }
@@ -751,20 +754,14 @@ async function handleRouteSubmit(event) {
   }
 }
 
-async function openEmail() {
+function openEmail() {
   const payload = getInquiryPayload();
 
   if (!payload) {
     return;
   }
 
-  elements.email.disabled = true;
-  setNote("Sending your request…");
-  const start = new Date(`${payload.pickupDate}T${payload.pickupTime}:00`);
-  const numericPrice = Number(String(payload.price || "").replace(/[^0-9.]/g, "")) || null;
-  const { error } = await supabase.rpc("submit_ride_request", { payload: { service_type: "transfer", scheduled_start_at: start.toISOString(), scheduled_end_at: new Date(start.getTime() + 90 * 60000).toISOString(), duration_minutes: 90, customer_name: payload.name, customer_email: payload.email, customer_phone: payload.telephone, pickup_name: payload.pickup.split(",")[0], pickup_address: payload.pickup, pickup_latitude: payload.origin?.lat, pickup_longitude: payload.origin?.lon, destination_name: payload.destination.split(",")[0], destination_address: payload.destination, destination_latitude: payload.target?.lat, destination_longitude: payload.target?.lon, passenger_count: 1, luggage: `${payload.luggage} pieces`, flight_number: payload.flightNumber, requested_vehicle_class: payload.vehicle, estimated_price: numericPrice, currency: "CHF", special_requests: payload.bothWays ? `Return ${payload.returnDate} at ${payload.returnTime}` : "" } });
-  elements.email.disabled = false;
-  setNote(error ? `We could not submit the request: ${error.message}` : "Request received. Space Drive will send your final offer shortly.", !!error);
+  window.location.href = getMailtoUrl(payload);
 }
 
 function initNavigation() {
@@ -1233,6 +1230,7 @@ function populateQuarterHourOptions(select) {
 
 function initPublicBookingOptions() {
   const today = new Date().toISOString().slice(0, 10);
+  let passengers = 1;
   let luggage = 1;
   [elements.pickupTime, elements.returnTime].forEach(populateQuarterHourOptions);
   elements.pickupDate.min = today;
@@ -1284,6 +1282,12 @@ function initPublicBookingOptions() {
     luggage = Math.min(8, Math.max(0, luggage + Number(button.dataset.publicLuggage)));
     elements.luggageCount.value = String(luggage);
     document.querySelector("#luggageUnit").textContent = luggage === 1 ? "piece" : "pieces";
+  }));
+
+  document.querySelectorAll("[data-public-passengers]").forEach((button) => button.addEventListener("click", () => {
+    passengers = Math.min(7, Math.max(1, passengers + Number(button.dataset.publicPassengers)));
+    elements.passengerCount.value = String(passengers);
+    document.querySelector("#passengerUnit").textContent = passengers === 1 ? "passenger" : "passengers";
   }));
 
   document.querySelectorAll('[name="vehicle"]').forEach((input) => input.addEventListener("change", refreshPublicPrice));
