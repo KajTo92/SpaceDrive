@@ -52,6 +52,7 @@ import {
 const app = document.querySelector("#passengerApp");
 const page = document.body.dataset.page || "home";
 const root = document.body.dataset.root || "../";
+let activeTripFilter = "upcoming";
 setPassengerRoot(root);
 await requireRole(["passenger", "admin"], `${root}login.html`);
 
@@ -129,13 +130,15 @@ async function renderTrips() {
   const trips = await getPassengerTrips();
   const upcoming = trips.filter((ride) => !["completed", "cancelled"].includes(ride.status));
   const completed = trips.filter((ride) => ride.status === "completed");
+  if (activeTripFilter === "completed" && !completed.length) activeTripFilter = "upcoming";
   const content = `
     <section class="page-heading"><p>Your journeys</p><h2>My trips</h2><span>Every confirmed and completed Space Drive journey in one place.</span></section>
-    <div class="segmented-control" role="tablist" aria-label="Trip filter"><button class="is-active" type="button" role="tab" aria-selected="true" data-trip-filter="upcoming">Upcoming <span>${upcoming.length}</span></button><button type="button" role="tab" aria-selected="false" data-trip-filter="completed">Completed <span>${completed.length}</span></button></div>
-    <section class="trip-list" data-trip-panel="upcoming">${upcoming.length ? upcoming.map((ride) => RideCard(ride)).join("") : EmptyState("No upcoming journeys", "Your next journey starts here.")}</section>
-    <section class="trip-list" data-trip-panel="completed" hidden>${completed.length ? completed.map((ride) => RideCard(ride, true)).join("") : EmptyState("No completed journeys", "Completed rides will be saved here.", "check")}</section>`;
+    <div class="segmented-control" role="tablist" aria-label="Trip filter"><button class="${activeTripFilter === "upcoming" ? "is-active" : ""}" type="button" role="tab" aria-selected="${activeTripFilter === "upcoming"}" data-trip-filter="upcoming">Upcoming <span>${upcoming.length}</span></button><button class="${activeTripFilter === "completed" ? "is-active" : ""}" type="button" role="tab" aria-selected="${activeTripFilter === "completed"}" data-trip-filter="completed">Completed <span>${completed.length}</span></button></div>
+    <section class="trip-list" data-trip-panel="upcoming"${activeTripFilter === "upcoming" ? "" : " hidden"}>${upcoming.length ? upcoming.map((ride) => RideCard(ride)).join("") : EmptyState("No upcoming journeys", "Your next journey starts here.")}</section>
+    <section class="trip-list" data-trip-panel="completed"${activeTripFilter === "completed" ? "" : " hidden"}>${completed.length ? completed.map((ride) => RideCard(ride, true)).join("") : EmptyState("No completed journeys", "Completed rides will be saved here.", "check")}</section>`;
   await withLayout({ active: "trips", title: "Trips", subtitle: "Journey history", content });
   document.querySelectorAll("[data-trip-filter]").forEach((button) => button.addEventListener("click", () => {
+    activeTripFilter = button.dataset.tripFilter;
     document.querySelectorAll("[data-trip-filter]").forEach((item) => { const active = item === button; item.classList.toggle("is-active", active); item.setAttribute("aria-selected", String(active)); });
     document.querySelectorAll("[data-trip-panel]").forEach((panel) => { panel.hidden = panel.dataset.tripPanel !== button.dataset.tripFilter; });
   }));
@@ -1143,4 +1146,11 @@ async function render() {
 
 render();
 let passengerRealtimeTimer;
-subscribeToPassengerRides(() => { clearTimeout(passengerRealtimeTimer); passengerRealtimeTimer = setTimeout(render, 120); });
+const refreshPassengerPortal = (event) => {
+  if (page === "trips" && event?.new?.status === "completed") activeTripFilter = "completed";
+  clearTimeout(passengerRealtimeTimer);
+  passengerRealtimeTimer = setTimeout(render, 120);
+};
+subscribeToPassengerRides(refreshPassengerPortal);
+window.addEventListener("focus", () => refreshPassengerPortal());
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refreshPassengerPortal(); });

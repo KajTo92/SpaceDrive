@@ -1,7 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { EmptyState, JourneyServiceMedia, NextJourneyCard, PassengerLayout, RideCard, assetUrl, setPassengerRoot } from "../passenger/components/passenger-components.js";
 import { nearestUpcomingRide } from "../shared/ride-selection.js";
+
+const passengerAppSource = readFileSync(new URL("../passenger/passenger-app.js", import.meta.url), "utf8");
 
 test("dashboard selects the nearest future journey instead of the last-created one", () => {
   const rides = [
@@ -166,4 +169,10 @@ test("trip cards distinguish fully confirmed and awaiting journeys", () => {
   assert.match(confirmed, /Confirmed/);
   assert.match(awaiting, /ride-card--pending/);
   assert.match(awaiting, /Awaiting confirmation/);
+});
+
+test("My Trips opens completed rides when realtime reports journey completion", () => {
+  assert.match(passengerAppSource, /event\?\.new\?\.status === "completed"/);
+  assert.match(passengerAppSource, /activeTripFilter = "completed"/);
+  assert.match(passengerAppSource, /visibilitychange/);
 });
