@@ -37,16 +37,16 @@ export function AdminLayout({ active, title, subtitle, notifications = [], conte
       <aside class="admin-sidebar" aria-label="Dispatch navigation">
         <a class="admin-brand" href="${adminUrl()}"><img src="${assetUrl("spacedrive-monogram-header.png")}" alt="" width="426" height="640"><span>Space Drive<small>Control Center</small></span></a>
         <nav class="admin-nav">${links}</nav>
-        <div class="admin-sidebar__footer"><span>Operations</span><strong>Dispatch online</strong><a href="${rootPath}login.html" data-admin-signout>${icon("log-out")} Sign out</a></div>
       </aside>
       <div class="admin-workspace">
         <header class="admin-header">
           <button class="admin-mobile-menu" type="button" aria-label="Open navigation" aria-expanded="false" data-admin-menu>${icon("menu")}</button>
           <div class="admin-header__title"><span>${escapeHtml(subtitle || "Dispatch operations")}</span><h1>${escapeHtml(title)}</h1></div>
-          <div class="admin-header__actions"><button class="admin-icon-button" type="button" aria-label="Open notifications" aria-expanded="false" data-notification-trigger>${icon("bell")}${unread ? `<span>${unread}</span>` : ""}</button><div class="admin-profile"><span>AR</span><div><strong>Admin</strong><small>Dispatcher</small></div></div></div>
+          <div class="admin-header__actions"><button class="admin-icon-button" type="button" aria-label="Open notifications" aria-expanded="false" data-notification-trigger>${icon("bell")}${unread ? `<span>${unread}</span>` : ""}</button><div class="admin-account-wrap"><button class="admin-profile" type="button" aria-label="Open admin account menu" aria-expanded="false" data-admin-account><span>AR</span><div><strong>Admin</strong><small>Dispatcher</small></div>${icon("chevron-down")}</button><div class="admin-account-menu" data-admin-account-menu hidden><button type="button" data-admin-signout>${icon("log-out")} Sign out</button></div></div></div>
         </header>
         <main class="admin-content" id="adminContent">${content}</main>
       </div>
+      <nav class="admin-mobile-nav" aria-label="Dispatch navigation">${links}</nav>
       <div class="admin-sidebar-scrim" data-admin-menu-close hidden></div>
       ${NotificationCenter(notifications)}
     </div>`;

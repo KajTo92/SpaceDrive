@@ -9,7 +9,7 @@ import { journeyRoute as journeyRouteData, serviceType, serviceTypeLabel } from 
 import {
   ActivityLog, AdminLayout, DriverAssignmentSelector, EmptyState, ErrorState, LoadingSkeleton, Modal, PageHeading, StatusBadge,
   VehicleAssignmentSelector, adminUrl, assetUrl, escapeHtml, formatDate, formatMoney, icon, initials, setAdminRoot, statusLabel,
-} from "./components/admin-components.js?v=2";
+} from "./components/admin-components.js?v=3";
 import "./admin-overrides.css";
 import { calendarCells, dateKey, monthBounds, monthLabel, shiftedMonth } from "../shared/availability-calendar.js";
 
@@ -59,8 +59,14 @@ function bindLayout() {
   const setNotifications = (open) => { center?.classList.toggle("is-open", open); center?.setAttribute("aria-hidden", String(!open)); trigger?.setAttribute("aria-expanded", String(open)); if (notificationScrim) notificationScrim.hidden = !open; };
   trigger?.addEventListener("click", () => setNotifications(true));
   document.querySelectorAll("[data-notification-close]").forEach((button) => button.addEventListener("click", () => setNotifications(false)));
+  const accountWrap = document.querySelector(".admin-account-wrap");
+  const accountTrigger = document.querySelector("[data-admin-account]");
+  const accountMenu = document.querySelector("[data-admin-account-menu]");
+  const setAccountMenu = (open) => { if (accountMenu) accountMenu.hidden = !open; accountTrigger?.setAttribute("aria-expanded", String(open)); };
+  accountTrigger?.addEventListener("click", () => setAccountMenu(accountMenu?.hidden ?? true));
+  accountWrap?.addEventListener("focusout", (event) => { if (!accountWrap.contains(event.relatedTarget)) setAccountMenu(false); });
   document.querySelector("[data-admin-signout]")?.addEventListener("click", signOut);
-  document.addEventListener("keydown", (event) => { if (event.key === "Escape") { setMenu(false); setNotifications(false); closeAllModals(); } }, { once: true });
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape") { setMenu(false); setNotifications(false); setAccountMenu(false); closeAllModals(); } }, { once: true });
   refreshIcons();
 }
 

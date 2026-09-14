@@ -1,5 +1,4 @@
 import {
-  getDriverAvailability,
   getDriverCurrentRide,
   getDriverNotifications,
   getDriverProfile,
@@ -9,7 +8,6 @@ import {
   getDriverAvailabilityDays,
   reportRideIssue,
   setDriverAvailabilityDay,
-  updateDriverAvailability,
   updateRideStatus,
   subscribeToDriverRides,
   deleteJourney,
@@ -24,6 +22,7 @@ import { calendarCells, dateKey, monthBounds, monthLabel, shiftedMonth } from ".
 import {
   DriverLayout,
   DriverMissionCard,
+  DriverNextJourneyEmpty,
   DriverServiceBadge,
   DriverRideAction,
   DriverRideCard,
@@ -45,7 +44,7 @@ import {
   formatDate,
   icon,
   setDriverRoot,
-} from "./components/driver-components.js?v=9";
+} from "./components/driver-components.js?v=10";
 
 const app = document.querySelector("#driverApp");
 const page = document.body.dataset.page || "home";
@@ -99,8 +98,8 @@ function ensureLocationController(ride) {
 }
 
 async function withLayout({ active, title, subtitle, content }) {
-  const [driver, notifications, availability] = await Promise.all([getDriverProfile(), getDriverNotifications(), getDriverAvailability()]);
-  app.innerHTML = DriverLayout({ active, title, subtitle, driver, availability, notifications, content });
+  const [driver, notifications] = await Promise.all([getDriverProfile(), getDriverNotifications()]);
+  app.innerHTML = DriverLayout({ active, title, subtitle, driver, notifications, content });
   bindSharedInteractions();
 }
 
@@ -123,11 +122,6 @@ function bindSharedInteractions() {
   accountTrigger?.addEventListener("click", (event) => { event.stopPropagation(); setAccountMenu(accountMenu.hidden); });
   document.querySelector("[data-account-signout]")?.addEventListener("click", signOut);
   document.addEventListener("click", (event) => { if (!event.target.closest(".driver-account-wrap")) setAccountMenu(false); });
-  document.querySelectorAll("[data-driver-availability]").forEach((select) => select.addEventListener("change", async () => {
-    const status = await updateDriverAvailability(select.value);
-    document.querySelectorAll("[data-driver-availability]").forEach((item) => { item.value = status; item.parentElement.className = `availability-control availability-control--${status}`; });
-    toast(`Driver status changed to ${statusLabel(status)}.`);
-  }));
   document.addEventListener("keydown", (event) => { if (event.key === "Escape") { setNotificationsOpen(false); setAccountMenu(false); } }, { once: true });
   bindRideInteractions();
   refreshIcons();
@@ -226,9 +220,8 @@ async function renderHome() {
   const [currentRide, rides] = await Promise.all([getDriverCurrentRide(), getDriverRides()]);
   activeRide = currentRide;
   if (!currentRide) {
-    const availability = await getDriverAvailability();
-    await withLayout({ active: "home", title: "Mission control", subtitle: "Driver portal", content: availability === "offline" ? `${EmptyState("You're currently offline", "Go available when you are ready to receive journey assignments.", "power")}<button class="driver-primary-button" type="button" data-go-available>Go available</button>` : EmptyState("No rides today", "You're all clear for now.", "calendar-check") });
-    document.querySelector("[data-go-available]")?.addEventListener("click", async () => { await updateDriverAvailability("available"); render(); });
+    const content = `<section class="driver-page-intro"><div><span>You're online</span><h2>Ready for the next journey.</h2></div></section><div class="driver-home-grid driver-home-grid--empty"><div>${DriverNextJourneyEmpty()}</div></div>`;
+    await withLayout({ active: "home", title: "Mission control", subtitle: "Driver portal", content });
     return;
   }
   const controller = ensureLocationController(currentRide);
@@ -313,12 +306,12 @@ async function renderPassengerPage() {
 }
 
 async function renderProfile() {
-  const [driver, availability] = await Promise.all([getDriverProfile(), getDriverAvailability()]);
+  const driver = await getDriverProfile();
   const currentRide = await getDriverCurrentRide();
   activeRide = currentRide;
   const location = ensureLocationController(currentRide).getState();
   const vehicle = currentRide?.vehicle;
-  const content = `<section class="driver-profile-hero"><img src="${assetUrl(driver.photo)}" alt="Portrait of ${driver.name}"><div><span>Driver profile</span><h2>${driver.name}</h2><p>${driver.email}</p></div></section><section class="driver-profile-grid"><article class="driver-setting-card"><header>${icon("id-card")}<div><span>Personal information</span><h2>${driver.name}</h2></div></header><dl><div><dt>Role</dt><dd>${driver.role}</dd></div><div><dt>Languages</dt><dd>${driver.languages.join(", ")}</dd></div><div><dt>Driver status</dt><dd>${statusLabel(getDriverAvailability())}</dd></div></dl></article>${vehicle ? `<article class="driver-setting-card vehicle-assignment"><header>${icon("car-front")}<div><span>Assigned vehicle</span><h2>${vehicle.brand} ${vehicle.model}</h2></div></header><img src="${assetUrl(vehicle.image)}" alt="${vehicle.brand} ${vehicle.model}"><dl><div><dt>Class</dt><dd>${vehicle.category}</dd></div><div><dt>Plate</dt><dd>${vehicle.plate || "Not assigned"}</dd></div></dl></article>` : EmptyState("No assigned vehicle", "Dispatch has not assigned a vehicle yet.", "car-front")}${LocationPermissionCard(location.permission, location.isTracking)}<article class="driver-setting-card"><header>${icon("bell")}<div><span>Notifications</span><h2>Journey updates</h2></div></header><label class="driver-setting-row"><span><strong>Operational updates</strong><small>Assignments, pickup changes and flight updates</small></span><input type="checkbox" checked aria-label="Operational updates"></label></article><article class="driver-setting-card"><header>${icon("shield-check")}<div><span>Security</span><h2>Driver account</h2></div></header><p>Authentication and device security are ready for backend connection.</p><button class="driver-secondary-button" type="button" data-demo>Security settings</button></article><article class="driver-setting-card"><header>${icon("settings-2")}<div><span>App preferences</span><h2>Driver experience</h2></div></header><label class="driver-setting-row"><span><strong>Stable mission layout</strong><small>Keep journey details visible when its status changes</small></span><input type="checkbox" checked disabled aria-label="Stable mission layout"></label></article></section>`;
+  const content = `<section class="driver-profile-hero"><img src="${assetUrl(driver.photo)}" alt="Portrait of ${driver.name}"><div><span>Driver profile</span><h2>${driver.name}</h2><p>${driver.email}</p></div></section><section class="driver-profile-grid"><article class="driver-setting-card"><header>${icon("id-card")}<div><span>Personal information</span><h2>${driver.name}</h2></div></header><dl><div><dt>Role</dt><dd>${driver.role}</dd></div><div><dt>Languages</dt><dd>${driver.languages.join(", ")}</dd></div><div><dt>Session status</dt><dd>Online</dd></div></dl></article>${vehicle ? `<article class="driver-setting-card vehicle-assignment"><header>${icon("car-front")}<div><span>Assigned vehicle</span><h2>${vehicle.brand} ${vehicle.model}</h2></div></header><img src="${assetUrl(vehicle.image)}" alt="${vehicle.brand} ${vehicle.model}"><dl><div><dt>Class</dt><dd>${vehicle.category}</dd></div><div><dt>Plate</dt><dd>${vehicle.plate || "Not assigned"}</dd></div></dl></article>` : EmptyState("No assigned vehicle", "Dispatch has not assigned a vehicle yet.", "car-front")}${LocationPermissionCard(location.permission, location.isTracking)}<article class="driver-setting-card"><header>${icon("bell")}<div><span>Notifications</span><h2>Journey updates</h2></div></header><label class="driver-setting-row"><span><strong>Operational updates</strong><small>Assignments, pickup changes and flight updates</small></span><input type="checkbox" checked aria-label="Operational updates"></label></article><article class="driver-setting-card"><header>${icon("shield-check")}<div><span>Security</span><h2>Driver account</h2></div></header><p>Authentication and device security are ready for backend connection.</p><button class="driver-secondary-button" type="button" data-demo>Security settings</button></article><article class="driver-setting-card"><header>${icon("settings-2")}<div><span>App preferences</span><h2>Driver experience</h2></div></header><label class="driver-setting-row"><span><strong>Stable mission layout</strong><small>Keep journey details visible when its status changes</small></span><input type="checkbox" checked disabled aria-label="Stable mission layout"></label></article></section>`;
   await withLayout({ active: "profile", title: "Profile", subtitle: "Driver settings", content });
   document.querySelector("[data-demo]")?.addEventListener("click", () => toast("Security settings are ready for authentication integration."));
 }

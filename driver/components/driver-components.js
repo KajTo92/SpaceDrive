@@ -16,7 +16,7 @@ export function DriverServiceBadge(ride) {
   return `<span class="driver-service-badge driver-service-badge--${service.key}">${icon(service.icon)}${service.label}</span>`;
 }
 
-export function DriverLayout({ active, title, subtitle, driver, availability, notifications, content }) {
+export function DriverLayout({ active, title, subtitle, driver, notifications, content }) {
   const unread = notifications.filter((item) => !item.read).length;
   const nav = [
     ["home", "", "house", "Home"],
@@ -32,13 +32,13 @@ export function DriverLayout({ active, title, subtitle, driver, availability, no
       <aside class="driver-sidebar" aria-label="Driver navigation">
         <a class="driver-brand" href="${driverUrl()}"><img src="${assetUrl("spacedrive-monogram-header.png")}" alt="" width="426" height="640"><span>Space Drive<small>Driver</small></span></a>
         <nav class="driver-nav">${navItems}</nav>
-        <div class="driver-sidebar__status">${DriverAvailability(availability, true)}</div>
+        <div class="driver-sidebar__status">${DriverOnlineStatus(true)}</div>
       </aside>
       <div class="driver-workspace">
         <header class="driver-header">
           <div class="driver-header__title"><span>${subtitle || "Driver portal"}</span><h1>${title}</h1></div>
           <div class="driver-header__actions">
-            <div class="header-availability">${DriverAvailability(availability)}</div>
+            <div class="header-availability">${DriverOnlineStatus()}</div>
             <button class="driver-icon-button notification-trigger" type="button" aria-label="Open notifications" aria-expanded="false" data-notification-trigger>${icon("bell")}${unread ? `<span>${unread}</span>` : ""}</button>
             <div class="driver-account-wrap"><button class="driver-profile-chip" type="button" aria-label="Open account menu" aria-expanded="false" data-account-trigger><span>${initials}</span><strong>${driver.shortName || driver.name}</strong>${icon("chevron-down")}</button><div class="driver-account-menu" data-account-menu hidden><a href="${driverUrl("profile/")}">${icon("user-round")} Profile</a><button type="button" data-account-signout>${icon("log-out")} Log out</button></div></div>
           </div>
@@ -53,6 +53,10 @@ export function DriverLayout({ active, title, subtitle, driver, availability, no
 export function DriverAvailability(status, compact = false) {
   const labels = { available: "Available", busy: "Busy", offline: "Offline" };
   return `<label class="driver-availability${compact ? " driver-availability--stack" : ""}"><span>${compact ? "Driver status" : "Status"}</span><span class="availability-control availability-control--${status}"><i aria-hidden="true"></i><select data-driver-availability aria-label="Driver status">${Object.entries(labels).map(([value, label]) => `<option value="${value}"${value === status ? " selected" : ""}>${label}</option>`).join("")}</select>${icon("chevron-down")}</span></label>`;
+}
+
+export function DriverOnlineStatus(compact = false) {
+  return `<div class="driver-availability${compact ? " driver-availability--stack" : ""}"><span>${compact ? "Session status" : "Status"}</span><span class="availability-control availability-control--available driver-online-status"><i aria-hidden="true"></i><strong>Online</strong></span></div>`;
 }
 
 export function DriverNotificationCenter(notifications) {
@@ -123,6 +127,13 @@ export function DriverMissionCard(ride) {
     <div class="driver-mission__brief"><div>${icon("user-round")}<span><small>Passenger</small><strong>${passenger}</strong></span></div><div>${icon("users-round")}<span><small>Passengers</small><strong>${ride.passengers}</strong></span></div><div>${icon("luggage")}<span><small>Luggage</small><strong>${ride.luggage || "Not provided"}</strong></span></div><div>${icon("plane")}<span><small>Flight</small><strong>${ride.flight?.flightNumber || ride.flightNumber || "Not provided"}</strong></span></div></div>
     <div class="driver-mission__status"><span>Journey progress</span><div data-journey-progress>${JourneyStatus(ride.status)}</div></div>
     ${DriverRideAction(ride)}
+  </section>`;
+}
+
+export function DriverNextJourneyEmpty() {
+  return `<section class="driver-mission driver-mission--empty" aria-labelledby="nextJourneyTitle">
+    <header class="driver-mission__header"><div><span>Next journey</span><p>Waiting for assignment</p></div><span class="driver-status-badge driver-status-badge--online"><i aria-hidden="true"></i> Online</span></header>
+    <div class="driver-mission-empty"><span>${icon("calendar-clock")}</span><div><h2 id="nextJourneyTitle">No journey assigned</h2><p>Your next assigned journey will appear here with its date, route and passenger details.</p></div></div>
   </section>`;
 }
 
