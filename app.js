@@ -1,5 +1,6 @@
 import headerLogoUrl from "./spacedrive-monogram-header.png";
 import scrollVideoUrl from "./scrollnowy.mp4?url";
+import scrollMobileVideoUrl from "./scrollmobile.mp4?url";
 const INQUIRY_EMAIL = "jan@spacecode.ch";
 const SHORT_DISTANCE_LIMIT_KM = 20;
 const VEHICLE_RATES = {
@@ -891,13 +892,17 @@ function initScrollHero() {
   let lastAutoplayFrame = 0;
   let manualScroll = false;
   let touchStartY = null;
+  const mobileScrollVideo = window.matchMedia("(max-aspect-ratio: 1/1)");
+  let activeVideoSourceUrl = mobileScrollVideo.matches ? scrollMobileVideoUrl : scrollVideoUrl;
+  let videoLoadVersion = 0;
   const autoplayDuration = 26000;
   const usesSafariMediaEngine =
     /AppleWebKit/i.test(navigator.userAgent) &&
     !/(Chrome|Chromium|Edg|OPR|Android)/i.test(navigator.userAgent);
 
   const loadSeekableVideo = async () => {
-    const sourceUrl = scrollVideoUrl;
+    const sourceUrl = activeVideoSourceUrl;
+    const loadVersion = ++videoLoadVersion;
 
     if (!sourceUrl) {
       releaseLoader();
@@ -921,10 +926,16 @@ function initScrollHero() {
       }
 
       const videoBlob = await response.blob();
+      if (loadVersion !== videoLoadVersion) {
+        return;
+      }
       videoObjectUrl = URL.createObjectURL(videoBlob);
       scrollVideo.src = videoObjectUrl;
       scrollVideo.load();
     } catch (error) {
+      if (loadVersion !== videoLoadVersion) {
+        return;
+      }
       // Direct source remains a functional fallback on hosts with byte-range support.
       scrollVideo.src = sourceUrl;
       scrollVideo.preload = "auto";
@@ -965,7 +976,7 @@ function initScrollHero() {
   const mobileViewport = window.matchMedia("(max-width: 860px)");
 
   const renderMobileVideoFraming = (videoTime) => {
-    if (!mobileViewport.matches) {
+    if (!mobileViewport.matches || mobileScrollVideo.matches) {
       scrollVideo.style.removeProperty("--mobile-video-top");
       scrollVideo.style.removeProperty("--mobile-video-height");
       scrollVideo.style.removeProperty("--mobile-video-x");
@@ -986,6 +997,20 @@ function initScrollHero() {
     scrollVideo.style.setProperty("--mobile-video-height", `${(100 - zoomOut).toFixed(3)}%`);
     scrollVideo.style.setProperty("--mobile-video-x", `${horizontalPosition.toFixed(3)}%`);
   };
+
+  mobileScrollVideo.addEventListener("change", (event) => {
+    const nextSourceUrl = event.matches ? scrollMobileVideoUrl : scrollVideoUrl;
+    if (nextSourceUrl === activeVideoSourceUrl) {
+      return;
+    }
+    activeVideoSourceUrl = nextSourceUrl;
+    mediaReady = false;
+    if (videoObjectUrl) {
+      URL.revokeObjectURL(videoObjectUrl);
+      videoObjectUrl = "";
+    }
+    loadSeekableVideo();
+  });
 
   const renderStory = (progress) => {
     const welcomeOpacity = 1 - smoothstep(0.13, 0.2, progress);

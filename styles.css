@@ -366,6 +366,10 @@ html.is-loading .hero-scroll-cue, html.is-loading .hero-scroll-cue svg { animati
   .brand-mark { gap: 8px; padding-right: 12px; padding-left: 9px; }.brand-mark span { display: inline; font-size: .66rem; letter-spacing: .13em; }.booking-section { padding: 60px 12px 64px; }.booking-heading { margin-bottom: 26px; }.booking-heading h1 { font-size: clamp(2.85rem,14vw,4.2rem); }.page-intro h1 { font-size: clamp(3.35rem,17vw,5rem); }.booking-panel, .contact-panel { padding: 17px 14px; }.public-schedule, .public-party-fields, .public-vehicles { grid-template-columns: 1fr; }.route-summary { grid-template-columns: 1fr; }.route-summary div:last-child { grid-column: auto; }.rate-pair { grid-template-columns: 1fr; }.price-hero strong { font-size: 4.8rem; }.included-note { align-items: flex-start; padding: 25px 22px; }.map-wrap { min-height: 300px; }.login-main { width: calc(100% - 24px); }.login-panel { width: min(90%, 380px); justify-self: center; padding: 18px 14px; }.site-footer { padding: 42px 20px; }
 }
 
+@media (max-aspect-ratio: 1/1) {
+  .scroll-hero__video { top: 0; bottom: 0; height: 100%; object-position: center; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
