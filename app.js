@@ -888,14 +888,9 @@ function initScrollHero() {
   let lastSeekAt = 0;
   let primed = false;
   let videoObjectUrl = "";
-  let autoplayElapsed = 0;
-  let lastAutoplayFrame = 0;
-  let manualScroll = false;
-  let touchStartY = null;
   const mobileScrollVideo = window.matchMedia("(max-aspect-ratio: 1/1)");
   let activeVideoSourceUrl = mobileScrollVideo.matches ? scrollMobileVideoUrl : scrollVideoUrl;
   let videoLoadVersion = 0;
-  const autoplayDuration = 26000;
   const usesSafariMediaEngine =
     /AppleWebKit/i.test(navigator.userAgent) &&
     !/(Chrome|Chromium|Edg|OPR|Android)/i.test(navigator.userAgent);
@@ -1046,10 +1041,7 @@ function initScrollHero() {
       return;
     }
 
-    if (!lastAutoplayFrame) lastAutoplayFrame = timestamp;
-    if (!manualScroll) autoplayElapsed = Math.min(autoplayDuration, autoplayElapsed + Math.min(50, Math.max(0, timestamp - lastAutoplayFrame)));
-    lastAutoplayFrame = timestamp;
-    const progress = manualScroll ? getProgress() : autoplayElapsed / autoplayDuration;
+    const progress = getProgress();
     const targetTime = getVideoProgress(progress) * Math.max(0.1, duration - 0.06);
 
     // Keep only the newest scroll position. Browsers coalesce an in-flight seek,
@@ -1070,8 +1062,7 @@ function initScrollHero() {
     renderMobileVideoFraming(targetTime);
     renderStory(progress);
 
-    if (progress < 1) frameId = window.requestAnimationFrame(updateFrame);
-    else active = false;
+    active = false;
   };
 
   const start = () => {
@@ -1079,7 +1070,6 @@ function initScrollHero() {
       return;
     }
     active = true;
-    lastAutoplayFrame = 0;
     frameId = window.requestAnimationFrame(updateFrame);
   };
 
@@ -1089,23 +1079,7 @@ function initScrollHero() {
     elements.header?.classList.remove("is-hero-finale");
   };
 
-  const activateManualScroll = () => {
-    if (manualScroll || reduceMotion) return;
-    const progress = autoplayElapsed / autoplayDuration;
-    const heroTop = window.scrollY + scrollHero.getBoundingClientRect().top;
-    const scrollDistance = Math.max(1, scrollHero.offsetHeight - window.innerHeight);
-    manualScroll = true;
-    window.scrollTo({ top: heroTop + progress * scrollDistance, behavior: "auto" });
-    start();
-  };
-
-  window.addEventListener("wheel", activateManualScroll, { passive: true, once: true });
-  window.addEventListener("touchstart", (event) => { touchStartY = event.touches[0]?.clientY ?? null; }, { passive: true });
-  window.addEventListener("touchmove", (event) => {
-    const currentY = event.touches[0]?.clientY;
-    if (touchStartY !== null && currentY !== undefined && Math.abs(currentY - touchStartY) > 8) activateManualScroll();
-  }, { passive: true });
-  window.addEventListener("scroll", () => { if (manualScroll) start(); }, { passive: true });
+  window.addEventListener("scroll", start, { passive: true });
 
   scrollVideo.addEventListener("loadedmetadata", () => {
     duration = Number.isFinite(scrollVideo.duration) ? scrollVideo.duration : duration;
@@ -1113,7 +1087,7 @@ function initScrollHero() {
     scrollVideo.pause();
     scrollVideo.currentTime = reduceMotion
       ? Math.max(0.1, duration - 0.06)
-      : getVideoProgress(autoplayElapsed / autoplayDuration) * Math.max(0.1, duration - 0.06);
+      : getVideoProgress(getProgress()) * Math.max(0.1, duration - 0.06);
     renderMobileVideoFraming(scrollVideo.currentTime);
   });
 
@@ -1125,7 +1099,7 @@ function initScrollHero() {
     primed = true;
     scrollVideo.pause();
     scrollVideo.currentTime =
-      getVideoProgress(autoplayElapsed / autoplayDuration) * Math.max(0.1, duration - 0.06);
+      getVideoProgress(getProgress()) * Math.max(0.1, duration - 0.06);
   };
 
   scrollVideo.addEventListener("canplay", primeDecoder, { once: true });
@@ -1152,7 +1126,7 @@ function initScrollHero() {
       scrollVideo.load();
     } else if (scrollVideo.readyState >= 1) {
       mediaReady = true;
-      const progress = autoplayElapsed / autoplayDuration;
+      const progress = getProgress();
       const targetTime = getVideoProgress(progress) * Math.max(0.1, duration - 0.06);
       scrollVideo.pause();
       scrollVideo.currentTime = targetTime;
