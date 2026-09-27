@@ -9,6 +9,8 @@ const registerJs = readFileSync(new URL("../shared/register.js", import.meta.url
 test("login uses one form and routes authenticated users by profile role", () => {
   assert.equal((loginHtml.match(/data-login-form/g) || []).length, 1);
   assert.doesNotMatch(loginHtml, /data-login-tab|Login as passenger|Login as driver|Dispatch/);
+  assert.doesNotMatch(loginHtml, /Ride tracking|Welcome back/);
+  assert.match(loginHtml, /Login to request, manage and live track your rides\./);
   assert.match(loginJs, /role==="admin"\?"admin\/":role==="driver"\?"driver\/":"passenger\/"/);
 });
 
