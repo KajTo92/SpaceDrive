@@ -1301,6 +1301,7 @@ function initApp() {
 
   initLanguageSwitch();
   initNavigation();
+  initLoginTransition();
   initBookingReveal();
   initScrollHero();
 
@@ -1316,6 +1317,19 @@ function initApp() {
   if (window.lucide) {
     window.lucide.createIcons();
   }
+}
+
+function initLoginTransition() {
+  document.querySelectorAll("[data-login-transition]").forEach((link) => {
+    link.addEventListener("click", (event) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      event.preventDefault();
+      try { sessionStorage.setItem("spacedrive-login-transition", "1"); } catch {}
+      document.body.classList.add("is-login-leaving");
+      window.setTimeout(() => { location.href = link.href; }, 420);
+    });
+  });
 }
 
 initApp();
