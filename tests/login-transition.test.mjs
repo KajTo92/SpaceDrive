@@ -11,6 +11,8 @@ test("homepage login links use the cinematic page transition", () => {
   assert.equal((home.match(/data-login-transition/g) || []).length, 2);
   assert.match(app, /spacedrive-login-transition/);
   assert.match(app, /prefers-reduced-motion: reduce/);
+  assert.match(app, /addEventListener\("pageshow", resetTransition\)/);
+  assert.match(app, /setTimeout\(\(\) => \{ location\.href = link\.href; \}, 280\)/);
   assert.match(css, /login-page-out/);
   assert.match(css, /login-curtain-in/);
 });

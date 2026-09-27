@@ -1320,6 +1320,9 @@ function initApp() {
 }
 
 function initLoginTransition() {
+  const resetTransition = () => document.body.classList.remove("is-login-leaving");
+  resetTransition();
+  window.addEventListener("pageshow", resetTransition);
   document.querySelectorAll("[data-login-transition]").forEach((link) => {
     link.addEventListener("click", (event) => {
       if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -1327,7 +1330,7 @@ function initLoginTransition() {
       event.preventDefault();
       try { sessionStorage.setItem("spacedrive-login-transition", "1"); } catch {}
       document.body.classList.add("is-login-leaving");
-      window.setTimeout(() => { location.href = link.href; }, 420);
+      window.setTimeout(() => { location.href = link.href; }, 280);
     });
   });
 }
