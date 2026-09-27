@@ -7,7 +7,7 @@
     <meta name="description" content="Login to track your Space Drive journey." />
     <title>Ride tracking | Space Drive</title>
     <link rel="icon" href="spacedrive-monogram.png" type="image/png" />
-    <link rel="stylesheet" href="styles.css?v=23" />
+    <link rel="stylesheet" href="styles.css?v=24" />
   </head>
   <body class="login-page">
     <header class="site-header is-solid" data-header>
@@ -25,31 +25,15 @@
         <p data-i18n="loginIntro">Sign in to view your ride details and live status.</p>
       </section>
       <section class="login-panel" aria-label="Login">
-        <div class="login-tabs" role="tablist" aria-label="Account type">
-          <button class="login-tab is-active" id="passengerTab" type="button" role="tab" aria-selected="true" aria-controls="passengerForm" data-login-tab="passenger"><i data-lucide="user-round" aria-hidden="true"></i><span data-i18n="passengerTab">Passenger</span></button>
-          <button class="login-tab" id="driverTab" type="button" role="tab" aria-selected="false" aria-controls="driverForm" data-login-tab="driver"><i data-lucide="route" aria-hidden="true"></i><span data-i18n="driverTab">Driver</span></button>
-          <button class="login-tab" id="dispatchTab" type="button" role="tab" aria-selected="false" aria-controls="dispatchForm" data-login-tab="admin"><i data-lucide="radio-tower" aria-hidden="true"></i><span>Dispatch</span></button>
-        </div>
-        <form class="login-form" id="passengerForm" data-login-form="passenger" role="tabpanel" aria-labelledby="passengerTab">
+        <form class="login-form" data-login-form>
           <label class="field"><span data-i18n="emailLabel">Email address</span><input name="email" type="email" autocomplete="email" placeholder="you@example.com" required /></label>
           <label class="field"><span data-i18n="passwordLabel">Password</span><input name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required /></label>
-          <button class="primary-button login-submit" type="submit"><span data-i18n="passengerLoginButton">Login as passenger</span></button>
-          <a class="login-demo-link" href="register/">Create passenger account</a><a class="login-demo-link" href="#" data-forgot-password>Forgot password?</a>
-        </form>
-        <form class="login-form" id="driverForm" data-login-form="driver" role="tabpanel" aria-labelledby="driverTab" hidden>
-          <label class="field"><span>Email address</span><input name="email" type="email" autocomplete="email" placeholder="you@example.com" required /></label>
-          <label class="field"><span data-i18n="passwordLabel">Password</span><input name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required /></label>
-          <button class="primary-button login-submit" type="submit"><span data-i18n="driverLoginButton">Login as driver</span></button><a class="login-demo-link" href="driver/register/">Apply as a driver</a>
-        </form>
-        <form class="login-form" id="dispatchForm" data-login-form="admin" role="tabpanel" aria-labelledby="dispatchTab" hidden>
-          <label class="field"><span>Admin email</span><input name="email" type="email" autocomplete="username" placeholder="admin@example.com" required /></label>
-          <label class="field"><span>Password</span><input name="password" type="password" autocomplete="current-password" placeholder="Enter your password" required /></label>
-          <button class="primary-button login-submit" type="submit"><span>Open Control Center</span></button>
-          <p class="login-magic">Restricted dispatch access for Space Drive operations.</p>
+          <button class="primary-button login-submit" type="submit"><span>Login</span></button>
+          <a class="login-demo-link" href="register/">Create an account</a><a class="login-demo-link" href="#" data-forgot-password>Forgot password?</a>
         </form>
         <p class="login-message" data-login-message aria-live="polite"></p>
       </section>
     </main>
-    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script><script type="module" src="app.js?v=17"></script><script type="module" src="login.js?v=6"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script><script type="module" src="app.js?v=17"></script><script type="module" src="login.js?v=8"></script>
   </body>
 </html>
